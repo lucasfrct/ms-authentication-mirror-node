@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-bt">
+  <head>
+    <base href="/" />
+
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Index Auth</title>
+  </head>
+  <body>
+    <h1>Auth</h1>
+    <div class="auth"></div>
+  </body>
+  <script
+    src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+    crossorigin="anonymous"
+  ></script>
+  <script src="/authenticate/hybrid-crypto-js"></script>
+  <script src="/authenticate/js-sha512"></script>
+  <script src="/authenticate/client"></script>
+  <script>
+    (async()=>{
+      let result;
+      let user = { email: "email@email.com", password: "Alterar123" };
+      
+      const auth = new AuthenticationClient();
+      // console.log("SIGN RESULT: ", await auth.sign(user.email, user.password));
+      console.log("LOGIN RESULT: ", await auth.login(user.email, user.password));
+      // console.log("CREDENTIAL RESULT: ", await auth.credentials(user));
+      setTimeout(async() =>{ console.log("LOGOUT RESULT: ", await auth.logout()); }, 10000);
+      // console.log("RUN: ", result);
+    })();
+    
+  </script>
+</html>
