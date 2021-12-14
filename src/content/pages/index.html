@@ -26,11 +26,14 @@
       let user = { email: "email@email.com", password: "Alterar123" };
       
       const auth = new AuthenticationClient();
+      publicKey = await auth.public();
+      auth.setUrl("/authenticate");
+      result = await auth.send({ cipher: "", publicKey });
       // console.log("SIGN RESULT: ", await auth.sign(user.email, user.password));
-      console.log("LOGIN RESULT: ", await auth.login(user.email, user.password));
+      // console.log("LOGIN RESULT: ", await auth.login(user.email, user.password));
       // console.log("CREDENTIAL RESULT: ", await auth.credentials(user));
-      setTimeout(async() =>{ console.log("LOGOUT RESULT: ", await auth.logout()); }, 10000);
-      // console.log("RUN: ", result);
+      // setTimeout(async() =>{ console.log("LOGOUT RESULT: ", await auth.logout()); }, 10000);
+      console.log("RUN: ", result);
     })();
     
   </script>

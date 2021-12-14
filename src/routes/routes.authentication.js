@@ -53,13 +53,11 @@ const RouterAuthenticatePublicKey = async(req, res)=> {
 
 const RouterAuthenticateRatify = async(req, res)=> {
     const auth = new Authentication;
-    const { cipher } = req.body;
-    [err, payload] = await handle(auth.ratify(cipher));
-    if(err || !payload) {
-        logger.error({ error: err, code:"", message: "Não foi possível comprocar autenticidade da requisição." });
-        return res.status(500).json({ message: "Não foi possível comprocar autenticidade da requisição." })
-    };
-    res.status(200).json(payload);
+    console.log("body", req.body);
+    const publicKey = await auth.required();
+    const keys = await auth.generateKeys();
+    const privateKey = keys.private;
+    res.status(200).json({ cipher: "", publicKey, privateKey });
 };
 
 const RouterAuthenticateHybridCryptoJS = (req, res) => {
@@ -89,3 +87,6 @@ router.get ('/authenticate', RouterAuthenticatePublicKey);  	// obter uma chave 
 router.post('/authenticate', RouterAuthenticateRatify);         // obter payload
 
 module.exports = router
+// router.post - 
+//    req: { cipher: "", publicKey: "" }
+//    res: { cipher: "", publicKey: "" }
