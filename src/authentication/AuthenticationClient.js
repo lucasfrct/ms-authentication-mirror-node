@@ -97,7 +97,7 @@ class AuthenticationClient {
             return this.payload;
         } catch(e) {
             console.error("ERROR send: ", e);
-            return this.payload;0
+            return this.payload;
         }
     }
 
