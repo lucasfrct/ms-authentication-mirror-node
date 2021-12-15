@@ -53,7 +53,7 @@ const RouterAuthenticatePublicKey = async(req, res)=> {
 
 const RouterAuthenticateRatify = async(req, res)=> {
     const auth = new Authentication;
-    console.log("body", req.body);
+    // console.log("body", req.body);
     const publicKey = await auth.required();
     const keys = await auth.generateKeys();
     const privateKey = keys.private;

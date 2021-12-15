@@ -1,6 +1,7 @@
 class AuthenticationClient {
     
     instance = null;                                                // instancia da libray de encrypt
+    rsa = null;
     keys = { public: "", private: "", secret: "", token: "", };     // chavess de criptografia
     data = { raw: "", cipher: "", decode: "", signature: "" };      // dados para processsamentos
     client = { protocol: "", host: "", uri: "", url: "" };          // url do client
@@ -16,9 +17,10 @@ class AuthenticationClient {
     headers = { token: 'x-auth-token', bearer: 'Bearer' };
     constructor() {
         this.instance = new Crypt();                            // library para RSA 
+        this.rsa = new RSA();
         this.setUrl("/authenticate");
     }
-
+    
     /**
      * Seta os dados para serem encriptados
      * @param raw: any 
@@ -26,7 +28,7 @@ class AuthenticationClient {
     setData(raw = "") {
         return this.data.raw = raw || this.data.raw;
     }
-
+    
     setUrl(uri = "") {
         uri = uri || this.client.uri;
         const protocol = window.location.protocol;
@@ -34,7 +36,21 @@ class AuthenticationClient {
         const url = `${protocol}//${host}${uri}`;
         return this.client = { protocol, host, uri, url };
     }
-
+    
+    async generateKeyPair(url = "/authenticate") {
+        try {
+            this.setUrl(url);
+            ( async()=> {
+                const result = await this.rsa.generateKeyPairAsync();
+                // console.log("RSA: ", result);
+            } )();
+            
+        } catch(e) {
+            console.error("Não foi possível gerar o par de chaves: ", e);
+            return ;
+        };
+    }
+    
     /**
      * Obtem chave pública do servidor
      * @return public key: string
