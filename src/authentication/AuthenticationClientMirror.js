@@ -1,4 +1,4 @@
-class AuthenticationClient {
+class AuthenticationClientMirror {
     
     instance = null;                                                // instancia da libray de encrypt
     rsa = null;
@@ -40,22 +40,25 @@ class AuthenticationClient {
     async generateKeyPair(url = "/authenticate") {
         try {
             this.setUrl(url);
-            ( async()=> {
-                const result = await this.rsa.generateKeyPairAsync();
-                // console.log("RSA: ", result);
-            } )();
+            const { publicKey, privateKey } = await this.rsa.generateKeyPairAsync();
+            
+            return this.keys = { public: publicKey, private: privateKey };
             
         } catch(e) {
             console.error("Não foi possível gerar o par de chaves: ", e);
-            return ;
+            return this.keys;
         };
+    }
+
+    async readKeys() {
+        console.log("Keys: ", this.keys);
     }
     
     /**
      * Obtem chave pública do servidor
      * @return public key: string
      */
-    async public(url = "/authenticate") {
+    /* async public(url = "/authenticate") {
         try {
             this.setUrl(url);
             const { publicKey } = await $.get(this.client.url);
@@ -64,7 +67,7 @@ class AuthenticationClient {
             console.error("Não foi possível obter a chave pública do servidor: ", e);
             return this.keys.public;
         };
-    }
+    } */
 
     /**
      * Encrypta dos dados com a public Key no padrão RSA

@@ -69,13 +69,13 @@ const RouterAuthenticateJsSha512File = (req, res) => {
 }
 
 const RouterAuthenticateClientClass = (req, res) => {
-    res.sendFile(path.join(__dirname, '../authentication/AuthenticationClient.js'));
+    res.sendFile(path.join(__dirname, '../authentication/AuthenticationClientMirror.js'));
 }
 
 // Files
 router.get ('/authenticate/hybrid-crypto-js', RouterAuthenticateHybridCryptoJS);
 router.get ('/authenticate/js-sha512', RouterAuthenticateJsSha512File);
-router.get ('/authenticate/client', RouterAuthenticateClientClass);
+router.get ('/authenticate/client/mirror', RouterAuthenticateClientClass);
 
 router.get ('/authenticate/write-keys', RouterAuthenticateWriteKeys);
 router.get ('/authenticate/read-keys', RouterAuthenticateReadKeys);
