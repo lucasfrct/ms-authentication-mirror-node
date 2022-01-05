@@ -14,16 +14,18 @@ const Err       = require('@ms-utils-node/src/core/error-handler');
  *  - faz decryptação com assinatura
  *  - verifuca assinatura [ assin com chave pública e verifica com chave privada]
  */
-const Authentication = class Authentication {
+const AuthenticationMirror = class AuthenticationMirror {
 
     instance = null;
     rsa      = null;
 
-    data     = { raw: "", cipher: "", decoded: "", signature: "" };     // dados manipulados
-    keys     = { public: "", private: "", secret: "", };                // chaves de authentication
+    // payload  = { claimant: "", message: "" };                           // payload
+    // keys     = { public: "", private: "", secret: "", };                // chaves de authentication
+    data     = { raw: "", cipher: "", decoded: "" };     // dados manipulados
+    keysBox = { public: "", private: "", image: "" , signature: "" , secret: "" }
+    heraders = { token: 'x-auth-token', bearer: 'Bearer' };             // headers request/response 
     paths    = { public: "", private: "", secret: "", base: "./keys", };// paths de escrita/leitura
-    payload  = { claimant: "", message: "" };                           // payload
-    heraders = { token: 'x-auth-token', bearer: 'Bearer' };             // headers request/response    
+    formBox = { raw: "", reform: "", deform: { origin: "", image: "" }};
 
     constructor() {
         this.instance = new Crypt({ md: 'sha512' });    // inicializando Crypto
@@ -32,63 +34,80 @@ const Authentication = class Authentication {
     }
 
     /**
-     * Faz set no dos dos dados que serão encryptados
-     * @param raw: any - recebe dados de qualquer typo 
-     * @return raw: any - retorna o mesmo dado de entrada 
-     */
-    setRaw(raw = "") {
-        return this.data.raw = raw || this.data.raw;
-    }
-
-    /**
-     * Retorna o dado que passou pela encriptação
-     * @return dedoced: any
-     */
-    getRaw() {
-        return this.data.decoded;
-    }
-
-    /**
      * define um diretório para armazenar as chaves public, private e secret
      * @param path: string - folder das chaves
      * @return paths: Object - contém todos os paths utilizados
      */
-    path(path = "./keys") {
+     path(path = "./keys") {
         this.paths.base     = path || this.paths.base;
         this.paths.public   = `${this.paths.base}/public_key.pem`
         this.paths.private  = `${this.paths.base}/private_key.pem`
         this.paths.secret   = `${this.paths.base}/secret_key.b64`
         return this.paths;
     }
+
+    /**
+     * Faz set no dos dos dados que serão encryptados
+     * @param raw: any - recebe dados de qualquer typo 
+     * @return raw: any - retorna o mesmo dado de entrada 
+     */
+     setRaw(raw = "") {
+        return this.formBox.raw = raw || this.formBox.raw;
+    }
     
+    /**
+    * Gera uma assinatura unica usando a chave privada
+    * @param raw: any
+    * @returns signature: object
+    */
+    async signature(raw = "") {
+
+        this.setRaw(raw);
+
+        try {
+            // se não hpuver chave privada, não faz a assinatura
+            if(!this.keysBox.private) {
+                logger.message({ code: "AU0008", message: "A private key não existe" });
+                return this.keysBox.signature; 
+            };
+
+            const { signature } = this.parse(this.instance.signature(this.keysBox.private, JSON.stringify(this.formBox.raw)));
+            return this.keysBox.signature = signature;
+
+        } catch(e) {
+            logger.error({ error: e, code: "AU0009", message: "A assinatura não pôde ser gerada" });
+            return this.keysBox.signature
+        }
+    }
+
     /**
      * Escreve as chaves public, private e secret em um diretório
      * @param path: string - folder das chaves
      * @return keys: Object - contém todas as chaves utilizadas 
      */
-    async writeKeys(path = "") {
+     async writeKeys(path = "") {
 
         this.path(path);
         
         try {
-            await fs.writeFileSync(this.paths.public, this.keys.public);
+            await fs.writeFileSync(this.paths.public, this.keysBox.public);
         } catch(e) {
             logger.error({ error: e, code: "AU0002", message: "A public Key não pôde ser escrita" });
         };
 
         try {
-            await fs.writeFileSync(this.paths.private, this.keys.private);
+            await fs.writeFileSync(this.paths.private, this.keysBox.private);
         } catch(e) {
             logger.error({ error: e, code: "AU0003", message: "A Private Key não pôde ser escrita" });
         };
 
         try {
-            await fs.writeFileSync(this.paths.secret,   this.keys.secret);
+            await fs.writeFileSync(this.paths.secret,   this.keysBox.secret);
         } catch(e) {
             logger.error({ error: e, code: "AU0004", message: "A secret Key não pôde ser escrita" });
         };
 
-        return this.keys
+        return this.keysBox
     }
 
     /**
@@ -128,31 +147,6 @@ const Authentication = class Authentication {
         this.keys.public = process.env.PUBLIC_KEY;
         this.keys.private = process.env.PRIVATE_KEY;
         return this.keys;
-    }
-
-    /**
-     * Gera uma assinatura unica usando a chave privada
-     * @param raw: any
-     * @returns signature: object
-     */
-    async signature(raw = "") {
-
-        this.setRaw(raw);
-
-        try {
-            // se não hpuver chave privada, não faz a assinatura
-            if(!this.keys.private) {
-                logger.message({ code: "AU0008", message: "A private key não existe" });
-                return this.data.signature; 
-            };
-
-            const { signature } = this.parse(this.instance.signature(this.keys.private, JSON.stringify(this.data.raw)));
-            return this.data.signature = signature;
-
-        } catch(e) {
-            logger.error({ error: e, code: "AU0009", message: "A assinatura não pôde ser gerada" });
-            return this.data.signature
-        }
     }
 
     /**
@@ -257,49 +251,41 @@ const Authentication = class Authentication {
     }
 
     /**
-     * Retorna a chave publica para iniciar uma cifragem
-     * @return publicKey: pem (RSA) - chave pública 
-     */
-    async required() {
-        await this.loadKeys()
-        return this.keys.public
-    }
-
-    /**
-     * Ratifica o envio de uma cifra assinada com a chave pública
-     * @param cipher: string - é obrigatório o envio da cifra
-     * @return decoded: any - dados decriptografado com a chave privada
-     */
-    async ratify(cipher = "") {
-        try {
-            this.data.cipher = this.parse(cipher || this.data.cipher);
-            await this.loadKeys()
-            return this.decrypt();
-        } catch (e) {
-            logger.message({ error: e, code: "AU0015", message: "Não foi possóvel verificar sua autenticidade." })
-            return this.data.decoded;
-        }
-    }
-
-    /**
      * Parseia uma string para json caso seja possível
      * @param payload: any 
      * @return payload: any 
      */
-    parse(payload = "") {
+     parse(payload = "") {
         try {
             return JSON.parse(payload);
         } catch (e) {
             return payload;
         };
     }
-
-    async assembler() {
-        await this.generateKeys();
-        await this.writeKeys();
-        await this.loadKeys();
-        return this.keys;
-    }
+        
 }
 
-module.exports = Authentication;
+module.exports = AuthenticationMirror;
+
+// Trocando chaves: posta a chave origin e recebe a chave image
+    // 1.0 request POST /authenticate/mirror reflex = { origin: { public: "asdf", cipher: ""}, image: { public: "", cipher: "" } }
+    // 1.1 respose (POST) reflex = { origin: { public: "asdf", cipher: ""}, image: { public: "asdf", cipher: "" } }
+    // 
+    // Trocando cifras: posta a cifra origin e recebe a cifra image
+    // 2.0 request POST { origin: { public: "asdf", cipher: "asdf"}, image: { public: "asdf", cipher: "" } }
+    // 2.1 response (POST) { origin: { public: "asdf", cipher: "asdf"}, image: { public: "asdf", cipher: "asdfasdf" } }
+    // 
+    // Armazenando chaves (image = publickey da image)
+    // 3.0 const keysBox = { public: "", private: "", image: "" }
+    // Armazenando as cifras
+    // 3.1 const formBox = { raw: "", reform: "", deform: { origin: "", image: "" }}
+    // 
+    // 4.0 
+    // const reflex = { origin: { public: "", cipher: ""}, image: { public: "", cipher: "" } }
+
+    // const mirror = new AuthenticationMirror();
+    // (POST trocando chaves) mirror.reflect("/authenticate/mirror/reflect", { origin: { public: "asdf", cipher: ""}, image: { public: "", cipher: "" } });
+    // (POST trocando cifras) mirror.distort("/authenticate/mirror/ditortion", { origin: { public: "asdf", cipher: ""}, image: { public: "", cipher: "" } });
+    // const keysBox = mirror.captureKeys(); // Gerar chaves
+    // const raw = mirror.reform( cipher )
+    // const cipher = mirror.deform( raw )

@@ -40,21 +40,25 @@
 
     })();
 
+    // Trocando chaves: posta a chave origin e recebe a chave image
     // 1.0 request POST /authenticate/mirror reflex = { origin: { public: "asdf", cipher: ""}, image: { public: "", cipher: "" } }
     // 1.1 respose (POST) reflex = { origin: { public: "asdf", cipher: ""}, image: { public: "asdf", cipher: "" } }
     // 
+    // Trocando cifras: posta a cifra origin e recebe a cifra image
     // 2.0 request POST { origin: { public: "asdf", cipher: "asdf"}, image: { public: "asdf", cipher: "" } }
     // 2.1 response (POST) { origin: { public: "asdf", cipher: "asdf"}, image: { public: "asdf", cipher: "asdfasdf" } }
     // 
+    // Armazenando chaves (image = publickey da image)
     // 3.0 const keysBox = { public: "", private: "", image: "" }
+    // Armazenando as cifras
     // 3.1 const deformBox = { origin: "", image: "" }
     // 
     // 4.0 
     // const reflex = { origin: { public: "", cipher: ""}, image: { public: "", cipher: "" } }
 
     // const mirror = new AuthenticationClientMirror();
-    // mirror.reflect("/authenticate/mirror", { origin: { public: "asdf", cipher: ""}, image: { public: "", cipher: "" } });
-    // mirror.distort("/authenticate/mirror", { origin: { public: "asdf", cipher: ""}, image: { public: "", cipher: "" } });
+    // (POST trocando chaves) mirror.reflect("/authenticate/mirror/reflect", { origin: { public: "asdf", cipher: ""}, image: { public: "", cipher: "" } });
+    // (POST trocando cifras) mirror.distort("/authenticate/mirror/ditortion", { origin: { public: "asdf", cipher: ""}, image: { public: "", cipher: "" } });
     // const keysBox = mirror.captureKeys(); // Gerar chaves
     // const raw = mirror.reform( cipher )
     // const cipher = mirror.deform( raw )

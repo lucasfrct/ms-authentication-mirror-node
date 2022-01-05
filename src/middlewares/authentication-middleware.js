@@ -3,7 +3,7 @@ const logger            = require('@ms-utils-node/src/core/logger-handler');
 const Err               = require('@ms-utils-node/src/core/error-handler');
 const TemplateEquals    = require('@ms-utils-node/src/core/template-equals');
 
-const Authentication = require('../authentication/Authentication');
+const Authentication = require('../authentication/AuthenticationMirror');
 
 const AuthenticateMiddleware = async(req, res, next) => {
     try {
