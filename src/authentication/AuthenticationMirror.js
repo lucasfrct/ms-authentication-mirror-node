@@ -19,13 +19,10 @@ const AuthenticationMirror = class AuthenticationMirror {
     instance = null;
     rsa      = null;
 
-    // payload  = { claimant: "", message: "" };                           // payload
-    // keys     = { public: "", private: "", secret: "", };                // chaves de authentication
-    data     = { raw: "", cipher: "", decoded: "" };     // dados manipulados
-    keysBox = { public: "", private: "", image: "" , signature: "" , secret: "" }
-    heraders = { token: 'x-auth-token', bearer: 'Bearer' };             // headers request/response 
-    paths    = { public: "", private: "", secret: "", base: "./keys", };// paths de escrita/leitura
-    formBox = { raw: "", reform: "", deform: { origin: "", image: "" }};
+    keysBox  = { public: "", private: "", image: "" , signature: "" , secret: "" }
+    heraders = { token: 'x-auth-token', bearer: 'Bearer' };                             // headers request/response 
+    paths    = { public: "", private: "", secret: "", base: "./keys", };                // paths de escrita/leitura
+    formBox  = { raw: "", reform: "", deform: { origin: "", image: "" }};
 
     constructor() {
         this.instance = new Crypt({ md: 'sha512' });    // inicializando Crypto
@@ -137,16 +134,23 @@ const AuthenticationMirror = class AuthenticationMirror {
             logger.error({ error: e, code: "AU0007", message: "A Parivate Key não pôde ser lida"});
         };
 
-        return this.keys;
+        return this.keysBox;
     }
 
 
     async loadKeys() {
         if(!process.env.PUBLIC_KEY.length < 64) { await this.readKeys() }
-        this.keys.secret = process.env.SECRET_KEY;
-        this.keys.public = process.env.PUBLIC_KEY;
-        this.keys.private = process.env.PRIVATE_KEY;
-        return this.keys;
+
+        if(!this.keysBox.public.length < 64) {
+            this.keysBox = { 
+                ...this.keysBox, 
+                private: process.env.PRIVATE_KEY, 
+                public: process.env.PUBLIC_KEY, 
+                secret: process.env.SECRET_KEY 
+            };
+        };
+
+        return this.keysBox;
     }
 
     /**
@@ -164,10 +168,10 @@ const AuthenticationMirror = class AuthenticationMirror {
             
             const { iv } = this.parse(this.instance.encrypt(publicKey, process.env.SECRET_KEY));
 
-            return this.keys = { public: publicKey, private: privateKey, secret: iv };
+            return this.keysBox = { ...this.keysBox, public: publicKey, private: privateKey, secret: iv };
         } catch(e) {
             logger.error({ error: e, code: "AU0011", message: "O par de chaves público e privado não puderam ser geradas" });
-            return this.keys;
+            return this.keysBox;
         }
     }
 
@@ -177,8 +181,8 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @return bool
      */
     async verify(raw = "") {
-        console.log("VERIFY: ", this.data.signature);
-        return await this.instance.verify( this.keys.public, raw, this.data.signature);
+        console.log("VERIFY: ", this.keysBox.signature);
+        return await this.instance.verify( this.keysBox.public, raw, this.keysBox.signature );
     }
     
     /**
@@ -188,30 +192,30 @@ const AuthenticationMirror = class AuthenticationMirror {
      */
     encrypt(raw = "") {
         try {
-            if(raw) { this.setRaw(raw); };
+            this.setRaw(raw);
 
             //faz assinatura da informação que será transmitida 
             this.signature();
 
-            if(!this.keys.public) {
+            if(!this.keysBox.public) {
                 logger.message({ code: "AU0012", message: "A public key não existe" })
-                return this.data.cipher;
+                return this.formBox.deform.image;
             };
 
-            if(!this.data.signature) {
+            if(!this.keysBox.signature) {
                 logger.message({ code: "AU0013", message: "A assinatura não existe" })
-                return this.data.cipher;
+                return this.formBox.deform.image;
             };
 
-            return this.data.cipher = this.instance.encrypt(
-                this.keys.public, 
-                JSON.stringify(this.data.raw), 
-                this.data.signature
+            return this.formBox.deform.image = this.instance.encrypt(
+                this.keysBox.public, 
+                JSON.stringify(this.formBox.raw), 
+                this.keysBox.signature
             );
 
         } catch(e) {
             logger.message({error: e, code: "AU0014", message: "Erro ao encryptar os dados"});
-            return this.data.cipher;
+            return this.formBox.deform.image;
         }
     }
 
@@ -222,45 +226,50 @@ const AuthenticationMirror = class AuthenticationMirror {
      */
     decrypt(cipher = "") {
         try {
-            this.data.cipher = cipher || this.data.cipher;
+            this.formBox.deform.image = cipher || this.formBox.deform.image;
             
             // testa se a chave privada existe
-            if(!this.keys.private) {
+            if(!this.keysBox.private) {
                 logger.message({ code: "AU0015", message: "a chave privada não existe" });
-                return this.data.decoded;
+                return this.formBox.reform;
             };
             
-            const { message, signature }  = this.instance.decrypt(this.keys.private, this.data.cipher);
+            const { message, signature }  = this.instance.decrypt(this.keysBox.private, this.formBox.deform.image);
 
             //faz assinatura da informação que será transmitida 
-            this.data.signature = signature;
+            this.keysBox.signature = signature;
 
 
             // verifica se a assinatura é autentica
-            if(this.data.signature && !this.verify(message)) {
+            if(this.keysBox.signature && !this.verify(message)) {
                 logger.message({ code: "AU0015", message: "Esse documento não foi assinado corretamente" });
-                return this.data.decoded;
+                return this.formBox.reform;
             };
 
-            return this.data.decoded = this.parse(message);
+            return this.formBox.reform = this.parse(message);
             
         } catch(e) {
             logger.message({ error: e, code: "AU0015", message: "Erro ao tentar decriptografar a cifra." })
-            return this.data.decoded 
+            return this.formBox.reform 
         }
     }
 
     /**
-     * Parseia uma string para json caso seja possível
-     * @param payload: any 
-     * @return payload: any 
-     */
-     parse(payload = "") {
+    * Parseia uma string para json caso seja possível
+    * @param payload: any 
+    * @return payload: any 
+    */
+    parse(payload = "") {
         try {
             return JSON.parse(payload);
         } catch (e) {
             return payload;
         };
+    }
+
+    async reflect(reflex) {
+        await this.loadKeys();
+        return reflex = { ...reflex, public: this.keysBox.public };
     }
         
 }

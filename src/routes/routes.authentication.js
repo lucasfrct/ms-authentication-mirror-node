@@ -9,21 +9,16 @@ const TemplateEquals    = require('@ms-utils-node/src/core/template-equals');
 
 const AuthenticationMirror = require('../authentication/AuthenticationMirror');
 
-const RouterAuthenticateMirror = async(req, res)=> {
-    const { body: reflex } = req;
-
+const RouterAuthenticateMirrorReflect = async(req, res)=> {
+    let { body: reflex } = req;
     const mirror = new AuthenticationMirror;
-    const { public } = await mirror.generateKeys();
-
-    reflex.image = { public, cipher: "" };
-    console.log("reflex", reflex);
-
+    reflex = await mirror.reflect(reflex);
     res.status(200).json(reflex);
 };
 
 // Files
 
-router.post('/authenticate/mirror/reflect', RouterAuthenticateMirror);         // 
+router.post('/authenticate/mirror/reflect', RouterAuthenticateMirrorReflect);         // 
 
 
 module.exports = router
