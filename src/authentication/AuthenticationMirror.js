@@ -19,10 +19,10 @@ const AuthenticationMirror = class AuthenticationMirror {
     instance = null;
     rsa      = null;
 
-    keysBox  = { public: "", private: "", image: "" , signature: "" , secret: "" }
+    keysBox  = { public: "", private: "", origin: "" , signature: "" , secret: "" }
     heraders = { token: 'x-auth-token', bearer: 'Bearer' };                             // headers request/response 
-    paths    = { public: "", private: "", secret: "", base: "./keys", };                // paths de escrita/leitura
-    formBox  = { raw: "", reform: "", deform: { origin: "", image: "" }};
+    paths    = { public: "", private: "", secret: "", base: "./keys" };                // paths de escrita/leitura
+    formBox  = { raw: "", reform: "", deform: { origin: "", image: "qqqq" }};
 
     constructor() {
         this.instance = new Crypt({ md: 'sha512' });    // inicializando Crypto
@@ -190,14 +190,15 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @param raw: any  - texto ou objeto para ser encrypta
      * @return cipher: string - texto cifrado com RSA
      */
-    encrypt(raw = "") {
+    encrypt(raw = "", publicKey = "") {
         try {
             this.setRaw(raw);
+            const Public = publicKey || this.keysBox.public;
 
             //faz assinatura da informação que será transmitida 
             this.signature();
 
-            if(!this.keysBox.public) {
+            if(!Public) {
                 logger.message({ code: "AU0012", message: "A public key não existe" })
                 return this.formBox.deform.image;
             };
@@ -208,7 +209,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             };
 
             return this.formBox.deform.image = this.instance.encrypt(
-                this.keysBox.public, 
+                Public, 
                 JSON.stringify(this.formBox.raw), 
                 this.keysBox.signature
             );
@@ -267,9 +268,20 @@ const AuthenticationMirror = class AuthenticationMirror {
         };
     }
 
+    // Client Request
     async reflect(reflex) {
         await this.loadKeys();
-        return reflex = { ...reflex, public: this.keysBox.public };
+        this.keysBox.origin = reflex.origin.public;
+        reflex.image = { ...reflex.image, public: this.keysBox.public };
+        return reflex;
+    }
+
+    // Client Request
+    async distort(reflex) {
+        reflex = await this.reflect(reflex);
+        await this.encrypt("matrix4", this.keysBox.origin);
+        reflex.image = { ...reflex.image, cipher: this.formBox.deform.image };
+        return reflex;
     }
         
 }
@@ -298,3 +310,5 @@ module.exports = AuthenticationMirror;
     // const keysBox = mirror.captureKeys(); // Gerar chaves
     // const raw = mirror.reform( cipher )
     // const cipher = mirror.deform( raw )
+    // client => (client = origin) && (server = image)
+    // server => (server = origin) && (client = image)

@@ -16,10 +16,18 @@ const RouterAuthenticateMirrorReflect = async(req, res)=> {
     res.status(200).json(reflex);
 };
 
+const RouterAuthenticateMirrorDistort = async(req, res)=> {
+    let { body: reflex } = req;
+    const mirror = new AuthenticationMirror;
+    reflex = await mirror.distort(reflex);
+    console.log("teste", reflex);
+    res.status(200).json(reflex);
+};
+
 // Files
 
 router.post('/authenticate/mirror/reflect', RouterAuthenticateMirrorReflect);         // 
-
+router.post('/authenticate/mirror/distort', RouterAuthenticateMirrorDistort);         // 
 
 module.exports = router
 // router.post - 
