@@ -22,7 +22,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     keysBox  = { public: "", private: "", origin: "" , signature: "" , secret: "" }
     heraders = { token: 'x-auth-token', bearer: 'Bearer' };                             // headers request/response 
     paths    = { public: "", private: "", secret: "", base: "./keys" };                // paths de escrita/leitura
-    formBox  = { raw: "", reform: "", deform: { origin: "", image: "qqqq" }};
+    formBox  = { raw: "", reform: "", deform: { origin: "", image: "" }};
 
     constructor() {
         this.instance = new Crypt({ md: 'sha512' });    // inicializando Crypto
@@ -157,7 +157,7 @@ const AuthenticationMirror = class AuthenticationMirror {
      * Gera as chaves para autenticação
      * @return keys: Object - chaves de autenticação
      */
-    async generateKeys() {
+    async captureKeys() {
         try{
             // Generate 1024 bit RSA key pair
             const [err, { privateKey, publicKey } ] = await handle(this.rsa.generateKeyPairAsync());
@@ -190,7 +190,7 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @param raw: any  - texto ou objeto para ser encrypta
      * @return cipher: string - texto cifrado com RSA
      */
-    encrypt(raw = "", publicKey = "") {
+    deform(raw = "", publicKey = "") {
         try {
             this.setRaw(raw);
             const Public = publicKey || this.keysBox.public;
@@ -208,12 +208,13 @@ const AuthenticationMirror = class AuthenticationMirror {
                 return this.formBox.deform.image;
             };
 
+            
             return this.formBox.deform.image = this.instance.encrypt(
                 Public, 
                 JSON.stringify(this.formBox.raw), 
                 this.keysBox.signature
             );
-
+            
         } catch(e) {
             logger.message({error: e, code: "AU0014", message: "Erro ao encryptar os dados"});
             return this.formBox.deform.image;
@@ -225,7 +226,7 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @param cipher: string - hash cifrada apara ser decriptofrafada 
      * @return decoded: any - dados que foi envidado via criptografia
      */
-    decrypt(cipher = "") {
+     reform(cipher = "") {
         try {
             this.formBox.deform.image = cipher || this.formBox.deform.image;
             
@@ -279,7 +280,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     // Client Request
     async distort(reflex) {
         reflex = await this.reflect(reflex);
-        await this.encrypt("matrix4", this.keysBox.origin);
+        await this.deform("matrix4", this.keysBox.origin);
         reflex.image = { ...reflex.image, cipher: this.formBox.deform.image };
         return reflex;
     }

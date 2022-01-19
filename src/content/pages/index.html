@@ -26,10 +26,11 @@
       let user = { email: "email@email.com", password: "Alterar123" };
       
       const auth = new AuthenticationClientMirror();
-      // publicKey = await auth.public();
-      auth.setUrl("/authenticate");
-      result = await auth.generateKeyPair();
+      result = await auth.reflect();
       console.log("RUN: ", result);
+      // publicKey = await auth.public();
+      // auth.setUrl("/authenticate");
+      // result = await auth.generateKeyPair();
       // result = await auth.readKeys();
       // result = await auth.send("/atuthentica/mirror", { cipher: "", keyPair });
       // console.log("SIGN RESULT: ", await auth.sign(user.email, user.password));

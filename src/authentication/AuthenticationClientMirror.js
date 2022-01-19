@@ -211,4 +211,9 @@ class AuthenticationClientMirror {
         return localStorage.getItem(this.headers.token);
     }
 
+    async reflect() {
+        this.setUrl('/authenticate/mirror/reflect');
+        return await this.send( { origin: { public: "feio" } } );
+    }
+
 }
