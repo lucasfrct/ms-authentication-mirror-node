@@ -2,11 +2,13 @@ class AuthenticationClientMirror {
     
     instance = null;                                                // instancia da libray de encrypt
     rsa = null;
-    keys = { public: "", private: "", secret: "", token: "", };     // chavess de criptografia
+    keysBox  = { public: "", private: "", image: "" , signature: "" , secret: "" }
+    keys = { origin: { public: "", private: "", secret: "", token: "" }, image: { public: "" } };     // chavess de criptografia
     data = { raw: "", cipher: "", decode: "", signature: "" };      // dados para processsamentos
+    formBox  = { raw: "", reform: "", deform: { origin: "", image: "" }};
     client = { protocol: "", host: "", uri: "", url: "" };          // url do client
     user = { email: "", password: "" };                             // modelo de usuário                                                   // token de validação
-    payload = {};                                                   // resposta do servidor
+    reflex = { origin: { public: this.keysBox.public, cipher: ""}, image: { public: "", cipher: "" } }
     params = {                                                      // params da requisição  
         type: "GET", 
         contentType:"application/json; charset=utf-8", 
@@ -16,8 +18,8 @@ class AuthenticationClientMirror {
     poll = [];
     headers = { token: 'x-auth-token', bearer: 'Bearer' };
     constructor() {
-        this.instance = new Crypt();                            // library para RSA 
-        this.rsa = new RSA();
+        this.instance = new Crypt({ md: 'sha512' });                            // library para RSA 
+        this.rsa = new RSA({ keySize: 4096 });
         this.setUrl("/authenticate");
     }
     
@@ -26,7 +28,7 @@ class AuthenticationClientMirror {
      * @param raw: any 
      */
     setData(raw = "") {
-        return this.data.raw = raw || this.data.raw;
+        return this.formBox.raw = raw || this.formBox.raw;
     }
     
     setUrl(uri = "") {
@@ -77,12 +79,12 @@ class AuthenticationClientMirror {
     async encrypt(raw = "") {
         try {
             this.setData(raw);
-            const dataString = JSON.stringify(this.data.raw);
-            const encrypt = this.instance.encrypt(this.keys.public, dataString, this.keys.secret);
-            return this.data.cipher = JSON.stringify(encrypt);
+            const dataString = JSON.stringify(this.formBox.raw);
+            const encrypt = this.instance.encrypt(this.keysBox.image, dataString);
+            return this.formBox.deform = JSON.stringify(encrypt);
         } catch (e) {
             console.error("ERROR encrypt: ", e);
-            return this.data.cipher;
+            return this.formBox.deform;
         }
     }
 
@@ -111,12 +113,12 @@ class AuthenticationClientMirror {
                 this.poll = [];
             }
             
-            this.payload = await $.ajax(this.params);
+            this.reflex = await $.ajax(this.params);
             
-            return this.payload;
+            return this.reflex;
         } catch(e) {
             console.error("ERROR send: ", e);
-            return this.payload;
+            return this.reflex;
         }
     }
 
@@ -141,12 +143,12 @@ class AuthenticationClientMirror {
                 this.poll = [];
             }
             
-            this.payload = await $.ajax(this.params);
+            this.reflex = await $.ajax(this.params);
 
-            return this.payload;
+            return this.reflex;
         } catch(e) {
             console.error("ERROR get: ", e);
-            return this.payload;
+            return this.reflex;
         }
     }
     
@@ -200,8 +202,8 @@ class AuthenticationClientMirror {
         return true;
     }
     
-    async credentials(payload = {}) {
-        return this.ratify(payload, "/login/credentials");
+    async credentials(reflex = {}) {
+        return this.ratify(reflex, "/login/credentials");
     }
 
     async session(token = "") {
@@ -212,8 +214,18 @@ class AuthenticationClientMirror {
     }
 
     async reflect() {
+        // colocar chave publica do client no keysBox.public 
+        // colocar a chave publica do servidor dentro de keysBox.image
         this.setUrl('/authenticate/mirror/reflect');
-        return await this.send( { origin: { public: "feio" } } );
+        await this.send( this.reflex );
+        this.keysBox.image = this.reflex.image.public;
+        return this.reflex;
+    }
+
+    async deform(raw, publicKey) {
+        this.setUrl("/authenticate/mirror/reform");
+        this.setData(raw);
+        this.keysBox.image = publicKey || this.keysBox.image;
     }
 
 }

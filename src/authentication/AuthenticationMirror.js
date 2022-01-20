@@ -313,3 +313,4 @@ module.exports = AuthenticationMirror;
     // const cipher = mirror.deform( raw )
     // client => (client = origin) && (server = image)
     // server => (server = origin) && (client = image)
+    // No cliente o deform chama o reform do servidor

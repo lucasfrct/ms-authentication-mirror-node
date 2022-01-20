@@ -27,7 +27,7 @@ const RouterAuthenticateMirrorDistort = async(req, res)=> {
 const RouterAuthenticateMirrorReform = async(req, res)=> {
     let { body: reflex } = req;
     const mirror = new AuthenticationMirror;
-    await mirror.captureKeys();
+    await mirror.loadKeys();
     let raw = await mirror.reform(reflex.image.cipher);
     console.log("Reflex: ", raw);
     res.status(200).json(raw);

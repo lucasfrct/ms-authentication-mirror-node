@@ -27,7 +27,9 @@
       
       const auth = new AuthenticationClientMirror();
       result = await auth.reflect();
+      result = await auth.encrypt("feio");
       console.log("RUN: ", result);
+      // let keys = await auth.readKeys();
       // publicKey = await auth.public();
       // auth.setUrl("/authenticate");
       // result = await auth.generateKeyPair();
