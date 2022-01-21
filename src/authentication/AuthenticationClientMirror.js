@@ -44,16 +44,17 @@ class AuthenticationClientMirror {
             this.setUrl(url);
             const { publicKey, privateKey } = await this.rsa.generateKeyPairAsync();
             
-            return this.keys = { public: publicKey, private: privateKey };
+            return this.keysBox = { public: publicKey, private: privateKey };
             
         } catch(e) {
             console.error("Não foi possível gerar o par de chaves: ", e);
-            return this.keys;
+            return this.keysBox;
         };
     }
 
     async readKeys() {
-        console.log("Keys: ", this.keys);
+        console.log("Keys: ", this.keysBox);
+        return this.keysBox;
     }
     
     /**
@@ -76,15 +77,16 @@ class AuthenticationClientMirror {
      * @param raw: any 
      * @return copher: string - hash cifrada
      */
-    async encrypt(raw = "") {
+    async deform(raw = "", publicKey = "") {
         try {
             this.setData(raw);
+            const Public = publicKey || this.keysBox.image;
             const dataString = JSON.stringify(this.formBox.raw);
-            const encrypt = this.instance.encrypt(this.keysBox.image, dataString);
-            return this.formBox.deform = JSON.stringify(encrypt);
+            const encrypt = this.instance.encrypt(Public, dataString);
+            return this.formBox.deform.origin = JSON.stringify(encrypt);
         } catch (e) {
             console.error("ERROR encrypt: ", e);
-            return this.formBox.deform;
+            return this.formBox.deform.origin;
         }
     }
 
@@ -222,10 +224,16 @@ class AuthenticationClientMirror {
         return this.reflex;
     }
 
-    async deform(raw, publicKey) {
-        this.setUrl("/authenticate/mirror/reform");
-        this.setData(raw);
-        this.keysBox.image = publicKey || this.keysBox.image;
+    async distort() {
+        // escolher um dado, colocar numa variavel, deformar o dado, armazenar dentro de reflex
+        // setar uma rota para o servidor, enviar para o servidor com o send
+        // receber a resposta do servidor e armazenar no reflex do servidor
+        const car = "Fennec";
+        this.reflex.origin.cipher = await this.deform(car);
+        this.setUrl("/authenticate/mirror/distortion");
+        await this.send(this.reflex);
+        console.log(this.reflex);
+        return this.reflex;
     }
 
 }

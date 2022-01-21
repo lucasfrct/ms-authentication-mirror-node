@@ -284,6 +284,12 @@ const AuthenticationMirror = class AuthenticationMirror {
         reflex.image = { ...reflex.image, cipher: this.formBox.deform.image };
         return reflex;
     }
+
+    async distortion(reflex) {
+        this.formBox.deform.image = reflex;
+        console.log("formBox", this.formBox);
+        return this.formBox;
+    }
         
 }
 

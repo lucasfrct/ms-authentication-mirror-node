@@ -27,7 +27,10 @@
       
       const auth = new AuthenticationClientMirror();
       result = await auth.reflect();
-      result = await auth.encrypt("feio");
+      // result = await auth.encrypt("feio");
+      // result = await auth.deform();
+      // result = await auth.readKeys();
+      result = await auth.distort();
       console.log("RUN: ", result);
       // let keys = await auth.readKeys();
       // publicKey = await auth.public();
