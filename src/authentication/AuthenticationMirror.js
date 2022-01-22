@@ -23,6 +23,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     heraders = { token: 'x-auth-token', bearer: 'Bearer' };                             // headers request/response 
     paths    = { public: "", private: "", secret: "", base: "./keys" };                // paths de escrita/leitura
     formBox  = { raw: "", reform: "", deform: { origin: "", image: "" }};
+    reflex   = { origin: { public: "", cipher: ""}, image: { public: "", cipher: "" } }
 
     constructor() {
         this.instance = new Crypt({ md: 'sha512' });    // inicializando Crypto
@@ -211,8 +212,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             
             return this.formBox.deform.image = this.instance.encrypt(
                 Public, 
-                JSON.stringify(this.formBox.raw), 
-                this.keysBox.signature
+                JSON.stringify(this.formBox.raw), ""
             );
             
         } catch(e) {
@@ -226,7 +226,8 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @param cipher: string - hash cifrada apara ser decriptofrafada 
      * @return decoded: any - dados que foi envidado via criptografia
      */
-     reform(cipher = "") {
+    async reform(cipher = "") {
+        //await loadKeys();
         try {
             this.formBox.deform.image = cipher || this.formBox.deform.image;
             
@@ -237,22 +238,21 @@ const AuthenticationMirror = class AuthenticationMirror {
             };
             
             const { message, signature }  = this.instance.decrypt(this.keysBox.private, this.formBox.deform.image);
-
             //faz assinatura da informação que será transmitida 
             this.keysBox.signature = signature;
-
-
+            
+            
             // verifica se a assinatura é autentica
             if(this.keysBox.signature && !this.verify(message)) {
                 logger.message({ code: "AU0015", message: "Esse documento não foi assinado corretamente" });
                 return this.formBox.reform;
             };
-
+            
             return this.formBox.reform = this.parse(message);
             
         } catch(e) {
             logger.message({ error: e, code: "AU0015", message: "Erro ao tentar decriptografar a cifra." })
-            return this.formBox.reform 
+            return this.formBox.reform
         }
     }
 
@@ -270,25 +270,30 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     // Client Request
-    async reflect(reflex) {
+    async reflect(reflex = "") {
         await this.loadKeys();
-        this.keysBox.origin = reflex.origin.public;
-        reflex.image = { ...reflex.image, public: this.keysBox.public };
-        return reflex;
+        this.reflex = reflex || this.reflex;
+        this.keysBox.origin = this.reflex.origin.public;
+        this.reflex.image = { ...this.reflex.image, public: this.keysBox.public };
+        return this.reflex;
     }
 
     // Client Request
-    async distort(reflex) {
-        reflex = await this.reflect(reflex);
-        await this.deform("matrix4", this.keysBox.origin);
-        reflex.image = { ...reflex.image, cipher: this.formBox.deform.image };
-        return reflex;
+    async distort(reflex = "") {
+        this.reflex = reflex || this.reflex;
+        this.keysBox.public = this.keysBox.origin
+        await this.loadKeys();
+        await this.reflect();
+        await this.deform();
+        this.reflex.image = { ...this.reflex.image, cipher: this.formBox.deform.image };
+        return this.reflex;
     }
 
-    async distortion(reflex) {
-        this.formBox.deform.image = reflex;
-        console.log("formBox", this.formBox);
-        return this.formBox;
+    async keep(reflex = "") {
+        this.reflex = reflex || this.reflex;
+        this.formBox.deform.image = this.reflex.origin.cipher;
+        await this.loadKeys();
+        return await this.reform();
     }
         
 }

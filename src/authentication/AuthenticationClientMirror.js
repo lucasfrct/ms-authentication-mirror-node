@@ -81,9 +81,9 @@ class AuthenticationClientMirror {
         try {
             this.setData(raw);
             const Public = publicKey || this.keysBox.image;
-            const dataString = JSON.stringify(this.formBox.raw);
-            const encrypt = this.instance.encrypt(Public, dataString);
-            return this.formBox.deform.origin = JSON.stringify(encrypt);
+            const dataString = (typeof this.formBox.raw == 'string') ? this.formBox.raw : JSON.stringify(this.formBox.raw);
+            const encrypt = this.instance.encrypt(Public, dataString, "");
+            return this.formBox.deform.origin = encrypt;
         } catch (e) {
             console.error("ERROR encrypt: ", e);
             return this.formBox.deform.origin;
@@ -227,13 +227,11 @@ class AuthenticationClientMirror {
     async distort() {
         // escolher um dado, colocar numa variavel, deformar o dado, armazenar dentro de reflex
         // setar uma rota para o servidor, enviar para o servidor com o send
-        // receber a resposta do servidor e armazenar no reflex do servidor
+        // receber a resposta do servidor e carrega no servidor
         const car = "Fennec";
         this.reflex.origin.cipher = await this.deform(car);
-        this.setUrl("/authenticate/mirror/distortion");
-        await this.send(this.reflex);
-        console.log(this.reflex);
-        return this.reflex;
+        this.setUrl("/authenticate/mirror/keep");
+        return await this.send(this.reflex);
     }
 
 }

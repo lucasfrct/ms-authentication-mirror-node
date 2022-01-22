@@ -17,27 +17,16 @@ const RouterAuthenticateMirrorReflect = async(req, res)=> {
 };
 
 const RouterAuthenticateMirrorDistort = async(req, res)=> {
-    let { body: ref } = req;
+    let { body: reflex } = req;
     const mirror = new AuthenticationMirror;
-    reflex = await mirror.distort(ref);
-    console.log("Reflex", reflex);
+    reflex = await mirror.distort(reflex);
     res.status(200).json(reflex);
 };
 
-const RouterAuthenticateMirrorReform = async(req, res)=> {
+const RouterAuthenticateMirrorKeep = async(req, res)=> {
     let { body: reflex } = req;
     const mirror = new AuthenticationMirror;
-    await mirror.loadKeys();
-    let raw = await mirror.reform(reflex.image.cipher);
-    console.log("Reflex: ", raw);
-    res.status(200).json(raw);
-};
-
-const RouterAuthenticateMirrorDistortion = async(req, res)=> {
-    let { body: reflex } = req;
-    const mirror = new AuthenticationMirror;
-    mirror.reflex = await mirror.distortion(reflex);
-    console.log(reflex);
+    reflex.xunda = await mirror.keep(reflex);
     res.status(200).json(reflex);
 };
 
@@ -66,8 +55,7 @@ router.get('/authenticate/client/mirror', RouterAuthenticateClientMirror);
 // Metodos
 router.post('/authenticate/mirror/reflect', RouterAuthenticateMirrorReflect);         // 
 router.post('/authenticate/mirror/distort', RouterAuthenticateMirrorDistort);         // 
-router.post('/authenticate/mirror/reform', RouterAuthenticateMirrorReform);         // 
-router.post('/authenticate/mirror/distortion', RouterAuthenticateMirrorDistortion);
+router.post('/authenticate/mirror/keep', RouterAuthenticateMirrorKeep);
 
 
 
