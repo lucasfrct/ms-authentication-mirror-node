@@ -53,7 +53,7 @@ class AuthenticationClientMirror {
     }
 
     async readKeys() {
-        console.log("Keys: ", this.keysBox);
+        //console.log("Keys: ", this.keysBox);
         return this.keysBox;
     }
     
@@ -218,6 +218,9 @@ class AuthenticationClientMirror {
     async reflect() {
         // colocar chave publica do client no keysBox.public 
         // colocar a chave publica do servidor dentro de keysBox.image
+        const result = await this.readKeys();
+        this.reflex.origin.public = this.keysBox.public;
+        console.log("client: ", result)
         this.setUrl('/authenticate/mirror/reflect');
         await this.send( this.reflex );
         this.keysBox.image = this.reflex.image.public;
@@ -225,9 +228,6 @@ class AuthenticationClientMirror {
     }
 
     async distort() {
-        // escolher um dado, colocar numa variavel, deformar o dado, armazenar dentro de reflex
-        // setar uma rota para o servidor, enviar para o servidor com o send
-        // receber a resposta do servidor e carrega no servidor
         const car = "Fennec";
         this.reflex.origin.cipher = await this.deform(car);
         this.setUrl("/authenticate/mirror/keep");

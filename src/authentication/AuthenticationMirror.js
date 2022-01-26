@@ -275,6 +275,7 @@ const AuthenticationMirror = class AuthenticationMirror {
         this.reflex = reflex || this.reflex;
         this.keysBox.origin = this.reflex.origin.public;
         this.reflex.image = { ...this.reflex.image, public: this.keysBox.public };
+        console.log("server: ", this.keysBox.origin)
         return this.reflex;
     }
 
