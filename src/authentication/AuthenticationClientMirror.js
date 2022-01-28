@@ -8,7 +8,7 @@ class AuthenticationClientMirror {
     formBox  = { raw: "", reform: "", deform: { origin: "", image: "" }};
     client = { protocol: "", host: "", uri: "", url: "" };          // url do client
     user = { email: "", password: "" };                             // modelo de usuário                                                   // token de validação
-    reflex = { origin: { public: this.keysBox.public, cipher: ""}, image: { public: "", cipher: "" } }
+    reflex = { origin: { public: this.keysBox.public, cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
     params = {                                                      // params da requisição  
         type: "GET", 
         contentType:"application/json; charset=utf-8", 
@@ -39,12 +39,14 @@ class AuthenticationClientMirror {
         return this.client = { protocol, host, uri, url };
     }
     
-    async generateKeyPair(url = "/authenticate") {
+    async captureKeys(url = "/authenticate") {
         try {
             this.setUrl(url);
             const { publicKey, privateKey } = await this.rsa.generateKeyPairAsync();
+
+            const { iv } = this.parse(this.instance.encrypt(publicKey, this.keysBox.secret));
             
-            return this.keysBox = { public: publicKey, private: privateKey };
+            return this.keysBox = { ...this.keysBox, public: publicKey, private: privateKey, secret: iv };
             
         } catch(e) {
             console.error("Não foi possível gerar o par de chaves: ", e);
@@ -52,9 +54,40 @@ class AuthenticationClientMirror {
         };
     }
 
+    async writeKeys() {
+
+        try {
+            localStorage.setItem("publicKey", this.keysBox.public);
+        } catch(e) {
+            logger.error({ error: e, code: "AU0001", message: "A public Key não pôde ser escrita" });
+        };
+
+        try {
+            localStorage.setItem("privateKey", this.keysBox.private);
+        } catch(e) {
+            logger.error({ error: e, code: "AU0002", message: "A private Key não pôde ser escrita" });
+        };
+
+        try {
+            localStorage.setItem("secretKey", this.keysBox.secret);
+        } catch(e) {
+            logger.error({ error: e, code: "AU0003", message: "A secret Key não pôde ser escrita" });
+        };
+
+        return this.keysBox
+    }
+
+    async loadKeys() {
+        return await this.readKeys();        
+    }
+
     async readKeys() {
-        //console.log("Keys: ", this.keysBox);
+
+        this.keysBox.public = localStorage.getItem("publiKey");
+        this.keysBox.private = localStorage.getItem("privateKey");
+        this.keysBox.secret = localStorage.getItem("secretKey");
         return this.keysBox;
+       
     }
     
     /**
@@ -71,6 +104,14 @@ class AuthenticationClientMirror {
             return this.keys.public;
         };
     } */
+
+    parse(payload = "") {
+        try {
+            return JSON.parse(payload);
+        } catch (e) {
+            return payload;
+        };
+    }
 
     /**
      * Encrypta dos dados com a public Key no padrão RSA
@@ -218,9 +259,8 @@ class AuthenticationClientMirror {
     async reflect() {
         // colocar chave publica do client no keysBox.public 
         // colocar a chave publica do servidor dentro de keysBox.image
-        const result = await this.readKeys();
+        await this.readKeys();
         this.reflex.origin.public = this.keysBox.public;
-        console.log("client: ", result)
         this.setUrl('/authenticate/mirror/reflect');
         await this.send( this.reflex );
         this.keysBox.image = this.reflex.image.public;
@@ -228,9 +268,13 @@ class AuthenticationClientMirror {
     }
 
     async distort() {
-        const car = "Fennec";
-        this.reflex.origin.cipher = await this.deform(car);
+        this.reflex.origin.cipher = await this.deform(this.data.raw);
         this.setUrl("/authenticate/mirror/keep");
+        return await this.send(this.reflex);
+    }
+
+    async serverDistort() {
+        this.setUrl("/authenticate/mirror/distort");
         return await this.send(this.reflex);
     }
 

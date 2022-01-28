@@ -26,10 +26,13 @@
       let user = { email: "email@email.com", password: "Alterar123" };
       
       const auth = new AuthenticationClientMirror();
-      await auth.generateKeyPair();
+      result = await auth.captureKeys();
+      result = await auth.writeKeys();
       result = await auth.reflect();
+      result = await auth.loadKeys();
       //result = await auth.distort();
-      console.log("RUN: ", result);
+      result = await auth.serverDistort();
+      console.log("Index: ", result);
       // result = await auth.encrypt("feio");
       // result = await auth.deform();
       // result = await auth.readKeys();
@@ -44,14 +47,15 @@
       // console.log("CREDENTIAL RESULT: ", await auth.credentials(user));
       // setTimeout(async() =>{ console.log("LOGOUT RESULT: ", await auth.logout()); }, 10000); 
 
+      //localStorage.removeItem("publiKey", 'Jerry');
 
-
-        localStorage.setItem("publiKey", 'Jerry');
-        setTimeout(() => { 
-            let key = localStorage.getItem("publiKey");
-            console.log("key: ", key);
-        }, 3000 )
+      /* localStorage.setItem("publiKey", 'Jerry');
+      setTimeout(() => { 
+          let key = localStorage.getItem("publiKey");
+          console.log("key: ", key);
+      }, 3000 ) */
       
+
 
     })();
 

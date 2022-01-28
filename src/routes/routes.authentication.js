@@ -19,14 +19,18 @@ const RouterAuthenticateMirrorReflect = async(req, res)=> {
 const RouterAuthenticateMirrorDistort = async(req, res)=> {
     let { body: reflex } = req;
     const mirror = new AuthenticationMirror;
+    mirror.readKeys();
+    reflex.origin.raw = "octane";
     reflex = await mirror.distort(reflex);
+    console.log(reflex)
     res.status(200).json(reflex);
 };
 
 const RouterAuthenticateMirrorKeep = async(req, res)=> {
     let { body: reflex } = req;
     const mirror = new AuthenticationMirror;
-    reflex.xunda = await mirror.keep(reflex);
+    reflex = await mirror.keep(reflex);
+    console.log("car: ", mirror.formBox);
     res.status(200).json(reflex);
 };
 

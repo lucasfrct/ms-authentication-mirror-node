@@ -23,7 +23,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     heraders = { token: 'x-auth-token', bearer: 'Bearer' };                             // headers request/response 
     paths    = { public: "", private: "", secret: "", base: "./keys" };                // paths de escrita/leitura
     formBox  = { raw: "", reform: "", deform: { origin: "", image: "" }};
-    reflex   = { origin: { public: "", cipher: ""}, image: { public: "", cipher: "" } }
+    reflex   = { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
 
     constructor() {
         this.instance = new Crypt({ md: 'sha512' });    // inicializando Crypto
@@ -191,10 +191,10 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @param raw: any  - texto ou objeto para ser encrypta
      * @return cipher: string - texto cifrado com RSA
      */
-    deform(raw = "", publicKey = "") {
+    deform() {
         try {
-            this.setRaw(raw);
-            const Public = publicKey || this.keysBox.public;
+            this.setRaw(this.reflex.origin.raw);
+            const Public = this.reflex.origin.public || this.keysBox.origin;
 
             //faz assinatura da informação que será transmitida 
             this.signature();
@@ -274,15 +274,15 @@ const AuthenticationMirror = class AuthenticationMirror {
         await this.loadKeys();
         this.reflex = reflex || this.reflex;
         this.keysBox.origin = this.reflex.origin.public;
+        console.log("server: ", this.keysBox.origin);
         this.reflex.image = { ...this.reflex.image, public: this.keysBox.public };
-        console.log("server: ", this.keysBox.origin)
         return this.reflex;
     }
 
     // Client Request
     async distort(reflex = "") {
         this.reflex = reflex || this.reflex;
-        this.keysBox.public = this.keysBox.origin
+        //this.keysBox.public = this.keysBox.origin
         await this.loadKeys();
         await this.reflect();
         await this.deform();
@@ -294,7 +294,8 @@ const AuthenticationMirror = class AuthenticationMirror {
         this.reflex = reflex || this.reflex;
         this.formBox.deform.image = this.reflex.origin.cipher;
         await this.loadKeys();
-        return await this.reform();
+        await this.reform();
+        return this.reflex;
     }
         
 }
