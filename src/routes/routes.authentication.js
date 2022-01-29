@@ -19,10 +19,7 @@ const RouterAuthenticateMirrorReflect = async(req, res)=> {
 const RouterAuthenticateMirrorDistort = async(req, res)=> {
     let { body: reflex } = req;
     const mirror = new AuthenticationMirror;
-    mirror.readKeys();
-    reflex.origin.raw = "octane";
     reflex = await mirror.distort(reflex);
-    console.log(reflex)
     res.status(200).json(reflex);
 };
 
@@ -30,10 +27,17 @@ const RouterAuthenticateMirrorKeep = async(req, res)=> {
     let { body: reflex } = req;
     const mirror = new AuthenticationMirror;
     reflex = await mirror.keep(reflex);
-    console.log("car: ", mirror.formBox);
+    console.log("routes: ", reflex);
     res.status(200).json(reflex);
 };
 
+const RouterAuthenticateMirrorReveal = async(req, res)=> {
+    let { body: reflex } = req;
+    const mirror = new AuthenticationMirror;
+    mirror.formBox.raw = "feio";
+    console.log("reveal", reflex);
+    res.status(200).json("feio");
+}
 const RouterAuthenticateHybridCrypto = async (req, res) => {
    // ../lib/hybrid-crypto-js/hybrid-crypto-js.js
     const file = `${__dirname}/../lib/hybrid-crypto-js/hybrid-crypto-js.js`;
@@ -61,9 +65,15 @@ router.post('/authenticate/mirror/reflect', RouterAuthenticateMirrorReflect);   
 router.post('/authenticate/mirror/distort', RouterAuthenticateMirrorDistort);         // 
 router.post('/authenticate/mirror/keep', RouterAuthenticateMirrorKeep);
 
+router.get('/authenticate/mirror/reveal', RouterAuthenticateMirrorReveal);
+
 
 
 module.exports = router
 // router.post - 
 //    req: { cipher: "", publicKey: "" }
 //    res: { cipher: "", publicKey: "" }
+
+
+// rota distort = client manda data e server distorce devolvendo cifra
+// rota reveal = 

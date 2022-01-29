@@ -19,11 +19,11 @@ const AuthenticationMirror = class AuthenticationMirror {
     instance = null;
     rsa      = null;
 
-    keysBox  = { public: "", private: "", origin: "" , signature: "" , secret: "" }
+    keysBox  = { public: "", private: "", origin: "" , signature: "" , secret: "" };
     heraders = { token: 'x-auth-token', bearer: 'Bearer' };                             // headers request/response 
     paths    = { public: "", private: "", secret: "", base: "./keys" };                // paths de escrita/leitura
     formBox  = { raw: "", reform: "", deform: { origin: "", image: "" }};
-    reflex   = { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
+    reflex   = { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } };
 
     constructor() {
         this.instance = new Crypt({ md: 'sha512' });    // inicializando Crypto
@@ -75,6 +75,28 @@ const AuthenticationMirror = class AuthenticationMirror {
         } catch(e) {
             logger.error({ error: e, code: "AU0009", message: "A assinatura não pôde ser gerada" });
             return this.keysBox.signature
+        }
+    }
+
+    /**
+     * Gera as chaves para autenticação
+     * @return keys: Object - chaves de autenticação
+     */
+    async captureKeys() {
+        try{
+            // Generate 1024 bit RSA key pair
+            const [err, { privateKey, publicKey } ] = await handle(this.rsa.generateKeyPairAsync());
+            if(err) {
+                logger.error({ error: err, code: "AU0010", message: "O par de chaves público e privado não puderam ser geradas" });
+                return this.keysBox;
+            };
+            
+            const { iv } = this.parse(this.instance.encrypt(publicKey, process.env.SECRET_KEY));
+
+            return this.keysBox = { ...this.keysBox, public: publicKey, private: privateKey, secret: iv };
+        } catch(e) {
+            logger.error({ error: e, code: "AU0011", message: "O par de chaves público e privado não puderam ser geradas" });
+            return this.keysBox;
         }
     }
 
@@ -154,27 +176,6 @@ const AuthenticationMirror = class AuthenticationMirror {
         return this.keysBox;
     }
 
-    /**
-     * Gera as chaves para autenticação
-     * @return keys: Object - chaves de autenticação
-     */
-    async captureKeys() {
-        try{
-            // Generate 1024 bit RSA key pair
-            const [err, { privateKey, publicKey } ] = await handle(this.rsa.generateKeyPairAsync());
-            if(err) {
-                logger.error({ error: err, code: "AU0010", message: "O par de chaves público e privado não puderam ser geradas" });
-                return this.keys;
-            };
-            
-            const { iv } = this.parse(this.instance.encrypt(publicKey, process.env.SECRET_KEY));
-
-            return this.keysBox = { ...this.keysBox, public: publicKey, private: privateKey, secret: iv };
-        } catch(e) {
-            logger.error({ error: e, code: "AU0011", message: "O par de chaves público e privado não puderam ser geradas" });
-            return this.keysBox;
-        }
-    }
 
     /**
      * Verifica se a assinatura é autentica
@@ -274,7 +275,6 @@ const AuthenticationMirror = class AuthenticationMirror {
         await this.loadKeys();
         this.reflex = reflex || this.reflex;
         this.keysBox.origin = this.reflex.origin.public;
-        console.log("server: ", this.keysBox.origin);
         this.reflex.image = { ...this.reflex.image, public: this.keysBox.public };
         return this.reflex;
     }
@@ -282,11 +282,12 @@ const AuthenticationMirror = class AuthenticationMirror {
     // Client Request
     async distort(reflex = "") {
         this.reflex = reflex || this.reflex;
-        //this.keysBox.public = this.keysBox.origin
+        this.keysBox.public = this.keysBox.origin
         await this.loadKeys();
         await this.reflect();
         await this.deform();
         this.reflex.image = { ...this.reflex.image, cipher: this.formBox.deform.image };
+        console.log("server: ", this.reflex);
         return this.reflex;
     }
 
@@ -295,6 +296,15 @@ const AuthenticationMirror = class AuthenticationMirror {
         this.formBox.deform.image = this.reflex.origin.cipher;
         await this.loadKeys();
         await this.reform();
+        return this.reflex;
+    }
+
+    async reveal() {
+        await this.loadKeys();
+        await this.reflect();
+        await this.deform();
+        this.reflex.image = { ...this.reflex.image, cipher: this.formBox.deform.image };
+        console.log("server: ", this.reflex);
         return this.reflex;
     }
         

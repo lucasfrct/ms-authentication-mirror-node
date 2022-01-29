@@ -8,7 +8,7 @@ class AuthenticationClientMirror {
     formBox  = { raw: "", reform: "", deform: { origin: "", image: "" }};
     client = { protocol: "", host: "", uri: "", url: "" };          // url do client
     user = { email: "", password: "" };                             // modelo de usuário                                                   // token de validação
-    reflex = { origin: { public: this.keysBox.public, cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
+    reflex = { origin: { public: this.keysBox.public, cipher: "", raw: "Dominus" }, image: { public: "", cipher: "", raw: "" } }
     params = {                                                      // params da requisição  
         type: "GET", 
         contentType:"application/json; charset=utf-8", 
@@ -83,7 +83,7 @@ class AuthenticationClientMirror {
 
     async readKeys() {
 
-        this.keysBox.public = localStorage.getItem("publiKey");
+        this.keysBox.public = localStorage.getItem("publicKey");
         this.keysBox.private = localStorage.getItem("privateKey");
         this.keysBox.secret = localStorage.getItem("secretKey");
         return this.keysBox;
@@ -113,6 +113,11 @@ class AuthenticationClientMirror {
         };
     }
 
+    async verify(raw = "") {
+        console.log("VERIFY: ", this.keysBox.signature);
+        return await this.instance.verify( this.keysBox.public, raw, this.keysBox.signature );
+    }
+
     /**
      * Encrypta dos dados com a public Key no padrão RSA
      * @param raw: any 
@@ -128,6 +133,36 @@ class AuthenticationClientMirror {
         } catch (e) {
             console.error("ERROR encrypt: ", e);
             return this.formBox.deform.origin;
+        }
+    }
+
+    async reform(cipher = "") {
+        //await loadKeys();
+        try {
+            this.formBox.deform.image = cipher || this.formBox.deform.image;
+            
+            // testa se a chave privada existe
+            if(!this.keysBox.private) {
+                logger.message({ code: "AU0015", message: "a chave privada não existe" });
+                return this.formBox.reform;
+            };
+            
+            const { message, signature }  = this.instance.decrypt(this.keysBox.private, this.formBox.deform.image);
+            //faz assinatura da informação que será transmitida 
+            this.keysBox.signature = signature;
+            
+            
+            // verifica se a assinatura é autentica
+            if(this.keysBox.signature && !this.verify(message)) {
+                logger.message({ code: "AU0015", message: "Esse documento não foi assinado corretamente" });
+                return this.formBox.reform;
+            };
+            
+            return this.formBox.reform = this.parse(message);
+            
+        } catch(e) {
+            logger.message({ error: e, code: "AU0015", message: "Erro ao tentar decriptografar a cifra." })
+            return this.formBox.reform
         }
     }
 
@@ -169,12 +204,12 @@ class AuthenticationClientMirror {
      * Obtem chave pública do servidor
      * @return public key: string
      */
-    async get(parameters = "", data = "") {
+    async get( data = "" ) {
         try {
 
-            this.params.data = data;
+            this.params.data = JSON.stringify(data);
             this.params.type = "GET";
-            this.params.url = parameters?.url || "/";
+            this.params.url = this.client.url;
             this.params.headers = { 
                 Authorization: `Bearer ${await this.session()}`
             };
@@ -268,14 +303,25 @@ class AuthenticationClientMirror {
     }
 
     async distort() {
-        this.reflex.origin.cipher = await this.deform(this.data.raw);
+        this.reflex.origin.cipher = await this.deform();
         this.setUrl("/authenticate/mirror/keep");
         return await this.send(this.reflex);
     }
 
     async serverDistort() {
         this.setUrl("/authenticate/mirror/distort");
-        return await this.send(this.reflex);
+        this.reflex =  await this.send(this.reflex);
+        console.log("client2: ", this.reflex);
+        return this.reflex;
+
+    }
+
+    async reveal() {
+        await this.readKeys();
+        this.reflex.origin.public = this.keysBox.public;
+        this.setUrl("/authenticate/mirror/reveal");
+        this.reflex = await this.get(this.reflex);
+        return this.reflex;
     }
 
 }
