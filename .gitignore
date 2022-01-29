@@ -2,7 +2,7 @@
 ## CONTROLANDO ARQUIVOS DE AMBIENTE
 # dotenv environment variables file
 #.env
-keys
+./keys
 ###########################################################
 
 # Logs
