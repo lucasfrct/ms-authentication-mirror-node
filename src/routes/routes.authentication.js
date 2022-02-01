@@ -34,9 +34,8 @@ const RouterAuthenticateMirrorKeep = async(req, res)=> {
 const RouterAuthenticateMirrorReveal = async(req, res)=> {
     let { body: reflex } = req;
     const mirror = new AuthenticationMirror;
-    mirror.formBox.raw = "feio";
-    console.log("reveal", reflex);
-    res.status(200).json("feio");
+    reflex = await mirror.reveal(reflex);
+    res.status(200).json(reflex);
 }
 const RouterAuthenticateHybridCrypto = async (req, res) => {
    // ../lib/hybrid-crypto-js/hybrid-crypto-js.js
@@ -65,7 +64,7 @@ router.post('/authenticate/mirror/reflect', RouterAuthenticateMirrorReflect);   
 router.post('/authenticate/mirror/distort', RouterAuthenticateMirrorDistort);         // 
 router.post('/authenticate/mirror/keep', RouterAuthenticateMirrorKeep);
 
-router.get('/authenticate/mirror/reveal', RouterAuthenticateMirrorReveal);
+router.post('/authenticate/mirror/reveal', RouterAuthenticateMirrorReveal);
 
 
 

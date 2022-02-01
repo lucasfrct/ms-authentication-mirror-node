@@ -49,7 +49,7 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @param raw: any - recebe dados de qualquer typo 
      * @return raw: any - retorna o mesmo dado de entrada 
      */
-     setRaw(raw = "") {
+    setRaw(raw = "") {
         return this.formBox.raw = raw || this.formBox.raw;
     }
     
@@ -192,15 +192,14 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @param raw: any  - texto ou objeto para ser encrypta
      * @return cipher: string - texto cifrado com RSA
      */
-    deform() {
+    deform(raw = "") {
         try {
-            this.setRaw(this.reflex.origin.raw);
-            const Public = this.reflex.origin.public || this.keysBox.origin;
+            this.setRaw(raw);
 
             //faz assinatura da informação que será transmitida 
             this.signature();
 
-            if(!Public) {
+            if(!this.keysBox.public) {
                 logger.message({ code: "AU0012", message: "A public key não existe" })
                 return this.formBox.deform.image;
             };
@@ -210,9 +209,8 @@ const AuthenticationMirror = class AuthenticationMirror {
                 return this.formBox.deform.image;
             };
 
-            
             return this.formBox.deform.image = this.instance.encrypt(
-                Public, 
+                this.keysBox.public, 
                 JSON.stringify(this.formBox.raw), ""
             );
             
@@ -283,8 +281,8 @@ const AuthenticationMirror = class AuthenticationMirror {
     async distort(reflex = "") {
         this.reflex = reflex || this.reflex;
         this.keysBox.public = this.keysBox.origin
-        await this.loadKeys();
-        await this.reflect();
+        //await this.loadKeys();
+        await this.reflect(reflex);
         await this.deform();
         this.reflex.image = { ...this.reflex.image, cipher: this.formBox.deform.image };
         console.log("server: ", this.reflex);
@@ -299,13 +297,29 @@ const AuthenticationMirror = class AuthenticationMirror {
         return this.reflex;
     }
 
-    async reveal() {
-        await this.loadKeys();
+    async reveal(reflex = "") {
+        this.reflex = reflex || this.reflex;
         await this.reflect();
-        await this.deform();
-        this.reflex.image = { ...this.reflex.image, cipher: this.formBox.deform.image };
-        console.log("server: ", this.reflex);
+
+        const image = await this.photo();       
+        
+        this.setRaw(this.reflex.origin.raw);
+        this.keysBox.public = this.reflex.origin.public;
+        this.reflex.origin.cipher = await this.deform();
+        
+        await this.photo(image);
+
         return this.reflex;
+    }
+
+    async photo(image = undefined) {
+        if (image) {
+            this.setRaw(image.raw);
+            this.keysBox.public = image.public;
+            this.formBox.deform.image = image.deform;
+            return image;
+        }
+        return { raw: this.setRaw(), public: this.keysBox.public, deform: this.formBox.deform.image };
     }
         
 }

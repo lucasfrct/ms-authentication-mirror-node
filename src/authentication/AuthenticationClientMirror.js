@@ -8,7 +8,7 @@ class AuthenticationClientMirror {
     formBox  = { raw: "", reform: "", deform: { origin: "", image: "" }};
     client = { protocol: "", host: "", uri: "", url: "" };          // url do client
     user = { email: "", password: "" };                             // modelo de usuário                                                   // token de validação
-    reflex = { origin: { public: this.keysBox.public, cipher: "", raw: "Dominus" }, image: { public: "", cipher: "", raw: "" } }
+    reflex = { origin: { public: this.keysBox.public, cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
     params = {                                                      // params da requisição  
         type: "GET", 
         contentType:"application/json; charset=utf-8", 
@@ -213,9 +213,9 @@ class AuthenticationClientMirror {
             this.params.headers = { 
                 Authorization: `Bearer ${await this.session()}`
             };
-
+            
             this.params.headers[this.headers.token] = await this.session();
-
+            
             this.params.complete = (res)=> {
                 this.poll.forEach((callback)=> { callback(res); });
                 this.poll = [];
@@ -303,24 +303,26 @@ class AuthenticationClientMirror {
     }
 
     async distort() {
+        this.formBox.raw = "feio";
         this.reflex.origin.cipher = await this.deform();
-        this.setUrl("/authenticate/mirror/keep");
-        return await this.send(this.reflex);
+        console.log("client2: ", this.formBox);
+        //this.setUrl("/authenticate/mirror/keep");
+        //return await this.send(this.reflex);
     }
 
     async serverDistort() {
         this.setUrl("/authenticate/mirror/distort");
         this.reflex =  await this.send(this.reflex);
-        console.log("client2: ", this.reflex);
         return this.reflex;
-
+        
     }
-
-    async reveal() {
+    
+    async reveal(raw = "") {
         await this.readKeys();
         this.reflex.origin.public = this.keysBox.public;
+        this.reflex.origin.raw = this.setData(raw);
         this.setUrl("/authenticate/mirror/reveal");
-        this.reflex = await this.get(this.reflex);
+        await this.send(this.reflex);
         return this.reflex;
     }
 
