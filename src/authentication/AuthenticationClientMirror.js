@@ -319,11 +319,19 @@ class AuthenticationClientMirror {
     
     async reveal(raw = "") {
         await this.readKeys();
+
         this.reflex.origin.public = this.keysBox.public;
         this.reflex.origin.raw = this.setData(raw);
+
         this.setUrl("/authenticate/mirror/reveal");
-        await this.send(this.reflex);
-        return this.reflex;
+        return await this.send(this.reflex);
+    }
+
+    async keep() {
+        this.formBox.deform.image = this.reflex.origin.cipher;
+        await this.readKeys();
+        await this.reform();
+        return this.formBox;
     }
 
 }

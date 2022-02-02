@@ -27,7 +27,6 @@ const RouterAuthenticateMirrorKeep = async(req, res)=> {
     let { body: reflex } = req;
     const mirror = new AuthenticationMirror;
     reflex = await mirror.keep(reflex);
-    console.log("routes: ", reflex);
     res.status(200).json(reflex);
 };
 
@@ -36,22 +35,22 @@ const RouterAuthenticateMirrorReveal = async(req, res)=> {
     const mirror = new AuthenticationMirror;
     reflex = await mirror.reveal(reflex);
     res.status(200).json(reflex);
-}
+};
+
 const RouterAuthenticateHybridCrypto = async (req, res) => {
-   // ../lib/hybrid-crypto-js/hybrid-crypto-js.js
     const file = `${__dirname}/../lib/hybrid-crypto-js/hybrid-crypto-js.js`;
     res.status(200).download(file);
-}
+};
 
 const RouterAuthenticateJsSha512 = async (req, res) => {
      const file = `${__dirname}/../lib/js-sha512/js-sha512.js`;
      res.status(200).download(file);
-}
+};
 
 const RouterAuthenticateClientMirror = async (req, res) => {
      const file = `${__dirname}/../authentication/AuthenticationClientMirror.js`;
      res.status(200).download(file);
-}
+};
 
 // Files
 router.get('/authenticate/hybrid-crypto-js', RouterAuthenticateHybridCrypto);
