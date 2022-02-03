@@ -26,36 +26,36 @@ Os dados do objeto persistem de modo que todas as alterações feitas pelo servi
     Request: { email: "", password: "" }
     Response: { uudi: "", token: "" }
 ```
-[x] /reveal : Enviando um dado para recebê-lo encriptado
-``` POST /reveal
+[x] /authenticate/mirror/reveal : Enviando um dado para recebê-lo encriptado
+``` POST /authenticate/mirror/reveal
     Headers: x-api-token = token
     Request: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
     Response: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
 ```
-[x] /reflect : Enviando a chave publica do cliente e recebendo a chave publica do servidor
-``` POST /reflect
+[x] /authenticate/mirror/reflect : Enviando a chave publica do cliente e recebendo a chave publica do servidor
+``` POST /authenticate/mirror/reflect
     Headers: x-api-token = token
     Request: { origin: { public: "{CHAVE PUBLICA DO CLIENTE}", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
     Response: { origin: { public: "{CHAVE PUBLICA DO CLIENTE}", cipher: "", raw: "" }, image: { public: "{CHAVE PUBLICA DO SERVIDOR}", cipher: "", raw: "" } }
 ```
-[x] /distort : Enviando o objeto para receber uma cifra do servidor
-``` POST /distort
+[x] /authenticate/mirror/distort : Enviando o objeto para receber uma cifra do servidor
+``` POST /authenticate/mirror/distort
     Headers: x-api-token = token
     Request: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
     Response: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
 ```
-[x] /keep : Enviando uma cifra para que o servidor decifre e armazene
-``` POST /keep
+[x] /authenticate/mirror/keep : Enviando uma cifra para que o servidor decifre e armazene
+``` POST /authenticate/mirror/keep
     Headers: x-api-token = token
     Request: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
     Response: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
 ```
-[x] /hybrid-crypto-js : Importando a biblioteca hybrid-crypto
-``` GET /hybrid-crypto-js
+[x] /authenticate/hybrid-crypto-js : Baixando a biblioteca hybrid-crypto
+``` GET /authenticate/hybrid-crypto-js
 ```
-[x] /js-sha512 : Importando a biblioteca js-sha512
-``` GET /js-sha512
+[x] /authenticate/js-sha512 : Baixando a biblioteca js-sha512
+``` GET /authenticate/js-sha512
 ```
-[x] /client : Importando a classe do cliente
-``` GET /client
+[x] /authenticate/client/mirror : Baixando a biblioteca do cliente
+``` GET /authenticate/client/mirror
 ```
