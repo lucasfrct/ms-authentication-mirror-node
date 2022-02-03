@@ -281,11 +281,9 @@ const AuthenticationMirror = class AuthenticationMirror {
     async distort(reflex = "") {
         this.reflex = reflex || this.reflex;
         this.keysBox.public = this.keysBox.origin
-        //await this.loadKeys();
         await this.reflect(reflex);
         await this.deform();
         this.reflex.image = { ...this.reflex.image, cipher: this.formBox.deform.image };
-        console.log("server: ", this.reflex);
         return this.reflex;
     }
 
