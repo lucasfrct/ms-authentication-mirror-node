@@ -2,12 +2,11 @@ const moduleAlias = require('module-alias');
 const path = require('path');
 
 const Aliases = {
-    '@config':  path.join(__dirname, './'),
-    '@content':  path.join(__dirname, '../content'),
-    '@middleware':  path.join(__dirname, '../middlewares'),
-    '@ms-utils-node':  path.join(__dirname, '..', '..')
-    // '@ms-utils-node':  path.join(__dirname, '..', '..', '..', 'olombongo-ms-utils-node'),
-
+    '@config': path.join(__dirname, './'),
+    '@public': path.join(__dirname, '../public'),
+    '@middleware': path.join(__dirname, '../middlewares'),
+    '@authentication': path.join(__dirname, '../authentication'),
+    '@routes': path.join(__dirname, '../routes'),
 };
 
 moduleAlias.addAliases(Aliases);
