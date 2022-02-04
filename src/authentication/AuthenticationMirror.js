@@ -17,7 +17,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     rsa = null;
 
     paths = { public: "", private: "", secret: "", base: "./keys" };
-    keysBox = { public: "", private: "", origin: "", signature: "", secret: "" };
+    keysBox = { public: "", private: "", origin: "", destiny: "", signature: "", secret: "" };
     headers = { token: 'x-auth-token', bearer: 'Bearer' };
 
     formBox = {
@@ -264,8 +264,8 @@ const AuthenticationMirror = class AuthenticationMirror {
 
     // Client Request
     async reflect(reflex = "") {
-        await this.loadKeys();
         this.setReflex(reflex);
+        await this.loadKeys();
         this.keysBox.origin = this.reflex.origin.public;
         this.reflex.image = {...this.reflex.image, public: this.keysBox.public };
         return this.reflex;
@@ -273,11 +273,17 @@ const AuthenticationMirror = class AuthenticationMirror {
 
     // Client Request
     async distort(reflex = "") {
-        this.setReflex(resflex);
-        this.keysBox.public = this.keysBox.origin
+        this.setReflex(reflex);
+
+        const image = this.photo();
         await this.reflect();
+
+        this.formBox.public = this.reflex.origin.public;
         await this.deform();
-        this.reflex.image = {...this.reflex.image, cipher: this.formBox.deform.image };
+        this.reflex.origin.cipher = this.formBox.deform.image;
+
+        this.photo(image);
+
         return this.reflex;
     }
 
@@ -306,12 +312,11 @@ const AuthenticationMirror = class AuthenticationMirror {
 
     async photo(image = undefined) {
         if (image) {
-            this.setRaw(image.raw);
-            this.keysBox.public = image.public;
-            this.formBox.deform.image = image.deform;
+            this.keysBox = image.keysBox;
+            this.formBox = image.formBox;
             return image;
         }
-        return { raw: this.setRaw(), public: this.keysBox.public, deform: this.formBox.deform.image };
+        return { keysBox: this.keysBox, formBox: this.formBox };
     }
 
 }

@@ -1,87 +1,35 @@
 <!DOCTYPE html>
 <html lang="pt-bt">
-  <head>
+
+<head>
     <base href="/" />
 
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Index Auth</title>
-  </head>
-  <body>
+</head>
+
+<body>
     <h1>Auth</h1>
     <div class="auth"></div>
-  </body>
-  <script
-    src="https://code.jquery.com/jquery-3.6.0.min.js"
-    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-    crossorigin="anonymous"
-  ></script>
-  <script src="/authenticate/hybrid-crypto-js"></script>
-  <script src="/authenticate/js-sha512"></script>
-  <script src="/authenticate/client/mirror"></script>
-  <script>
-    (async()=>{
-      let result = null;
-      let user = { email: "email@email.com", password: "Alterar123" };
-      
-      const auth = new AuthenticationClientMirror();
-      //result = await auth.captureKeys();
-      //result = await auth.writeKeys();
-      //result = await auth.reflect();
-      //result = await auth.loadKeys();
-      //result = await auth.distort();
-      //result = await auth.serverDistort();
-      result = await auth.reveal("Lucas feio");
-      result = await auth.keep();
-      console.log("DEBUG: ", result);
-      // result = await auth.encrypt("feio");
-      // result = await auth.deform();
-      // result = await auth.readKeys();
-      // let keys = await auth.readKeys();
-      // publicKey = await auth.public();
-      // auth.setUrl("/authenticate");
-      // result = await auth.generateKeyPair();
-      // result = await auth.readKeys();
-      // result = await auth.send("/atuthentica/mirror", { cipher: "", keyPair });
-      // console.log("SIGN RESULT: ", await auth.sign(user.email, user.password));
-      // console.log("LOGIN RESULT: ", await auth.login(user.email, user.password));
-      // console.log("CREDENTIAL RESULT: ", await auth.credentials(user));
-      // setTimeout(async() =>{ console.log("LOGOUT RESULT: ", await auth.logout()); }, 10000); 
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="/authenticate/hybrid-crypto-js"></script>
+<script src="/authenticate/js-sha512"></script>
+<script src="/authenticate/client/mirror"></script>
+<script>
+    (async() => {
+        let result = null;
 
-      //localStorage.removeItem("publiKey", 'Jerry');
+        const auth = new AuthenticationClientMirror();
 
-      /* localStorage.setItem("publiKey", 'Jerry');
-      setTimeout(() => { 
-          let key = localStorage.getItem("publiKey");
-          console.log("key: ", key);
-      }, 3000 ) */
-      
+        result = await auth.reflect();
+        result = await auth.distort("FEIOS");
 
+        console.log("DEBUG: ", result)
 
     })();
-
-    // Trocando chaves: posta a chave origin e recebe a chave image
-    // 1.0 request POST /authenticate/mirror reflex = { origin: { public: "asdf", cipher: ""}, image: { public: "", cipher: "" } }
-    // 1.1 respose (POST) reflex = { origin: { public: "asdf", cipher: ""}, image: { public: "asdf", cipher: "" } }
-    // 
-    // Trocando cifras: posta a cifra origin e recebe a cifra image
-    // 2.0 request POST { origin: { public: "asdf", cipher: "asdf"}, image: { public: "asdf", cipher: "" } }
-    // 2.1 response (POST) { origin: { public: "asdf", cipher: "asdf"}, image: { public: "asdf", cipher: "asdfasdf" } }
-    // 
-    // Armazenando chaves (image = publickey da image)
-    // 3.0 const keysBox = { public: "", private: "", image: "" }
-    // Armazenando as cifras
-    // 3.1 const deformBox = { origin: "", image: "" }
-    // 
-    // 4.0 
-    // const reflex = { origin: { public: "", cipher: ""}, image: { public: "", cipher: "" } }
-
-    // const mirror = new AuthenticationClientMirror();
-    // (POST trocando chaves) mirror.reflect("/authenticate/mirror/reflect", { origin: { public: "asdf", cipher: ""}, image: { public: "", cipher: "" } });
-    // (POST trocando cifras) mirror.distort("/authenticate/mirror/ditortion", { origin: { public: "asdf", cipher: ""}, image: { public: "", cipher: "" } });
-    // const keysBox = mirror.captureKeys(); // Gerar chaves
-    // const raw = mirror.reform( cipher )
-    // const cipher = mirror.deform( raw )
 </script>
+
 </html>

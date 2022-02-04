@@ -32,8 +32,12 @@ const RouterAuthenticateMirrorReveal = async(req, res) => {
 };
 
 // Metodos
-router.post('/authenticate/mirror/reflect', RouterAuthenticateMirrorReflect); // 
-router.post('/authenticate/mirror/distort', RouterAuthenticateMirrorDistort); // 
+router.post('/authenticate/mirror/reflect', RouterAuthenticateMirrorReflect);
+
+// cliente envia um chave para o servidor encriptar um dado do servidor, 
+// devolver a cipher para o cliente e o clinete desemcriptar o dados do servidor 
+router.post('/authenticate/mirror/distort', RouterAuthenticateMirrorDistort);
+
 router.post('/authenticate/mirror/keep', RouterAuthenticateMirrorKeep);
 router.post('/authenticate/mirror/reveal', RouterAuthenticateMirrorReveal);
 

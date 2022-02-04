@@ -4,7 +4,7 @@ class AuthenticationClientMirror {
     instance = null
 
     client = { protocol: "", host: "", uri: "", url: "" };
-    keysBox = { public: "", private: "", image: "", signature: "", secret: "" };
+    keysBox = { public: "", private: "", image: "", destiny: "", signature: "", secret: "" };
     headers = { token: 'x-api-token', bearer: 'Bearer' };
 
     formBox = {
@@ -88,21 +88,31 @@ class AuthenticationClientMirror {
     }
 
     async writeKeys() {
-        localStorage.setItem("publicKey", this.keysBox.public);
-        localStorage.setItem("privateKey", this.keysBox.private);
-        localStorage.setItem("secretKey", this.keysBox.secret);
+        localStorage.setItem("AuthenticateMirrorPublicKey", this.keysBox.public);
+        localStorage.setItem("AuthenticateMirrorPrivateKey", this.keysBox.private);
+        localStorage.setItem("AuthenticateMirrorSecretKey", this.keysBox.secret);
         return this.keysBox;
     }
 
     async readKeys() {
-        this.keysBox.public = localStorage.getItem("publicKey");
-        this.keysBox.private = localStorage.getItem("privateKey");
-        this.keysBox.secret = localStorage.getItem("secretKey");
+        this.keysBox.public = localStorage.getItem("AuthenticateMirrorPublicKey") || "";
+        this.keysBox.private = localStorage.getItem("AuthenticateMirrorPrivateKey") || "";
+        this.keysBox.secret = localStorage.getItem("AuthenticateMirrorSecretKey") || "";
         return this.keysBox;
     }
 
     async loadKeys() {
-        return await this.readKeys();
+
+        if (this.keysBox.public.length < 64) {
+            await this.readKeys();
+        };
+
+        if (this.keysBox.public.length < 64) {
+            await this.captureKeys();
+            await this.writeKeys();
+        };
+
+        this.keysBox;
     }
 
     async verify(raw = "") {
@@ -198,7 +208,7 @@ class AuthenticationClientMirror {
 
     async reflect(reflex = "") {
         this.setUrl('/authenticate/mirror/reflect');
-        await this.readKeys();
+        await this.loadKeys()
         this.setReflex(reflex);
         this.reflex.origin.public = this.keysBox.public;
 
@@ -209,11 +219,18 @@ class AuthenticationClientMirror {
     }
 
     async distort(raw = "") {
-        this.setUrl("/authenticate/mirror/keep");
+        this.setUrl("/authenticate/mirror/distort");
         this.setRaw(raw);
-        this.reflex.origin.cipher = await this.deform();
+        this.reflex.origin.raw = this.formBox.raw;
         return await this.send();
     }
+
+    // async distort(raw = "") {
+    //     this.setUrl("/authenticate/mirror/keep");
+    //     this.setRaw(raw);
+    //     this.reflex.origin.cipher = await this.deform();
+    //     return await this.send();
+    // }
 
     async keep() {
         this.formBox.deform.image = this.reflex.origin.cipher;
