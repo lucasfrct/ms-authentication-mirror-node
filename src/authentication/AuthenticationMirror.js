@@ -288,7 +288,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     async keep(reflex = "") {
-        this.setReflex(resflex);
+        this.setReflex(reflex);
         this.formBox.deform.image = this.reflex.origin.cipher;
         await this.loadKeys();
         await this.reform();

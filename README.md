@@ -74,3 +74,23 @@ Criar um arquivo só com essas librarys - o nome do arquivo client-mirror-autent
 
 path do arquivo de cliente
 - src/public/client-mirror-autentication.js
+
+Rota reflect
+- O cliente envia o objeto reflex com sua chave publica para o servidor, o servidor por sua vez lê sua chave publica, insere no reflex e responde o reflex.
+
+Rota distort
+- Envia o objeto reflex com o dado e a chave publica do cliente para o servidor, o servidor por sua vez cifra o dado recebido no reflex com a chave publica do cliente, insere a cifra no reflex e o responde o reflex.
+Servidor precisa distorcer um dado
+
+Rota reveal
+- Envia o objeto reflex com o dado e a chave publica do cliente para o servidor, o servidor por sua vez cifra o dado recebido no reflex com a chave publica do cliente, insere a cifra no reflex e o responde o reflex.
+
+Rota keep
+- Envia o objeto reflex com uma cifra para o servidor, o servidor por sua vez decifra, armazena na classe e responde o reflex.
+
+## Casos de uso
+- 1. O cliente obtém publica do servidor, cifra um dado com a chave publica do servidor, envia a cifra para o servidor, o servidor decifra e guarda no banco de dados.
+- 2. O cliente envia sua chave publica para o servidor, o servidor cifra um dado do banco de dados, o servidor devolve a cifra para o cliente e o cliente decifra com sua chave privada.
+- 3. O cliente envia um dado para o servidor, o servidor cifra com sua chave publica, o servidor devolve uma cifra para o cliente, o cliente envia a cifra para seus pares e somente o servidor pode decifrar com a chave privada.
+- 4. (Servidor como TURN) O cliente cifra um dado com a chave publica do servidor, o servidor decifra, recifra com a chave publica do cliente2, envia para cliente2, o cliente2 decifra com sua privada.
+- 5. Cliente cifra a sua chave privada com a chave publica do cliente2, envia a cifra para o servidor, o servidor redireciona para o cliente2. (Usar Socket)
