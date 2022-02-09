@@ -278,9 +278,9 @@ const AuthenticationMirror = class AuthenticationMirror {
         const image = this.photo();
         await this.reflect();
 
-        this.formBox.public = this.reflex.origin.public;
+        this.keysBox.public = this.reflex.origin.public;
         await this.deform();
-        this.reflex.origin.cipher = this.formBox.deform.image;
+        this.reflex.image.cipher = this.formBox.deform.image;
 
         this.photo(image);
 
@@ -292,6 +292,7 @@ const AuthenticationMirror = class AuthenticationMirror {
         this.formBox.deform.image = this.reflex.origin.cipher;
         await this.loadKeys();
         await this.reform();
+        console.info("SERVER: ", this.formBox.reform, this.formBox.deform.image);
         return this.reflex;
     }
 

@@ -218,26 +218,17 @@ class AuthenticationClientMirror {
         return this.reflex;
     }
 
-    async distort(raw = "") {
+    async distort(reflex = "") {
         this.setUrl("/authenticate/mirror/distort");
-        this.setRaw(raw);
-        this.reflex.origin.raw = this.formBox.raw;
+        this.setReflex(reflex);
         return await this.send();
     }
 
-    // async distort(raw = "") {
-    //     this.setUrl("/authenticate/mirror/keep");
-    //     this.setRaw(raw);
-    //     this.reflex.origin.cipher = await this.deform();
-    //     return await this.send();
-    // }
-
     async keep() {
-        this.formBox.deform.image = this.reflex.origin.cipher;
-        await this.readKeys();
-        await this.reform();
-        this.reflex.origin.raw = this.formBox.reform
-        return this.reflex;
+        this.setUrl('/authenticate/mirror/keep');
+        await this.deform();
+        this.reflex.origin.cipher = this.formBox.deform.origin;
+        return this.send();
     }
 
     async reveal(raw = "") {
@@ -247,7 +238,5 @@ class AuthenticationClientMirror {
         this.reflex.origin.raw = this.setRaw(raw);
         return await this.send();
     }
-
-
 
 }
