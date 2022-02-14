@@ -42,10 +42,27 @@
         };
 
         async function thirdUC() {
+            const auth = new AuthenticationClientMirror();
+            await auth.reflect();
+            const response = await auth.reveal("Mussum Ipsum, cacilds vidis litro abertis. Per aumento de cachacis, eu reclamis.Praesent vel viverra nisi. Mauris aliquet nunc non turpis scelerisque, eget.Nullam volutpat risus nec leo commodo, ut interdum diam laoreet. Sed non consequat odio.Aenean aliquam molestie leo, vitae iaculis nisl.");
+            auth.formBox.deform.origin = response.origin.cipher;
+            // console.info("raw: ", auth.formBox);
+            return response;
+        };
+
+        async function fourthUC() {
+            const auth = new AuthenticationClientMirror();
+            await auth.reflect();
+            auth.setRaw("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam id quam non purus porta faucibus gravida et eros. Fusce luctus ante non lacus egestas facilisis. Nunc facilisis nibh nec magna accumsan varius. Integer interdum mauris nec massa luctus imperdiet. Cras ornare sem libero, et feugiat ligula gravida in. Aliquam sed neque ipsum. Mauris facilisis magna quis dolor condimentum, blandit lobortis massa rutrum. Duis semper augue nec sapien luctus venenatis.");
+            const response = await auth.keep();
+            return response;
+        };
+
+        async function fifthUC() {
 
         };
 
-        result = await firstUC();
+        result = await fourthUC();
         console.log("DEBUG: ", result);
 
     })();

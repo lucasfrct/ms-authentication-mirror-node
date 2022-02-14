@@ -90,7 +90,7 @@ Rota keep
 
 ## Casos de uso
 - 1. O cliente obtém a chave publica do servidor, cifra um dado com a chave publica do servidor, envia a cifra para o servidor, o servidor decifra e guarda no banco de dados. URL /keep
-- 2. O cliente envia sua chave publica para o servidor, o servidor cifra um dado do banco de dados, o servidor devolve a cifra para o cliente e o cliente decifra com sua chave privada.
-- 3. O cliente envia um dado para o servidor, o servidor cifra com sua chave publica, o servidor devolve uma cifra para o cliente, o cliente envia a cifra para seus pares e somente o servidor pode decifrar com a chave privada.
-- 4. (Servidor como TURN) O cliente cifra um dado com a chave publica do servidor, o servidor decifra, recifra com a chave publica do cliente2, envia para cliente2, o cliente2 decifra com sua privada.
+- 2. O cliente envia sua chave publica para o servidor, o servidor cifra um dado do banco de dados, o servidor devolve a cifra para o cliente e o cliente decifra com sua chave privada. URL /distort
+- 3. O cliente envia um dado para o servidor, o servidor cifra com sua chave publica, o servidor devolve uma cifra para o cliente, o cliente envia a cifra para seus pares e somente o servidor pode decifrar com a chave privada. URL /reveal
+- 4. (Servidor como TURN) O cliente cifra um dado com a chave publica do servidor, envia para o servidor, o servidor decifra, recifra com a chave publica do cliente2, envia para cliente2, o cliente2 decifra com sua privada.
 - 5. Cliente cifra a sua chave privada com a chave publica do cliente2, envia a cifra para o servidor, o servidor redireciona para o cliente2. (Usar Socket)

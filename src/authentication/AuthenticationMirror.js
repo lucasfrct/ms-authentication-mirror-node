@@ -303,7 +303,7 @@ const AuthenticationMirror = class AuthenticationMirror {
         const image = await this.photo();
 
         this.setRaw(this.reflex.origin.raw);
-        this.keysBox.public = this.reflex.origin.public;
+        // this.keysBox.public = this.reflex.origin.public;
         this.reflex.origin.cipher = await this.deform();
 
         await this.photo(image);

@@ -75,6 +75,10 @@ class AuthenticationClientMirror {
         }
     }
 
+    /**
+     * Gera um par de chaves, desconstroi o iv e os armazena no keysBox
+     * @returns keysBox: object
+     */
     async captureKeys() {
         try {
             const { publicKey, privateKey } = await this.rsa.generateKeyPairAsync();
@@ -87,6 +91,10 @@ class AuthenticationClientMirror {
         };
     }
 
+    /**
+     * Escreve as chaves publica, privada e secreta no localStorage do navegador
+     * @returns keysBox: object
+     */
     async writeKeys() {
         localStorage.setItem("AuthenticateMirrorPublicKey", this.keysBox.public);
         localStorage.setItem("AuthenticateMirrorPrivateKey", this.keysBox.private);
@@ -94,6 +102,10 @@ class AuthenticationClientMirror {
         return this.keysBox;
     }
 
+    /**
+     * Lê o valor das chaves no localStorage do navegador e passa para o objeto da classe
+     * @returns keysBox: object
+     */
     async readKeys() {
         this.keysBox.public = localStorage.getItem("AuthenticateMirrorPublicKey") || "";
         this.keysBox.private = localStorage.getItem("AuthenticateMirrorPrivateKey") || "";
@@ -101,6 +113,9 @@ class AuthenticationClientMirror {
         return this.keysBox;
     }
 
+    /**
+     * 
+     */
     async loadKeys() {
 
         if (this.keysBox.public.length < 64) {
@@ -122,7 +137,7 @@ class AuthenticationClientMirror {
     /**
      * Encrypta dos dados com a public Key no padrão RSA
      * @param raw: any 
-     * @return copher: string - hash cifrada
+     * @return cipher: string - hash cifrada
      */
     async deform(raw = "") {
         try {
@@ -134,7 +149,11 @@ class AuthenticationClientMirror {
             return this.formBox.deform.origin;
         }
     }
-
+    /**
+    * Desencrypta uma cifra com a chave privada no padrão RSA 
+    * @param cipher: string - hash cifrada
+    * @return raw: any
+    */
     async reform(cipher = "") {
         //await loadKeys();
         try {
@@ -234,7 +253,7 @@ class AuthenticationClientMirror {
     async reveal(raw = "") {
         this.setUrl("/authenticate/mirror/reveal");
         await this.readKeys();
-        this.reflex.origin.public = this.keysBox.public;
+        // this.reflex.origin.public = this.keysBox.public;
         this.reflex.origin.raw = this.setRaw(raw);
         return await this.send();
     }
