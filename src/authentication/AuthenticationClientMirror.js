@@ -161,6 +161,7 @@ class AuthenticationClientMirror {
 
             // testa se a chave privada existe
             if (!this.keysBox.private) {
+                console.error("A PRIVATE KEY NÃO EXISTE");
                 return this.formBox.reform;
             };
 
@@ -170,12 +171,14 @@ class AuthenticationClientMirror {
 
             // verifica se a assinatura é autentica
             if (this.keysBox.signature && !this.verify(message)) {
+                console.error("ERRO NA ASSINATURA");
                 return this.formBox.reform;
             };
 
             return this.formBox.reform = this.parse(message);
 
         } catch (e) {
+            console.error("ERRO");
             return this.formBox.reform
         }
     }
@@ -256,6 +259,15 @@ class AuthenticationClientMirror {
         // this.reflex.origin.public = this.keysBox.public;
         this.reflex.origin.raw = this.setRaw(raw);
         return await this.send();
+    }
+
+    async refraction() {
+        this.setUrl('/authenticate/mirror/refraction');
+        const response = await this.send();
+        this.setReflex(response);
+        this.formBox.deform.image = this.reflex.image.cipher;
+        await this.readKeys();
+        return await this.reform(this.formBox.deform.image);
     }
 
 }

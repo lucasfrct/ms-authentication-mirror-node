@@ -16,7 +16,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     instance = null;
     rsa = null;
 
-    paths = { public: "", private: "", secret: "", base: "./keys" };
+    paths = { public: "", private: "", secret: "", base: "./keys", data: "" };
     keysBox = { public: "", private: "", origin: "", destiny: "", signature: "", secret: "" };
     headers = { token: 'x-auth-token', bearer: 'Bearer' };
 
@@ -48,6 +48,7 @@ const AuthenticationMirror = class AuthenticationMirror {
         this.paths.public = `${this.paths.base}/public_key.pem`
         this.paths.private = `${this.paths.base}/private_key.pem`
         this.paths.secret = `${this.paths.base}/secret_key.b64`
+        this.paths.data = `${this.paths.base}/data.pem`
         return this.paths;
     }
 
@@ -67,6 +68,28 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @return payload: any 
      */
     parse(payload = "") { try { return JSON.parse(payload); } catch (e) { return payload; }; }
+
+    async writeData(data = "", path = "") {
+
+        this.path(path);
+
+        try { 
+            await fs.writeFileSync(this.paths.data, data);
+        }catch (e) {
+            console.error("Error writing data");
+        };
+    }
+
+    async readData(path = "") {
+
+        this.path(path);
+
+        try { 
+            this.formBox.raw = await fs.readFileSync(this.paths.data, "utf8");
+        }catch (e) {
+            console.error("Error reading data");
+        };
+    }
 
     /**
      * Gera uma assinatura unica usando a chave privada
@@ -211,10 +234,12 @@ const AuthenticationMirror = class AuthenticationMirror {
             this.signature();
 
             if (!this.keysBox.public) {
+                console.error("A PUBLIC KEY NÃO EXISTE");
                 return this.formBox.deform.image;
             };
 
             if (!this.keysBox.signature) {
+                console.error("A ASSINATURA KEY NÃO EXISTE");
                 return this.formBox.deform.image;
             };
 
@@ -224,7 +249,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             );
 
         } catch (e) {
-            console.error(e);
+            console.error("ERRO", e);
             return this.formBox.deform.image;
         }
     }
@@ -292,7 +317,19 @@ const AuthenticationMirror = class AuthenticationMirror {
         this.formBox.deform.image = this.reflex.origin.cipher;
         await this.loadKeys();
         await this.reform();
-        console.info("SERVER: ", this.formBox.reform, this.formBox.deform.image);
+        await this.writeData(this.formBox.reform);
+        // console.info("SERVER: ", this.formBox.reform);
+        return this.reflex;
+    }
+
+    async refraction(reflex = "") {
+        this.setReflex(reflex);
+        await this.loadKeys();
+        this.keysBox.public = this.reflex.origin.public;
+        this.formBox.reform = await this.readData();
+        await this.deform();
+        this.reflex.image.cipher = this.formBox.deform.image;
+        console.info("SERVER: ", this.reflex);
         return this.reflex;
     }
 

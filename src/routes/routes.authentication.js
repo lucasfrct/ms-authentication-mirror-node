@@ -32,6 +32,13 @@ const RouterAuthenticateMirrorReveal = async(req, res) => {
     res.status(200).json(reflex);
 };
 
+const RouterAuthenticateMirrorRefraction = async(req, res) => {
+    let { body: reflex } = req;
+    const mirror = new AuthenticationMirror;
+    reflex = await mirror.refraction(reflex);
+    res.status(200).json(reflex);
+}
+
 // Metodos
 router.post('/authenticate/mirror/reflect', RouterAuthenticateMirrorReflect);
 
@@ -41,5 +48,6 @@ router.post('/authenticate/mirror/distort', RouterAuthenticateMirrorDistort);
 
 router.post('/authenticate/mirror/keep', RouterAuthenticateMirrorKeep);
 router.post('/authenticate/mirror/reveal', RouterAuthenticateMirrorReveal);
+router.post('/authenticate/mirror/refraction', RouterAuthenticateMirrorRefraction);
 
 module.exports = router
