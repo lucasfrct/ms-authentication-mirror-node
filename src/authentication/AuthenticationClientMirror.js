@@ -1,98 +1,141 @@
+/**
+ * * Classe usada pelo cliente para gerar suporte a autenticação
+ */
 class AuthenticationClientMirror {
+    rsa = null; // ! classe para gerar RSA
+    crypt = null; // ! classe para encryptar
 
-    rsa = null;
-    instance = null
+    headers = ["x-api-token", "Bearer", "authorization"]; // cabeçalhos que serão aceitos
+    client = { protocol: "", host: "", uri: "", url: "" }; // dados da URL
+    keysBox = { public: "", private: "", secret: "", signature: "", image: "", destiny: "" }; // ! chaves
 
-    client = { protocol: "", host: "", uri: "", url: "" };
-    keysBox = { public: "", private: "", image: "", destiny: "", signature: "", secret: "" };
-    headers = { token: 'x-api-token', bearer: 'Bearer' };
-
+    // ? armazena dos dados para a classe
     formBox = {
         raw: "",
-        reform: "",
-        deform: { origin: "", image: "", destiny: "" }
+        reform: { origin: "", image: "", destiny: "" },
+        deform: { origin: "", image: "", destiny: "" },
     };
 
+    // ? payload de troca com o servidor
     reflex = {
         origin: { public: "", cipher: "", raw: "" }, // browser
         image: { public: "", cipher: "", raw: "" }, // servidor local
-        destiny: { public: "", cipher: "", raw: "" } // servidor remoto
+        destiny: { public: "", cipher: "", raw: "" }, // servidor remoto
+        body: ""
     };
 
+    // ? parametros da requisição
     params = {
         type: "GET",
-        contentType: "application/json; charset=utf-8"
+        contentType: "application/json; charset=utf-8",
     };
 
+    // ! inicia a classe
     constructor() {
-        this.instance = new Crypt({ md: 'sha512' });
         this.rsa = new RSA({ keySize: 4096 });
-        this.setUrl("/authenticate");
+        this.crypt = new Crypt({ md: "sha512" });
     }
 
     /**
-     * Seta os dados para serem encriptados
-     * @param raw: any 
+     * * carrega os dados para serem encriptados
+     * @param raw: any
      */
-    setRaw(raw = "") { return this.formBox.raw = raw || this.formBox.raw; }
-    setReflex(reflex = "") { return this.reflex = reflex || this.reflex; }
-    setPublic(publicKey = "") { return this.keysBox.image = publicKey || this.keysBox.image; }
-    setDeform(cipher = "") { return this.formBox.deform.image = cipher || this.formBox.deform.image; }
+    setRaw(raw = "") {
+        return (this.formBox.raw = raw || this.formBox.raw);
+    }
 
     /**
-     * Transforma uma texto em hash 
-     * @param txt: string 
-     * @return txt: string 
+     * * carrega o payload reflex na classe
+     * @paoram {*} reflex
+     * @returns
      */
-    hash(txt = "") { return sha512(txt); }
+    setReflex(reflex = null) {
+        return (this.reflex = reflex || this.reflex);
+    }
 
-    parse(payload = "") { try { return JSON.parse(payload); } catch (e) { return payload; }; }
+    /**
+     * ! carrega a public key do servidor na classe
+     * @param {*} publicKey
+     * @returns
+     */
+    setImage(publicKey = "") {
+        return (this.keysBox.image = publicKey || this.keysBox.image);
+    }
 
+    /**
+     * ! carrega a public key do cliente parceiro na classe
+     * @param {*} publicKey 
+     * @returns 
+     */
+    setDestinity(publicKey = "") {
+        return (this.keysBox.destiny = publicKey || this.keysBox.destiny);
+    }
+
+    /**
+     *  ! carrega a cifra do servidor na classe 
+     * @param {*} cipher
+     * @returns
+     */
+    setDeformImage(cipher = "") {
+        return (this.formBox.deform.image = cipher || this.formBox.deform.image);
+    }
+
+    /**
+     *  ! carrega a cifra do cliente
+     * @param {*} cipher 
+     * @returns 
+     */
+    setDeformOrigin(cipher = "") {
+        return this.formBox.deform.origin = cipher || this.formBox.deform.origin
+    }
+
+    /**
+     *  * carrega o dado reformado do servidor na classe
+     * @param {*} raw 
+     * @returns 
+     */
+    setReformImage(raw = "") {
+        return (this.formBox.reform.image = raw || this.formBox.reform.image);
+    }
+
+    /**
+     * * configura uma URI para uma requisição
+     * @param {*} uri
+     * @returns
+     */
     setUrl(uri = "") {
-        uri = uri || this.client.uri;
-        const protocol = window.location.protocol;
-        const host = window.location.host;
-        const url = `${protocol}//${host}${uri}`;
-        return this.client = { protocol, host, uri, url };
-    }
-
-    async signature(raw = "") {
-
-        this.setRaw(raw);
-
-        try {
-            // se não hpuver chave privada, não faz a assinatura
-            if (!this.keysBox.private) {
-                return this.keysBox.signature;
-            };
-
-            const { signature } = this.parse(this.instance.signature(this.keysBox.private, JSON.stringify(this.formBox.raw)));
-            return this.keysBox.signature = signature;
-
-        } catch (e) {
-            console.error(e);
-            return this.keysBox.signature
-        }
+        this.client.uri = uri || this.client.uri;
+        this.client.protocol = window.location.protocol;
+        this.client.host = window.location.host;
+        this.client.url = `${this.client.protocol}//${this.client.host}${this.client.uri}`;
+        return this.client;
     }
 
     /**
-     * Gera um par de chaves, desconstroi o iv e os armazena no keysBox
+     * ! gera um par de chaves, desconstroi o iv e os armazena no keysBox
      * @returns keysBox: object
      */
     async captureKeys() {
         try {
+            // ! extrai o par de chaves publica/privada RSA
             const { publicKey, privateKey } = await this.rsa.generateKeyPairAsync();
-            const { iv } = this.parse(this.instance.encrypt(publicKey, this.keysBox.secret));
-            return this.keysBox = {...this.keysBox, public: publicKey, private: privateKey, secret: iv };
 
+            // ! gera uma chave IV de uma string forte de 64 caracteres
+            const { iv } = this.parse(this.crypt.encrypt(publicKey, "De@14@Jxfjm^MiKpQP6tzKSm83xpa*vfXRi2bSjvtSFGVbwU8Yy&9K*&soIT5ft&EIS"));
+
+            // ! gera uma chave secreta auto-assinada
+            const sercretKey = await this.crypt.signature(this.keysBox.private, iv);
+
+            // ? armazena as chaves na classe
+            return (this.keysBox = {...this.keysBox, public: publicKey, private: privateKey, secret: sercretKey });
         } catch (e) {
             console.error("Não foi possível gerar o par de chaves: ", e);
             return this.keysBox;
-        };
+        }
     }
 
     /**
-     * Escreve as chaves publica, privada e secreta no localStorage do navegador
+     * * Escreve as chaves publica, privada e secreta no localStorage do navegador
      * @returns keysBox: object
      */
     async writeKeys() {
@@ -103,7 +146,7 @@ class AuthenticationClientMirror {
     }
 
     /**
-     * Lê o valor das chaves no localStorage do navegador e passa para o objeto da classe
+     * * Lê o valor das chaves no localStorage do navegador e passa para o objeto da classe
      * @returns keysBox: object
      */
     async readKeys() {
@@ -114,123 +157,173 @@ class AuthenticationClientMirror {
     }
 
     /**
-     * 
+     *
      */
     async loadKeys() {
-
+        // ! se não houver chave pública faz a leitura das chaves
         if (this.keysBox.public.length < 64) {
             await this.readKeys();
-        };
+        }
 
+        // ! se não houver chaves para serem lidas então gera novas chaves
         if (this.keysBox.public.length < 64) {
             await this.captureKeys();
             await this.writeKeys();
-        };
+        }
 
+        // ? return das chaves para solicitação
         this.keysBox;
     }
 
+    /**
+     * ! assina um string
+     * @param {*} raw
+     * @returns
+     */
+    async signature(raw = "") {
+        try {
+
+            // ! se não houver chave privada, não faz a assinatura
+            if (this.keysBox.private.length < 64) {
+                return this.keysBox.signature;
+            }
+
+            // ! converte para string
+            const dataString = this.parseStr(this.setRaw(raw));
+
+            // ! faz a assinatura do dado e extrai do JSON a assinnatura
+            const { signature } = this.parse(this.crypt.signature(this.keysBox.private, dataString));
+
+            // ? retorna a assinatura
+            return (this.keysBox.signature = signature);
+        } catch (e) {
+            console.error(e);
+            return this.keysBox.signature;
+        }
+    }
+
+
+    /**
+     * ! verifica se uma string foi assinada
+     * @param {*} raw
+     * @returns
+     */
     async verify(raw = "") {
-        return await this.instance.verify(this.keysBox.public, raw, this.keysBox.signature);
+        return await this.crypt.verify(this.keysBox.public, this.setRaw(raw), this.keysBox.signature);
     }
 
     /**
-     * Encrypta dos dados com a public Key no padrão RSA
-     * @param raw: any 
+     * ! Encrypta os dados com a public Key do servidor no padrão RSA
+     * @param raw: any
      * @return cipher: string - hash cifrada
      */
     async deform(raw = "") {
         try {
-            this.setRaw(raw);
-            const dataString = (typeof this.formBox.raw == 'string') ? this.formBox.raw : JSON.stringify(this.formBox.raw);
-            return this.formBox.deform.origin = this.instance.encrypt(this.keysBox.image, dataString, "");
+
+            // ! carrega a chave pública do servidor
+            const image = this.setImage();
+
+            // ! se não houver chave pública do servidor, nã faz a cifragem 
+            if (image.length < 64) {
+                console.error("Erro, a chave publica não existe");
+                return this.setDeformOrigin();
+            }
+
+            // ! converte par string
+            const dataString = this.parseStr(this.setRaw(raw));
+
+            // ! faz assinatura
+            const signature = this.signature(dataString);
+
+            // ! criar uma crifra no cliente com a chave do servidor
+            return this.setDeformOrigin(this.crypt.encrypt(image, dataString, signature));
         } catch (e) {
-            console.error("ERROR encrypt: ", e);
-            return this.formBox.deform.origin;
+            console.error("Error ao deforma um dado: ", e);
+            return this.setDeformOrigin();
         }
     }
+
     /**
-    * Desencrypta uma cifra com a chave privada no padrão RSA 
-    * @param cipher: string - hash cifrada
-    * @return raw: any
-    */
+     * ! Decrypta uma cifra do servidor com a chave privada do cliente no padrão RSA
+     * @param cipher: string - hash cifrada
+     * @return raw: any
+     */
     async reform(cipher = "") {
-        //await loadKeys();
         try {
-            this.setDeform(cipher);
 
-            // testa se a chave privada existe
-            if (!this.keysBox.private) {
-                console.error("A PRIVATE KEY NÃO EXISTE");
-                return this.formBox.reform;
-            };
+            // ! pega a chave privada do client
+            const privateKey = this.keysBox.private;
 
-            const { message, signature } = this.instance.decrypt(this.keysBox.private, this.formBox.deform.image);
-            //faz assinatura da informação que será transmitida 
+            // ! se não houver chave privada do cliente, não faz a decifragem
+            if (privateKey.length < 64) {
+                console.error("Erro, a chave privada não existe");
+                return this.setReformImage()
+            }
+
+            // ! faz a decigragem a string enviada do servidor
+            const { message, signature } = this.crypt.decrypt(privateKey, this.setDeformImage(cipher));
+
+            // ! carrega a assinatura
             this.keysBox.signature = signature;
 
-            // verifica se a assinatura é autentica
+            // ! verifica se a assinatura é autentica
             if (this.keysBox.signature && !this.verify(message)) {
-                console.error("ERRO NA ASSINATURA");
-                return this.formBox.reform;
-            };
+                console.error("Erro, documento com assinatura inválida");
+                return this.setReformImage()
+            }
 
-            return this.formBox.reform = this.parse(message);
-
+            // ? return a informação decigrada
+            return this.setReformImage(this.parse(message));
         } catch (e) {
-            console.error("ERRO");
-            return this.formBox.reform
+            console.error("Error ao tentar decifra a=o dado");
+            return this.setReformImage();
         }
     }
 
     /**
-     * Envia dados com o Vebo POST
-     * @param reflex: JSON - precisa ser uma JSON passar na requisicao 
+     * * Envia dados com o Verbo POST
+     * @param reflex: JSON - precisa ser uma JSON passar na requisicao
      * @return payload: JSON
      */
     async send(reflex = "") {
         try {
-            this.setReflex(reflex);
 
-            this.params.data = JSON.stringify(this.reflex);
+            // ! configura a requisição
+            this.params.data = this.parseStr(this.setReflex(reflex));
             this.params.type = "POST";
             this.params.url = this.client.url;
-            this.params.headers = { Authorization: `Bearer ` };
-            this.params.headers[this.headers.token] = "";
 
-            return this.reflex = await $.ajax(this.params);
-
+            // ? faz a requição ao servidor
+            return this.setReflex(await $.ajax(this.params))
         } catch (e) {
-            console.error("ERROR send: ", e);
-            return this.reflex;
+            console.error("Error ao tentar acessar o servidor: ", e);
+            return this.setReflex();
         }
     }
 
     /**
-     * Obtem chave pública do servidor
+     * * Faz uma requisicao ao servidor com o verbo GET
      * @return public key: string
      */
     async get(reflex = "") {
         try {
-            this.setReflex(reflex);
 
-            this.params.data = JSON.stringify(this.reflex);
+            // ! configura a requisição
+            this.params.data = this.parseStr(this.setReflex(reflex));
             this.params.type = "GET";
             this.params.url = this.client.url;
-            this.params.headers = { Authorization: `Bearer ${await this.session()}` };
-            this.params.headers[this.headers.token] = await this.session();
 
-            return this.reflex = await $.ajax(this.params);
-
+            // ? faz a requição ao servidor
+            return this.setReflex(await $.ajax(this.params))
         } catch (e) {
-            console.error("ERROR get: ", e);
-            return this.reflex;
+            console.error("Error ao tentar acessar o servidor: ", e);
+            return this.setReflex();
         }
     }
 
     async reflect(reflex = "") {
-        this.setUrl('/authenticate/mirror/reflect');
-        await this.loadKeys()
+        this.setUrl("/authenticate/mirror/reflect");
+        await this.loadKeys();
         this.setReflex(reflex);
         this.reflex.origin.public = this.keysBox.public;
 
@@ -247,7 +340,7 @@ class AuthenticationClientMirror {
     }
 
     async keep() {
-        this.setUrl('/authenticate/mirror/keep');
+        this.setUrl("/authenticate/mirror/keep");
         await this.deform();
         this.reflex.origin.cipher = this.formBox.deform.origin;
         return this.send();
@@ -262,7 +355,7 @@ class AuthenticationClientMirror {
     }
 
     async refraction() {
-        this.setUrl('/authenticate/mirror/refraction');
+        this.setUrl("/authenticate/mirror/refraction");
         const response = await this.send();
         this.setReflex(response);
         this.formBox.deform.image = this.reflex.image.cipher;
@@ -270,4 +363,43 @@ class AuthenticationClientMirror {
         return await this.reform(this.formBox.deform.image);
     }
 
+    /**
+     * Transforma um texto em hash
+     * @param raw: string
+     * @return txt: string
+     */
+    hash(raw = "") {
+        return sha512(raw);
+    }
+
+    /**
+     * faz um parse par json
+     * @param {*} payload
+     * @returns
+     */
+    parse(payload = "") {
+        try {
+            return JSON.parse(payload);
+        } catch (e) {
+            return payload;
+        }
+    }
+
+    /**
+     *  Passa um dado Json para string
+     * @param {*} data 
+     * @returns 
+     */
+    parseStr(data = "") {
+        if (typeof data === "string") {
+            return data;
+        }
+
+        try {
+            return JSON.stringify(data);
+        } catch (e) {
+            return data;
+        }
+
+    }
 }
