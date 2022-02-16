@@ -54,11 +54,23 @@ class AuthenticationClientMirror {
     }
 
     /**
+     * ! carrega a public key do cliente na classe
+     * @param {*} publicKey
+     * @returns
+     */
+    setPublic(publicKey = "") {
+        this.reflex.origin.public = publicKey || this.reflex.origin.public;
+        return (this.keysBox.public = publicKey || this.keysBox.public);
+    }
+
+
+    /**
      * ! carrega a public key do servidor na classe
      * @param {*} publicKey
      * @returns
      */
     setImage(publicKey = "") {
+        this.reflex.image.public = publicKey || this.reflex.image.public;
         return (this.keysBox.image = publicKey || this.keysBox.image);
     }
 
@@ -68,6 +80,7 @@ class AuthenticationClientMirror {
      * @returns 
      */
     setDestinity(publicKey = "") {
+        this.reflex.destiny.public = publicKey || this.reflex.destiny.public;
         return (this.keysBox.destiny = publicKey || this.keysBox.destiny);
     }
 
@@ -77,6 +90,7 @@ class AuthenticationClientMirror {
      * @returns
      */
     setDeformImage(cipher = "") {
+        this.reflex.image.cipher = cipher || this.reflex.image.cipher;
         return (this.formBox.deform.image = cipher || this.formBox.deform.image);
     }
 
@@ -86,6 +100,7 @@ class AuthenticationClientMirror {
      * @returns 
      */
     setDeformOrigin(cipher = "") {
+        this.reflex.origin.cipher = cipher || this.reflex.origin.cipher;
         return this.formBox.deform.origin = cipher || this.formBox.deform.origin
     }
 
@@ -95,6 +110,7 @@ class AuthenticationClientMirror {
      * @returns 
      */
     setReformImage(raw = "") {
+        this.reflex.image.raw = raw || this.reflex.image.raw;
         return (this.formBox.reform.image = raw || this.formBox.reform.image);
     }
 
@@ -108,7 +124,7 @@ class AuthenticationClientMirror {
         this.client.protocol = window.location.protocol;
         this.client.host = window.location.host;
         this.client.url = `${this.client.protocol}//${this.client.host}${this.client.uri}`;
-        return this.client;
+        return this.client.url;
     }
 
     /**
@@ -272,7 +288,7 @@ class AuthenticationClientMirror {
                 return this.setReformImage()
             }
 
-            // ? return a informação decigrada
+            // ? retorna a informação decigrada
             return this.setReformImage(this.parse(message));
         } catch (e) {
             console.error("Error ao tentar decifra a=o dado");
@@ -291,7 +307,7 @@ class AuthenticationClientMirror {
             // ! configura a requisição
             this.params.data = this.parseStr(this.setReflex(reflex));
             this.params.type = "POST";
-            this.params.url = this.client.url;
+            this.params.url = this.setUrl();
 
             // ? faz a requição ao servidor
             return this.setReflex(await $.ajax(this.params))
@@ -311,7 +327,7 @@ class AuthenticationClientMirror {
             // ! configura a requisição
             this.params.data = this.parseStr(this.setReflex(reflex));
             this.params.type = "GET";
-            this.params.url = this.client.url;
+            this.params.url = this.setUrl();
 
             // ? faz a requição ao servidor
             return this.setReflex(await $.ajax(this.params))
@@ -321,15 +337,29 @@ class AuthenticationClientMirror {
         }
     }
 
+    /**
+     *  ! Troca as chaves publicas entre cliente e servidor
+     * @param {*} reflex 
+     * @returns 
+     */
     async reflect(reflex = "") {
+        // ! define uma rota
         this.setUrl("/authenticate/mirror/reflect");
-        await this.loadKeys();
-        this.setReflex(reflex);
-        this.reflex.origin.public = this.keysBox.public;
 
+        // ! carega as chaves para o cliente
+        await this.loadKeys();
+
+        // ! carrega o objeto de troca para para a classe
+        this.setReflex(reflex);
+
+        // ! carrega a chave publica para dentro do reflex
+        this.setPublic(this.keysBox.public)
+
+        // ! envia as chaves para o servidor
         await this.send();
 
-        this.keysBox.image = this.reflex.image.public;
+        // ! carrega a cha
+        this.setImage(this.reflex.image.public)
         return this.reflex;
     }
 
