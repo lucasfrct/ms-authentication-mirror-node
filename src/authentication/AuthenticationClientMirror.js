@@ -363,12 +363,18 @@ class AuthenticationClientMirror {
         return this.reflex;
     }
 
+    /**
+     *
+     */
     async distort(reflex = "") {
         this.setUrl("/authenticate/mirror/distort");
         this.setReflex(reflex);
         return await this.send();
     }
 
+    /**
+     *
+     */
     async keep() {
         this.setUrl("/authenticate/mirror/keep");
         await this.deform();
@@ -376,6 +382,9 @@ class AuthenticationClientMirror {
         return this.send();
     }
 
+    /**
+     *
+     */
     async reveal(raw = "") {
         this.setUrl("/authenticate/mirror/reveal");
         await this.readKeys();
@@ -384,6 +393,9 @@ class AuthenticationClientMirror {
         return await this.send();
     }
 
+    /**
+     *
+     */
     async refraction() {
         this.setUrl("/authenticate/mirror/refraction");
         const response = await this.send();

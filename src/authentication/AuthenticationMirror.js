@@ -13,19 +13,21 @@ const RSA = require('hybrid-crypto-js').RSA;
  */
 const AuthenticationMirror = class AuthenticationMirror {
 
-    instance = null;
-    rsa = null;
+    instance = null; // ! classe para criar instancia
+    rsa = null; // ! classe para gerar RSA
 
-    paths = { public: "", private: "", secret: "", base: "./keys", data: "" };
-    keysBox = { public: "", private: "", origin: "", destiny: "", signature: "", secret: "" };
-    headers = { token: 'x-auth-token', bearer: 'Bearer' };
+    paths = { public: "", private: "", secret: "", base: "./keys", data: "" }; // caminhos para arquivos
+    keysBox = { public: "", private: "", origin: "", destiny: "", signature: "", secret: "" }; // ! chaves
+    headers = { token: 'x-auth-token', bearer: 'Bearer' }; // cabeçalhos
 
+    // ? armazena dos dados para a classe
     formBox = {
         raw: "",
         reform: "",
         deform: { origin: "", image: "", destiny: "" }
     };
 
+    // ? payload de troca com o servidor
     reflex = {
         origin: { public: "", cipher: "", raw: "" }, // browser
         image: { public: "", cipher: "", raw: "" }, // servidor local
@@ -58,6 +60,12 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @return raw: any - retorna o mesmo dado de entrada 
      */
     setRaw(raw = "") { return this.formBox.raw = raw || this.formBox.raw; }
+
+    /**
+     * * carrega o payload reflex na classe
+     * @paoram {*} reflex
+     * @returns
+     */
     setReflex(reflex = "") { return this.reflex = reflex || this.reflex; }
 
     hash(txt = "") { return sha512(txt); }
@@ -116,8 +124,8 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * Gera as chaves para autenticação
-     * @return keys: Object - chaves de autenticação
+     * ! gera um par de chaves, desconstroi o iv e os armazena no keysBox
+     * @returns keysBox: object
      */
     async captureKeys() {
         try {
@@ -137,9 +145,8 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * Escreve as chaves public, private e secret em um diretório
-     * @param path: string - folder das chaves
-     * @return keys: Object - contém todas as chaves utilizadas 
+     * * Escreve as chaves publica, privada e secreta em arquivos no disco
+     * @returns keysBox: object
      */
     async writeKeys(path = "") {
 
@@ -167,8 +174,8 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * Faz a leitura dos das chaves public, private e secret do HD para a classe
-     * @param path: string - caminho do folder das chaves 
+     * * Lê o valor das chaves no disco e passa para o objeto da classe
+     * @param path: string - caminho da pasta das chaves 
      * @return keys: Object -  contém todas as chaves utilizadas   
      */
     async readKeys(path = "") {
@@ -196,7 +203,10 @@ const AuthenticationMirror = class AuthenticationMirror {
         return this.keysBox;
     }
 
-
+    /**
+     * * Carrega as chaves armazenadas no objeto da classe para as variaveis de ambiente
+     * @returns keysBox: object
+     */
     async loadKeys() {
         if (!process.env.PUBLIC_KEY.length < 64) { await this.readKeys() }
 
@@ -222,9 +232,9 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * Encrypta uma string para troca e mensagens RSA
-     * @param raw: any  - texto ou objeto para ser encrypta
-     * @return cipher: string - texto cifrado com RSA
+     * Encrypta um dado com uma public key recebida no padrão RSA
+     * @param raw: any
+     * @return cipher: string - hash cifrada
      */
     deform(raw = "") {
         try {
@@ -255,7 +265,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * Decriptografa o conteúdo cifrado no 
+     * ! Decrypta uma cifra do cliente com a chave privada do servidor no padrão RSA
      * @param cipher: string - hash cifrada apara ser decriptofrafada 
      * @return decoded: any - dados que foi envidado via criptografia
      */
@@ -287,67 +297,140 @@ const AuthenticationMirror = class AuthenticationMirror {
         }
     }
 
-    // Client Request
+    /**
+     *  ! Troca as chaves publicas entre cliente e servidor
+     * @param {*} reflex 
+     * @returns reflex
+     */
     async reflect(reflex = "") {
+        // ! carrega o objeto de troca para para a classe
         this.setReflex(reflex);
+
+        // ! Carrega as chaves armazenadas no objeto da classe para as variaveis de ambiente
         await this.loadKeys();
+
+        // ! Carrega a chave publica recebida do cliente para a classe
         this.keysBox.origin = this.reflex.origin.public;
+
+        // ! Carrega a chave publica do servidor no objeto usado para a troca
         this.reflex.image = {...this.reflex.image, public: this.keysBox.public };
+
         return this.reflex;
     }
 
-    // Client Request
+    /**
+     * * Encrypta um dado do servidor com uma public key recebida do cliente
+     * @param {*} reflex 
+     * @returns 
+     */
     async distort(reflex = "") {
+        // ! carrega o objeto de troca para para a classe
         this.setReflex(reflex);
 
+        // ! Salva o estado dos objetos formBox e keysBox
         const image = this.photo();
+
+        // ! Troca as chaves publicas entre cliente e servidor
         await this.reflect();
 
+        // ! Carrega a chave publica recebida do cliente para a classe
         this.keysBox.public = this.reflex.origin.public;
+
+        // ! Encrypta um dado com uma public key recebida no padrão RSA
         await this.deform();
+
+        // ! Carrega a cifra para o objeto usado para a troca
         this.reflex.image.cipher = this.formBox.deform.image;
 
+        // ! Reseta os objetos formBox e keysBox ao estado anterior
         this.photo(image);
 
         return this.reflex;
     }
 
+    /**
+     * * Decrypta uma cifra recebida do cliente com a chave privada do servidor
+     * @param {*} reflex 
+     * @returns 
+     */
     async keep(reflex = "") {
+        // ! carrega o objeto de troca para para a classe
         this.setReflex(reflex);
+
+        // ! carrega a cifra recebida para a classe
         this.formBox.deform.image = this.reflex.origin.cipher;
+
+        // ! Carrega as chaves armazenadas no objeto da classe para as variaveis de ambiente
         await this.loadKeys();
+
+        // ! Decrypta uma cifra recebida do cliente com a chave privada do servidor
         await this.reform();
+
+        // ! Carrega o dado decryptado no banco de dados
         await this.writeData(this.formBox.reform);
+
         // console.info("SERVER: ", this.formBox.reform);
         return this.reflex;
     }
 
+    /**
+     *
+     */
     async refraction(reflex = "") {
+        // ! carrega o objeto de troca para para a classe
         this.setReflex(reflex);
+
+        // ! Carrega as chaves armazenadas no objeto da classe para as variaveis de ambiente
         await this.loadKeys();
+
+        // ! Carrega a chave publica recebida do cliente para a classe
         this.keysBox.public = this.reflex.origin.public;
+
+        // Carrega o dado do banco de dados para a classe
         this.formBox.reform = await this.readData();
+
+        // ! Encrypta um dado com uma public key recebida no padrão RSA
         await this.deform();
+
+        // ! Carrega a cifra para o objeto usado para a troca
         this.reflex.image.cipher = this.formBox.deform.image;
-        console.info("SERVER: ", this.reflex);
+        
+        //console.info("SERVER: ", this.reflex);
         return this.reflex;
     }
 
+    /**
+     * * Encrypta um dado recebido do cliente com sua chave publica e retorna para ele a cifra
+     * @param {*} reflex
+     * @returns 
+     */
     async reveal(reflex = "") {
-        this.setReflex(reflex)
+        // ! carrega o objeto de troca para para a classe
+        this.setReflex(reflex);
+
+        // ! Troca as chaves publicas entre cliente e servidor
         await this.reflect();
 
+        // ! Salva o estado dos objetos formBox e keysBox
         const image = await this.photo();
 
+        // ! carrega os dados para serem encriptados
         this.setRaw(this.reflex.origin.raw);
+
         // this.keysBox.public = this.reflex.origin.public;
+
+        // ! Encrypta um dado com uma public key recebida e carrega no objeto usado para a troca
         this.reflex.origin.cipher = await this.deform();
 
+        // ! Reseta os objetos formBox e keysBox ao estado anterior
         await this.photo(image);
 
         return this.reflex;
     }
 
+    /**
+     *
+     */
     async photo(image = undefined) {
         if (image) {
             this.keysBox = image.keysBox;
