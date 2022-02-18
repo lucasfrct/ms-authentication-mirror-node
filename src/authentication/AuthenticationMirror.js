@@ -9,7 +9,7 @@ const RSA = require('hybrid-crypto-js').RSA;
  *  - gera um par de chaves publico-privada
  *  - faz encryptacao com assinatura
  *  - faz decryptação com assinatura
- *  - verifuca assinatura [ assin com chave pública e verifica com chave privada]
+ *  - verifuca assinatura [ assin com chave pública e verifica com chave privada
  */
 const AuthenticationMirror = class AuthenticationMirror {
 
@@ -34,6 +34,7 @@ const AuthenticationMirror = class AuthenticationMirror {
         destiny: { public: "", cipher: "", raw: "" } // servidor remoto
     };
 
+    // ? inicia a classe
     constructor() {
         this.instance = new Crypt({ md: 'sha512' }); // inicializando Crypto
         this.rsa = new RSA({ keySize: 4096 }); // inicializando RSA
@@ -41,7 +42,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * define um diretório para armazenar as chaves public, private e secret
+     * * define um diretório para armazenar as chaves public, private e secret
      * @param path: string - folder das chaves
      * @return paths: Object - contém todos os paths utilizados
      */
@@ -55,7 +56,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * Faz set no dos dos dados que serão encryptados
+     * * Faz set no dos dos dados que serão encryptados
      * @param raw: any - recebe dados de qualquer typo 
      * @return raw: any - retorna o mesmo dado de entrada 
      */
@@ -71,7 +72,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     hash(txt = "") { return sha512(txt); }
 
     /**
-     * Parseia uma string para json caso seja possível
+     * * Parseia uma string para json caso seja possível
      * @param payload: any 
      * @return payload: any 
      */
@@ -100,7 +101,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * Gera uma assinatura unica usando a chave privada
+     * * Gera uma assinatura unica usando a chave privada
      * @param raw: any
      * @returns signature: object
      */
@@ -109,7 +110,7 @@ const AuthenticationMirror = class AuthenticationMirror {
         this.setRaw(raw);
 
         try {
-            // se não hpuver chave privada, não faz a assinatura
+            // ! se não hpuver chave privada, não faz a assinatura
             if (!this.keysBox.private) {
                 return this.keysBox.signature;
             };
@@ -124,19 +125,21 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * ! gera um par de chaves, desconstroi o iv e os armazena no keysBox
+     * * gera um par de chaves, desconstroi o iv e os armazena no keysBox
      * @returns keysBox: object
      */
     async captureKeys() {
         try {
-            // Generate 1024 bit RSA key pair
+            // ! Generate 1024 bit RSA key pair
             const [err, { privateKey, publicKey }] = await handle(this.rsa.generateKeyPairAsync());
             if (err) {
                 return this.keysBox;
             };
 
+            // ! Desconstroi o iv
             const { iv } = this.parse(this.instance.encrypt(publicKey, process.env.SECRET_KEY));
 
+            // ! Carrega na classe as chaves publica, privada e secreta
             return this.keysBox = {...this.keysBox, public: publicKey, private: privateKey, secret: iv };
         } catch (e) {
             console.error(e);
@@ -150,6 +153,7 @@ const AuthenticationMirror = class AuthenticationMirror {
      */
     async writeKeys(path = "") {
 
+        // ! define um diretório para armazenar as chaves public, private e secret
         this.path(path);
 
         try {
@@ -174,12 +178,13 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * * Lê o valor das chaves no disco e passa para o objeto da classe
+     * * Lê o valor das chaves no disco e passa para as variaveis de ambiente
      * @param path: string - caminho da pasta das chaves 
      * @return keys: Object -  contém todas as chaves utilizadas   
      */
     async readKeys(path = "") {
 
+        // ! define um diretório para armazenar as chaves public, private e secret
         this.path(path);
 
         try {
@@ -204,12 +209,16 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * * Carrega as chaves armazenadas no objeto da classe para as variaveis de ambiente
+     * * Carrega as chaves armazenadas nas variaveis de ambiente para o objeto da classe 
      * @returns keysBox: object
      */
     async loadKeys() {
+
+        // ! Se o conteúdo da variavel de ambiente for menor que 64, faça um readKeys
         if (!process.env.PUBLIC_KEY.length < 64) { await this.readKeys() }
 
+        // ! Se o conteúdo da variavel de ambiente for menor que 64, carrega as chaves armazenadas
+        // nas variaveis de ambiente para a classe
         if (!this.keysBox.public.length < 64) {
             this.keysBox = {
                 ...this.keysBox,
@@ -223,7 +232,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * Verifica se a assinatura é autentica
+     * * Verifica se a assinatura é autentica
      * @param raw: any
      * @return bool
      */
@@ -232,7 +241,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * Encrypta um dado com uma public key recebida no padrão RSA
+     * * Encrypta um dado com uma public key recebida no padrão RSA
      * @param raw: any
      * @return cipher: string - hash cifrada
      */
@@ -240,19 +249,22 @@ const AuthenticationMirror = class AuthenticationMirror {
         try {
             this.setRaw(raw);
 
-            //faz assinatura da informação que será transmitida 
+            // ! faz assinatura da informação que será transmitida 
             this.signature();
 
+            // ! Se não houver a chave publica do servidor, não faz a cifragem
             if (!this.keysBox.public) {
                 console.error("A PUBLIC KEY NÃO EXISTE");
                 return this.formBox.deform.image;
             };
 
+            // ! Se não houver a assinatura, não faz a cifragem
             if (!this.keysBox.signature) {
                 console.error("A ASSINATURA KEY NÃO EXISTE");
                 return this.formBox.deform.image;
             };
 
+            // ! Cria uma cifra no servidor com a chave do cliente
             return this.formBox.deform.image = this.instance.encrypt(
                 this.keysBox.public,
                 JSON.stringify(this.formBox.raw), ""
@@ -265,21 +277,24 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * ! Decrypta uma cifra do cliente com a chave privada do servidor no padrão RSA
+     * * Decrypta uma cifra do cliente com a chave privada do servidor no padrão RSA
      * @param cipher: string - hash cifrada apara ser decriptofrafada 
      * @return decoded: any - dados que foi envidado via criptografia
      */
     async reform(cipher = "") {
         //await loadKeys();
         try {
+            // ! Carrega a cifra na classe
             this.formBox.deform.image = cipher || this.formBox.deform.image;
 
-            // testa se a chave privada existe
+            // ! Se não houver chave privada, não decifra
             if (!this.keysBox.private) {
                 return this.formBox.reform;
             };
 
+            // ! Decifra a cifra com a chave privada do servidor
             const { message, signature } = this.instance.decrypt(this.keysBox.private, this.formBox.deform.image);
+            
             //faz assinatura da informação que será transmitida 
             this.keysBox.signature = signature;
 
@@ -298,7 +313,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     *  ! Troca as chaves publicas entre cliente e servidor
+     * * Troca as chaves publicas entre cliente e servidor
      * @param {*} reflex 
      * @returns reflex
      */
@@ -374,7 +389,9 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     *
+     * * Encrypta o dado de um cliente para enviar a outro cliente
+     * @param {*} reflex 
+     * @returns 
      */
     async refraction(reflex = "") {
         // ! carrega o objeto de troca para para a classe
@@ -429,14 +446,19 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     *
+     * * Salva o estado dos objetos formBox e keysBox para reseta-los após uso
+     * @param {*} image
+     * @return Object
      */
     async photo(image = undefined) {
+        // ! Se houver uma imagem carrega no keysBox e formBox o estado anterior
         if (image) {
             this.keysBox = image.keysBox;
             this.formBox = image.formBox;
             return image;
         }
+
+        // ! Retorna o estado atual dos objetos
         return { keysBox: this.keysBox, formBox: this.formBox };
     }
 
