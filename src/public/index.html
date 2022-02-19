@@ -50,14 +50,17 @@
         <p>DEBUG: </p>
     </div>
 </body>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-<script src="/authenticate/hybrid-crypto-js"></script>
-<script src="/authenticate/js-sha512"></script>
-<script src="/authenticate/client/mirror"></script>
+<script src="/authenticate/mirror/lib"></script>
+<script src="/authenticate/mirror/client"></script> 
+
 <script>
     (async() => {
         let result = '';
 
+        const auth = new AuthenticationClientMirror();
+
+        result = auth;
+        console.info("DEBUG: ", result);
 
 
         // async function firstUC() {
@@ -104,7 +107,6 @@
         // };
 
         // result = await fourthUC();
-        console.info("DEBUG: ", result);
 
     })();
 </script>

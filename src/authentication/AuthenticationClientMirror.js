@@ -1,5 +1,7 @@
 /**
- * * Classe usada pelo cliente para gerar suporte a autenticação
+ * * Classe usada pelo cliente para gerar suporte a autenticação espelada
+ * @dependency hybrid-crypto-js: https://github.com/juhoen/hybrid-crypto-js
+ * @dependency js-sha512: https://github.com/emn178/js-sha512
  */
 class AuthenticationClientMirror {
     rsa = null; // ! classe para gerar RSA
@@ -497,9 +499,3 @@ class AuthenticationClientMirror {
 
     }
 }
-
-// module.exports = AuthenticationClientMirror;
-
-module.exports = {
-    displayName: 'CLIENT',
-  };

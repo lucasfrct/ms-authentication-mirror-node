@@ -3,6 +3,7 @@ const router = require('express').Router();
 
 // ! Imports das rotas
 HealthzRoute = require('./healthz.route');
+IndexRoute = require('./index.route');
 LibRoute = require('./lib.route');
 AuthenticationClietMirror = require('./authentication-client-mirror.route');
 
@@ -12,6 +13,7 @@ AuthenticationClietMirror = require('./authentication-client-mirror.route');
 router.get('/healthz', HealthzRoute);
 
 // ! Files statics to Clinet
+router.get('/', IndexRoute);
 router.get('/authenticate/mirror/lib', LibRoute);
 router.get('/authenticate/mirror/client', AuthenticationClietMirror);
 
