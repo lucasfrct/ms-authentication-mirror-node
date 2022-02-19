@@ -497,3 +497,9 @@ class AuthenticationClientMirror {
 
     }
 }
+
+// module.exports = AuthenticationClientMirror;
+
+module.exports = {
+    displayName: 'CLIENT',
+  };

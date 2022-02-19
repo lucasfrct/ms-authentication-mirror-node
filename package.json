@@ -5,7 +5,8 @@
     "main": "app.js",
     "scripts": {
         "dev": "set NODE_ENV=dev && nodemon ./app.js",
-        "test": "jest"
+        "test": "jest --verbose",
+        "spec": "jest --verbose --watch"
     },
     "repository": {
         "type": "git",
