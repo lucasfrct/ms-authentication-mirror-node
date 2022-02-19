@@ -1,7 +1,7 @@
 {
-    "name": "ms-auth-node",
+    "name": "ms-auth-mirror-node",
     "version": "1.0.0",
-    "description": "microservice auth",
+    "description": "microservice auth mirror",
     "main": "app.js",
     "scripts": {
         "dev": "set NODE_ENV=dev && nodemon ./app.js",
