@@ -6,7 +6,8 @@
   "scripts": {
     "create": "npm i && npx sequelize-cli db:create && npx sequelize-cli db:migrate",
     "dev": "set NODE_ENV=dev && nodemon ./app.js",
-    "staging": "set NODE_ENV=staging && nodemon ./app.js"
+    "staging": "set NODE_ENV=staging && nodemon ./app.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -21,19 +22,15 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
-    "dayjs": "^1.10.7",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "fs": "^0.0.1-security",
     "hybrid-crypto-js": "^0.2.4",
-    "js-encrypt": "^2.3.4",
-    "jsonwebtoken": "^8.5.1",
-    "jwt-session-manager": "^1.1.3",
     "module-alias": "^2.2.2",
-    "mysql2": "^2.3.3",
     "nodemon": "^2.0.15",
-    "sequelize": "^6.12.0-alpha.1",
-    "uuid": "^8.3.2"
+    "uglify-js": "^3.15.1"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1"
   }
 }
-
