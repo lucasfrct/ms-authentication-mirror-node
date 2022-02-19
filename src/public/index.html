@@ -7,12 +7,48 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index Auth</title>
+    <title>MS Authentication Client Mirror</title>
+
+    <style>
+        body {
+            background-color: rgba(33,20,29, 1);
+            color: rgba(255,255,255,1);
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 32px;
+        }
+
+        .debug {
+            background-color: rgba(255,255,255,0.4);
+            max-width: 90%;
+            min-height: 60px;
+            display: block;
+            margin: auto;
+            border-radius: 8px;
+            padding: 4px 16px;
+            box-sizing: border-box;
+            font-size: 11px;
+        }
+
+        .debug p {
+            border-top: dotted 1px rgba(79,22,39,1);
+            border-bottom: dotted 1px rgba(79,22,39,1);
+            padding: 4px 0px;
+            margin: 16px 0;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Auth</h1>
-    <div class="auth"></div>
+    <h1>Authenticate Client Mirror</h1>
+    <div class="debug">
+        <p>DEBUG: </p>
+    </div>
 </body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 <script src="/authenticate/hybrid-crypto-js"></script>

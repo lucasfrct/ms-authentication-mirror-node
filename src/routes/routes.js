@@ -1,22 +1,27 @@
 require('@config/module-alias.config');
-
-const path = require('path');
 const router = require('express').Router();
 
-const AuthenticationMirrorMiddleware = require('@middleware/authentication-mirror-middleware');
+// ! Imports das rotas
+HealthzRoute = require('./healthz.route');
+LibRoute = require('./lib.route');
+AuthenticationClietMirror = require('./authentication-client-mirror.route');
 
-const RouterHealthz = async(req, res) => {
-    res.status(200).json({ healthz: "OK" });
-};
+/**
+ * Testa se o servidor está de pé
+ */
+router.get('/healthz', HealthzRoute);
 
-const RouterIndex = (req, res) => {
-    res.status(200).sendFile(path.join(__dirname, '../public/index.html'));
-};
+// ! Files statics to Clinet
+router.get('/authenticate/mirror/lib', LibRoute);
+router.get('/authenticate/mirror/client', AuthenticationClietMirror);
 
-// healthz - serviço ativo
-router.get('/healthz', RouterHealthz);
 
-// Acessando index
-router.get('/', RouterIndex, AuthenticationMirrorMiddleware);
+// router.post('/authenticate/mirror/reflect', RouterAuthenticateMirrorReflect);
+// cliente envia um chave para o servidor encriptar um dado do servidor, 
+// devolver a cipher para o cliente e o clinete desemcriptar o dados do servidor 
+// router.post('/authenticate/mirror/distort', RouterAuthenticateMirrorDistort);
+// router.post('/authenticate/mirror/keep', RouterAuthenticateMirrorKeep);
+// router.post('/authenticate/mirror/reveal', RouterAuthenticateMirrorReveal);
+// router.post('/authenticate/mirror/refraction', RouterAuthenticateMirrorRefraction);
 
 module.exports = router;
