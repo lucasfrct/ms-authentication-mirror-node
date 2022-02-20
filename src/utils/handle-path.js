@@ -2,6 +2,20 @@ const fs = require("fs");
 const path = require("path");
 
 /**
+ * * le um arquivo do servidor
+ * @param {Sting} file 
+ * @returns 
+ */
+const PathRead = async(file = "")=> {
+    try {
+        path.join("",file);
+        return await fs.readFileSync(file, "utf8");
+    } catch (e) {
+        return e
+    }
+}
+
+/**
  * Listas os arquivos em um diretorio e combina todos num só
  * @param {*String} directory: diretorio para ser lido
  * @param {*String} destination : diretorio de destino
@@ -16,10 +30,10 @@ const PathMatch = (directory = "", destination = "", intercept = undefined)=> {
 
             // carrega os binarios dos arquivos
             let match = "";
-            await files.map(async(file)=> { 
-                const bin = await fs.readFileSync(file, "utf8"); 
-                match = match + "\n" + bin;
-            });  
+            await Promise.all(files.map(async(file)=> { 
+                const bin = await PathRead(file); 
+                match = match + '\n' + bin;
+            })); 
 
             // desvia o math para outra função assincrona
             if(intercept && typeof intercept == "function") {
@@ -36,4 +50,4 @@ const PathMatch = (directory = "", destination = "", intercept = undefined)=> {
     });
 };
 
-module.exports = { PathMatch };
+module.exports = { PathMatch, PathRead };

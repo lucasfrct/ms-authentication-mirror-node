@@ -5,7 +5,8 @@ const router = require('express').Router();
 HealthzRoute = require('./healthz.route');
 IndexRoute = require('./index.route');
 LibRoute = require('./lib.route');
-AuthenticationMirrorClient = require('./authentication-mirror-client.route');
+UCRoute = require('./uc.route');
+SpecRoute = require('./spec.route');
 
 /**
  * Testa se o servidor está de pé
@@ -15,7 +16,9 @@ router.get('/healthz', HealthzRoute);
 // ! Files statics to Clinet
 router.get('/', IndexRoute);
 router.get('/authentication/mirror/lib', LibRoute);
-router.get('/authentication/mirror/client', AuthenticationMirrorClient);
+router.get('/authentication/mirror/uc', UCRoute);
+router.get('/authentication/mirror/spec', SpecRoute);
+
 
 
 // router.post('/authenticate/mirror/reflect', RouterAuthenticateMirrorReflect);
