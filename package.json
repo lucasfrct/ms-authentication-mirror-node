@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "set NODE_ENV=dev && nodemon ./app.js",
         "test": "jest --verbose",
-        "spec": "jest --verbose --watch"
+        "spec": "jest --watch --coverage"
     },
     "repository": {
         "type": "git",
@@ -30,6 +30,10 @@
         "uglify-js": "^3.15.1"
     },
     "devDependencies": {
-        "jest": "^27.5.1"
+        "@babel/core": "^7.17.5",
+        "@babel/preset-env": "^7.16.11",
+        "babel-jest": "^27.5.1",
+        "jest": "^27.5.1",
+        "regenerator-runtime": "^0.13.9"
     }
 }
