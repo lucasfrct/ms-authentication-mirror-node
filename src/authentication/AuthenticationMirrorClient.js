@@ -86,23 +86,37 @@
      */
     match(data = {}) {
 
-        // // ! se o dado for formBox, carregada para reflex
-        // if (data.hasOwnProperty('origin') && data.origin.hasOwnProperty("reform")) {
+        // ! se o dado for formBox, carregada para reflex
+        if (data.hasOwnProperty('origin') && data.origin.hasOwnProperty("reform")) {
 
-        //     // ! extrai os dados para reflex
-        //     const { origin: { raw: or, deform: od }, image: { raw: ir, deform: id }, destinity: { raw: dr, deform: dd } } = this.formBox;
-        //     const { origin: { public: op }, image: { public: ip }, destinity: { public: dp } } = this.keysBox;
+            // ! extrai os dados para reflex
+            const { origin: { raw: or, deform: od }, image: { raw: ir, deform: id }, destiny: { raw: dr, deform: dd } } = data;
+            const { origin: { public: op }, image: { public: ip }, destiny: { public: dp } } = this.keysBox;
 
-        //     // ! monta o novo reflex
-        //     const reflex = {
-        //         origin: { raw: or, cipher: od, public: op },
-        //         image: { raw: ir, cipher: id, public: ip },
-        //         destinity: { raw: dr, cipher: dd, public: dp },
-        //     }
+            // ! monta o novo reflex
+            this.reflex.image   = { ...this.reflex.image,   raw: ir, cipher: id, public: ip };
+            this.reflex.origin  = { ...this.reflex.origin,  raw: or, cipher: od, public: op };
+            this.reflex.destiny = { ...this.reflex.destiny, raw: dr, cipher: dd, public: dp };
 
-        //     // ? combina e retorn um reflex preenchido 
-        //     return this.reflex = {...this.reflex, ...reflex };
-        // }
+            // ? combina e retorn um reflex preenchido 
+            return this.reflex;
+        }
+
+         // ! se o dado for KeysBox, carregada para reflex
+         if (data.hasOwnProperty('origin') && data.origin.hasOwnProperty("private")) {
+
+            // ! extrai os dados para reflex
+            const { origin: { raw: or, deform: od }, image: { raw: ir, deform: id }, destiny: { raw: dr, deform: dd } } = this.formBox;
+            const { origin: { public: op }, image: { public: ip }, destiny: { public: dp } } = data;
+
+            // ! monta o novo reflex
+            this.reflex.image   = { ...this.reflex.image,   raw: ir, cipher: id, public: ip };
+            this.reflex.origin  = { ...this.reflex.origin,  raw: or, cipher: od, public: op };
+            this.reflex.destiny = { ...this.reflex.destiny, raw: dr, cipher: dd, public: dp };
+
+            // ? combina e retorn um reflex preenchido 
+            return this.reflex;
+        }
 
         // ! se o dado for reflex, carrega para formBox e keysBox
         if (data.hasOwnProperty('origin') && data.origin.hasOwnProperty('cipher')) {
@@ -115,286 +129,307 @@
             } = data;
 
             // ! monta o novo keysbox
-            this.keysBox.image      = { ...this.keysBox.origin, public: op };
-            this.keysBox.origin     = { ...this.keysBox.origin, public: op };
-            this.keysBox.destiny    = { ...this.keysBox.origin, public: op };
+            this.keysBox.image      = { ...this.keysBox.image,      public: ip };
+            this.keysBox.origin     = { ...this.keysBox.origin,     public: op };
+            this.keysBox.destiny    = { ...this.keysBox.destiny,    public: dp };
 
+            // ! monta o novo form box
+            this.formBox.image      = {...this.formBox.image,   raw: ir, deform: ic };
+            this.formBox.origin     = {...this.formBox.origin,  raw: or, deform: oc };
+            this.formBox.destiny    = {...this.formBox.destiny, raw: dr, deform: dc };
 
-        //     // ! monta o novo form box
-        //     const formBox = {
-        //         origin: { raw: or, deform: oc },
-        //         image: { raw: ir, deform: ic },
-        //         destinity: { raw: dr, deform: dc }
-        //     };
-
-        //     // ? combina e retorna form box
-        //     return this.formBox = {...this.formBox, ...formBox }
+            // ? combina e retorn um reflex preenchido 
+            return this.formBox;
         }
         return data;
     }
 
-    // /**
-    //  * ! gera um par de chaves, desconstroi o iv e os armazena no keysBox
-    //  * @returns keysBox: object
-    //  */
-    // async captureKeys() {
-    //     try {
-    //         // ! extrai o par de chaves publica/privada RSA
-    //         const { publicKey, privateKey } = await this.rsa.generateKeyPairAsync();
+    /**
+     * ! gera um par de chaves, desconstroi o iv e os armazena no keysBox
+     * @returns keysBox: object
+     */
+    async captureKeys() {
+        try {
+            // ! extrai o par de chaves publica/privada RSA
+            const { publicKey, privateKey } = await this.rsa.generateKeyPairAsync();
 
-    //         // ! gera uma chave IV de uma string forte de 64 caracteres e define a secret 
-    //         const { iv: secret } = this.parse(this.crypt.encrypt(publicKey, "De@14@Jxfjm^MiKpQP6tzKSm83xpa*vfXRi2bSjvtSFGVbwU8Yy&9K*&soIT5ft&EIS"));
+            // ! gera uma chave IV de uma string forte de 64 caracteres e define a secret 
+            const { iv: secret } = this.parse(this.crypt.encrypt(publicKey, "De@14@Jxfjm^MiKpQP6tzKSm83xpa*vfXRi2bSjvtSFGVbwU8Yy&9K*&soIT5ft&EIS"));
 
-    //         // ! gera uma chave de assinatura
-    //         const signature = await this.crypt.signature(this.keysBox.private, secret);
+            // ! gera uma chave de assinatura
+            const { signature }  = this.parse(await this.crypt.signature(privateKey, secret));
 
-    //         // ! cria novo o objeto de chaves da origem
-    //         this.keysBox.origin = { public: publicKey, private: privateKey, secret, signature };
+            // ! cria novo o objeto de chaves da origem
+            this.keysBox.origin = { public: publicKey, private: privateKey, secret, signature };
 
-    //         // ? returna o objeto de chaves
-    //         return this.keysBox
-    //     } catch (e) {
-    //         console.error("Não foi possível gerar o par de chaves: ", e);
-    //         return this.keysBox;
-    //     }
-    // }
+            // ? returna o objeto de chaves
+            return this.keysBox
+        } catch (e) {
+            console.error("Não foi possível gerar o par de chaves: ", e);
+            return this.keysBox;
+        }
+    }
 
-    // /**
-    //  * * Escreve as chaves publica, privada e secreta no localStorage do navegador
-    //  * @returns keysBox: object
-    //  */
-    // async writeKeys() {
-    //     localStorage.setItem("AuthenticateMirrorPublicKey", this.keysBox.origin.public);
-    //     localStorage.setItem("AuthenticateMirrorPrivateKey", this.keysBox.origin.private);
-    //     localStorage.setItem("AuthenticateMirrorSecretKey", this.keysBox.origin.secret);
-    //     localStorage.setItem("AuthenticateMirrorSignature", this.keysBox.origin.signature);
+    /**
+     * * Escreve as chaves publica, privada e secreta no localStorage do navegador
+     * @returns keysBox: object
+     */
+    async writeKeys() {
+        localStorage.setItem("AuthenticateMirrorPublicKey",     this.keysBox.origin.public);
+        localStorage.setItem("AuthenticateMirrorPrivateKey",    this.keysBox.origin.private);
+        localStorage.setItem("AuthenticateMirrorSecretKey",     this.keysBox.origin.secret);
+        localStorage.setItem("AuthenticateMirrorSignature",     this.keysBox.origin.signature);
 
-    //     return this.keysBox;
-    // }
+        return this.keysBox;
+    }
 
-    // /**
-    //  * * Lê o valor das chaves no localStorage do navegador e passa para o objeto da classe
-    //  * @returns keysBox: object
-    //  */
-    // async readKeys() {
-    //     this.keysBox.public = localStorage.getItem("AuthenticateMirrorPublicKey") || "";
-    //     this.keysBox.private = localStorage.getItem("AuthenticateMirrorPrivateKey") || "";
-    //     this.keysBox.secret = localStorage.getItem("AuthenticateMirrorSecretKey") || "";
-    //     this.keysBox.signature = localStorage.getItem("AuthenticateMirrorSignature") || "";
+    /**
+     * * Lê o valor das chaves no localStorage do navegador e passa para o objeto da classe
+     * @returns keysBox: object
+     */
+    async readKeys() {
 
-    //     return this.keysBox;
-    // }
+        this.keysBox.secret     = await localStorage.getItem("AuthenticateMirrorSecretKey")   || "";
+        this.keysBox.public     = await localStorage.getItem("AuthenticateMirrorPublicKey")   || "";
+        this.keysBox.private    = await localStorage.getItem("AuthenticateMirrorPrivateKey")  || "";
+        this.keysBox.signature  = await localStorage.getItem("AuthenticateMirrorSignature")   || "";
 
-    // /**
-    //  * carrega as chaves para a classe
-    //  */
-    // async loadKeys() {
-    //     // ! se não houver chave pública faz a leitura das chaves
-    //     if (this.keysBox.origin.public.length < 64) {
-    //         await this.readKeys();
-    //     }
+        return this.keysBox;
+    }
 
-    //     // ! se não houver chaves para serem lidas então gera novas chaves
-    //     if (this.keysBox.origin.public.length < 64) {
-    //         await this.captureKeys();
-    //         await this.writeKeys();
-    //     }
+    /**
+     * carrega as chaves para a classe
+     */
+    async loadKeys() {
+        // ! se não houver chave pública faz a leitura das chaves
+        if (this.keysBox.origin.public.length < 64) {
+            await this.readKeys();
+        }
 
-    //     // ? return das chaves para solicitação
-    //     this.keysBox;
-    // }
+        // ! se não houver chaves para serem lidas então gera novas chaves
+        if (this.keysBox.origin.public.length < 64) {
+            await this.captureKeys();
+            await this.writeKeys();
+        }
 
-    // /**
-    //  * ! assina um string
-    //  * @param {*} raw
-    //  * @returns
-    //  */
-    // async signature(raw = "") {
-    //     try {
+        // ? return das chaves para solicitação
+        return this.keysBox;
+    }
 
-    //         // ! se não houver chave privada, não faz a assinatura
-    //         if (this.keysBox.origin.private.length < 64) {
-    //             return this.keysBox.origin.signature;
-    //         }
+    /**
+     * ! assina um string
+     * @param {*} raw
+     * @returns
+     */
+    async signature(raw = "") {
+        try {
 
-    //         // ! converte para string
-    //         const dataString = this.parseStr(this.row(raw));
+            // ! se não houver chave privada, não faz a assinatura
+            if (this.keysBox.origin.private.length < 64) {
+                console.error("Erro, a chave privada não existe");
+                return this.keysBox.origin.signature;
+            }
 
-    //         // ! faz a assinatura do dado e extrai do JSON a assinnatura
-    //         const { signature } = this.parse(this.crypt.signature(this.keysBox.origin.private, dataString));
+            // ! converte para string
+            const dataString = this.parseStr(this.raw(raw));
 
-    //         // ? retorna a assinatura
-    //         return this.keysBox.origin.signature = signature;
-    //     } catch (e) {
-    //         console.error("Nõ foi possível asinnar o dado: ", e);
-    //         return this.keysBox.origin.signature;
-    //     }
-    // }
+            // ! faz a assinatura do dado e extrai do JSON a assinnatura
+            const { signature } = this.parse(this.crypt.signature(this.keysBox.origin.private, dataString));
 
+            // ? retorna a assinatura
+            return this.keysBox.origin.signature = signature;
+        } catch (e) {
+            console.error("Nõ foi possível asinnar o dado: ", e);
+            return this.keysBox.origin.signature;
+        }
+    }
 
-    // /**
-    //  * ! verifica se uma string foi assinada
-    //  * @param {*} raw
-    //  * @returns
-    //  */
-    // async verify(raw = "") {
-    //     return await this.crypt.verify(this.keysBox.origin.public, this.row(raw), this.keysBox.origin.signature);
-    // }
+    /**
+     * ! verifica se uma string foi assinada
+     * @param {*} raw
+     * @returns
+     */
+    async verify(raw = "") {
+        return await this.crypt.verify(this.keysBox.origin.public, this.raw(raw), this.keysBox.origin.signature);
+    }
 
-    // /**
-    //  * ! Encrypta os dados com a public Key do servidor no padrão RSA
-    //  * @param raw: any
-    //  * @return cipher: string - hash cifrada
-    //  */
-    // async deform(raw = "") {
-    //     try {
+    /**
+     * ! Encrypta os dados com a public Key do servidor no padrão RSA
+     * @param raw: any
+     * @return cipher: string - hash cifrada
+     */
+    async deform(raw = "") {
+        try {
 
-    //         // ! carrega a chave pública do servidor
-    //         const image = this.keysBox.image.public;
+            // ! carrega a chave pública do servidor
+            const image = this.keysBox.image.public;
 
-    //         // ! se não houver chave pública do servidor, não faz a cifragem 
-    //         if (image.length < 64) {
-    //             console.error("Erro, a chave publica não existe");
-    //             return this.formBox.origin.deform;
-    //         }
+            // ! se não houver chave pública do servidor, não faz a cifragem 
+            if (image.length < 64) {
+                console.error("Erro, a chave publica não existe");
+                return this.formBox.origin.deform;
+            }
 
-    //         // ! converte para string
-    //         const dataString = this.parseStr(this.row(raw));
+            // ! converte para string
+            const dataString = this.parseStr(this.raw(raw));
 
-    //         // ! faz assinatura
-    //         const signature = this.signature(dataString);
+            // ! faz assinatura
+            const signature = this.signature(dataString);
 
-    //         // ! cria uma crifra no cliente com a chave pública do servidor
-    //         return this.formBox.origin.deform = this.crypt.encrypt(image, dataString, signature);
-    //     } catch (e) {
-    //         console.error("Error ao deforma um dado: ", e);
-    //         return this.formBox.origin.deform;
-    //     }
-    // }
+            // ! cria uma crifra no cliente com a chave pública do servidor
+            return this.formBox.origin.deform = this.crypt.encrypt(image, dataString, signature);
+        } catch (e) {
+            console.error("Error ao deforma um dado: ", e);
+            return this.formBox.origin.deform;
+        }
+    }
 
-    // /**
-    //  * ! Decrypta uma cifra do servidor com a chave privada do cliente no padrão RSA
-    //  * @param cipher: string - hash cifrada
-    //  * @return raw: any
-    //  */
-    // async reform(cipher = "") {
-    //     try {
+    /**
+     * ! Decrypta uma cifra do servidor com a chave privada do cliente no padrão RSA
+     * @param cipher: string - hash cifrada
+     * @return raw: any
+     */
+    async reform(cipher = "") {
+        try {
 
-    //         // ! pega a chave privada do client
-    //         const privateKey = this.keysBox.private;
+            this.formBox.image.deform = cipher || this.formBox.image.deform;
 
-    //         // ! se não houver chave privada do cliente, não faz a decifragem
-    //         if (privateKey.length < 64) {
-    //             console.error("Erro, a chave privada não existe");
-    //             return this.setReformImage()
-    //         }
+            // ! pega a chave privada do client
+            const privateKey = this.keysBox.origin.private;
 
-    //         // ! faz a decigragem a string enviada do servidor
-    //         const { message, signature } = this.crypt.decrypt(privateKey, this.setDeformImage(cipher));
+            // ! se não houver chave privada do cliente, não faz a decifragem
+            if (privateKey.length < 64) {
+                console.error("Erro, a chave privada não existe");
+                return this.formBox.image.reform;
+            }
 
-    //         // ! carrega a assinatura
-    //         this.keysBox.signature = signature;
+            // ! faz a decigragem a string enviada do servidor
+            const { message, signature } = this.crypt.decrypt(privateKey, this.formBox.image.deform);
 
-    //         // ! verifica se a assinatura é autentica
-    //         if (this.keysBox.signature && !this.verify(message)) {
-    //             console.error("Erro, documento com assinatura inválida");
-    //             return this.setReformImage()
-    //         }
+            // ! carrega a assinatura
+            this.keysBox.image.signature = signature;
 
-    //         // ? retorna a informação decigrada
-    //         return this.setReformImage(this.parse(message));
-    //     } catch (e) {
-    //         console.error("Error ao tentar decifra a=o dado");
-    //         return this.setReformImage();
-    //     }
-    // }
+            // ! verifica se a assinatura é autentica
+            // ! vrify ainda não está funcional
+            // if (this.keysBox.signature && !this.verify(message)) {
+            //     console.error("Erro, documento com assinatura inválida");
+            // }
 
-    // /**
-    //  * * Envia dados com o Verbo POST
-    //  * @param reflex: JSON - precisa ser uma JSON passar na requisicao
-    //  * @return payload: JSON
-    //  */
-    // async send(reflex = "") {
-    //     try {
+            // ? retorna a informação decigrada
+            return this.formBox.image.reform = this.parse(message);
+        } catch (e) {
+            console.error("Error ao tentar decifrar o dado");
+            return this.formBox.image.reform;
+        }
+    }
 
-    //         // ! configura a requisição
-    //         this.params.data = this.parseStr(this.setReflex(reflex));
-    //         this.params.type = "POST";
-    //         this.params.url = this.url();
+    config(method = "GET", body = undefined) {
+         
+         // ! defune os headers da requisicao
+         const headers   = new Headers();
+         headers.append('Content-Type', 'application/json');
+         headers.append('Accept-Charset', 'utf-8');
 
-    //         // ? faz a requição ao servidor
-    //         return this.setReflex(await $.ajax(this.params))
-    //     } catch (e) {
-    //         console.error("Error ao tentar acessar o servidor: ", e);
-    //         return this.setReflex();
-    //     }
-    // }
+         return { mode: 'cors', headers, method, body };
+    }
 
-    // /**
-    //  * * Faz uma requisicao ao servidor com o verbo GET
-    //  * @param {Object} reflex: 
-    //  * @return reflex key: string
-    //  */
-    // async get(reflex = "") {
-    //     try {
+    /**
+     * * Envia dados com o Verbo POST
+     * @param {Object} reflex: JSON - precisa ser uma JSON passar na requisicao
+     * @return {Object} payload: JSON
+     */
+    async send(reflex = "") {
+        try {
+            // ! configura a requisição
+            const url       = this.url();
+            const config    = this.config("POST", this.parseStr(this.setReflex(reflex)));
 
-    //         // ! configura a requisição
-    //         this.params.data = this.parseStr(this.setReflex(reflex));
-    //         this.params.type = "GET";
-    //         this.params.url = this.url();
+            // ! instancia a requisição
+            const request = new Request(url, config);
 
-    //         // ? faz a requição ao servidor
-    //         return this.setReflex(await $.ajax(this.params))
-    //     } catch (e) {
-    //         console.error("Error ao tentar acessar o servidor: ", e);
-    //         return this.setReflex();
-    //     }
-    // }
+            // ! faz a requição ao servidor
+            const resp = await fetch(request);
+            const response = await resp.json();
 
-    // /**
-    //  *  ! Troca as chaves publicas entre cliente e servidor
-    //  * @param {Object} reflex 
-    //  * @returns reflex
-    //  */
-    // async reflect(reflex = "") {
-    //     // ! define uma rota
-    //     this.url("/authenticate/mirror/reflect");
+            // ? carrega o reflex para a clesse
+            return await this.setReflex(response);
 
-    //     // ! carrega as chaves para o cliente
-    //     await this.loadKeys();
+        } catch (e) {
+            console.error("Error ao tentar acessar o servidor: ", e);
+            return this.setReflex();
+        }
+    }
 
-    //     // ! carrega o objeto de troca para para a classe
-    //     this.setReflex(reflex);
+    /**
+     * * Faz uma requisicao ao servidor com o verbo GET 
+     * @return reflex key: string
+     */
+    async get() {
+        try {
+           // ! configura a requisição
+           const url       = this.url();
+           const config    = this.config("GET");
 
-    //     // ! carrega a chave publica para dentro do reflex
-    //     this.setPublicKey(this.keysBox.public);
+           // ! instancia a requisição
+           const request = new Request(url, config);
 
-    //     // ! envia as chaves para o servidor
-    //     await this.send();
+           // ! faz a requição ao servidor
+           const resp = await fetch(request);
+           const response = await resp.json();
 
-    //     // ! carrega a chave publica do servidor para a classe
-    //     this.setImageKey(this.reflex.image.public);
+           // ? carrega o reflex para a clesse
+           return await this.setReflex(response);
 
-    //     // ? retorna o payload da requisicão
-    //     return this.reflex;
-    // }
+        } catch (e) {
+            console.error("Error ao tentar acessar o servidor: ", e);
+            return this.setReflex();
+        }
+    }
 
-    // /**
-    //  * * faz postagem do cliente no servidor
-    //  * * um dado no cliente é cifrado com a public Key do servidor
-    //  * @param {*} reflex 
-    //  * @returns 
-    //  */
-    // async distort(reflex = "") {
-    //     // ! define a url do servidor
-    //     this.url("/authenticate/mirror/distort");
+    /**
+     *  ! Troca as chaves publicas entre cliente e servidor
+     * @param {Object} reflex 
+     * @returns reflex
+     */
+    async reflect(reflex = "") {
+        // ! define uma rota
+        this.url("/authentication/mirror/reflect");
 
-    //     // ! se houver payload, substitui o payload da classe
-    //     this.setReflex(reflex);
+        // ! carrega as chaves para o cliente
+        await this.loadKeys();
 
-    //     // ? faz o envio e recebe a resposta  em um reflex
-    //     return await this.send();
-    // }
+        // ! carrega o objeto de troca para para a classe
+        this.setReflex(reflex);
+
+        // ! carrega a chave publica para dentro do reflex
+        this.match(this.keysBox);
+
+        // ! envia as chaves para o servidor
+        await this.send();
+
+        // // ! carrega a chave publica do servidor para a classe
+        // this.setImageKey(this.reflex.image.public);
+
+        // ? retorna o payload da requisicão
+        return this.reflex;
+    }
+
+    /**
+     * * faz postagem do cliente no servidor
+     * * um dado no cliente é cifrado com a public Key do servidor
+     * @param {*} reflex 
+     * @returns 
+     */
+    async distort(reflex = "") {
+        // ! define a url do servidor
+        this.url("/authentication/mirror/distort");
+
+        // ! se houver payload, substitui o payload da classe
+        this.setReflex(reflex);
+
+        // ? faz o envio e recebe a resposta  em um reflex
+        return await this.send();
+    }
 
     // /**
     //  * * faz uma postagem do cliente no servidor
@@ -469,34 +504,34 @@
     //     return sha512(raw);
     // }
 
-    // /**
-    //  * faz um parse par json
-    //  * @param {*} payload
-    //  * @returns
-    //  */
-    // parse(payload = "") {
-    //     try {
-    //         return JSON.parse(payload);
-    //     } catch (e) {
-    //         return payload;
-    //     }
-    // }
+    /**
+     * faz um parse par json
+     * @param {*} payload
+     * @returns
+     */
+    parse(payload = "") {
+        try {
+            return JSON.parse(payload);
+        } catch (e) {
+            return payload;
+        }
+    }
 
-    // /**
-    //  *  Passa um dado Json para string
-    //  * @param {*} data 
-    //  * @returns 
-    //  */
-    // parseStr(data = "") {
-    //     if (typeof data === "string") {
-    //         return data;
-    //     }
+    /**
+     *  Passa um dado Json para string
+     * @param {*} data 
+     * @returns 
+     */
+    parseStr(data = "") {
+        if (typeof data === "string") {
+            return data;
+        }
 
-    //     try {
-    //         return JSON.stringify(data);
-    //     } catch (e) {
-    //         return data;
-    //     }
+        try {
+            return JSON.stringify(data);
+        } catch (e) {
+            return data;
+        }
 
-    // }
+    }
 }
