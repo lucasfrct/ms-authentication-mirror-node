@@ -4,7 +4,7 @@
  * @dependency js-sha512: https://github.com/emn178/js-sha512
  */
 
-class AuthenticationClientMirror {
+ class AuthenticationClientMirror {
     rsa = null; // ! classe para gerar RSA
     crypt = null; // ! classe para encryptar
 
