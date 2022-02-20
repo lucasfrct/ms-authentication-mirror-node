@@ -15,134 +15,134 @@
  * @dependency js-sha512: https://github.com/emn178/js-sha512
  */
 
- class AuthenticationClientMirror {
+ class AuthenticationMirrorClient {
     rsa = null; // ! classe para gerar RSA
     crypt = null; // ! classe para encryptar
 
     // * estrutura da url
     client = { protocol: "", host: "", uri: "", url: "" };
 
-    // // ? Armazena as chaves das entidades
-    // keysBox = {
-    //     origin: { public: "", private: "", secret: "", signature: "" },
-    //     image: { public: "", private: "", secret: "", signature: "" },
-    //     destinity: { public: "", private: "", secret: "", signature: "" }
-    // };
+    // ? Armazena as chaves das entidades
+    keysBox = {
+        origin: { public: "", private: "", secret: "", signature: "" },
+        image: { public: "", private: "", secret: "", signature: "" },
+        destiny: { public: "", private: "", secret: "", signature: "" }
+    };
 
-    // // ? armazena dos dados das entidades
-    // formBox = {
-    //     origin: { reform: "", deform: "", raw: "" },
-    //     image: { reform: "", deform: "", raw: "" },
-    //     destinity: { reform: "", deform: "", raw: "" },
-    // };
+    // ? armazena dos dados das entidades
+    formBox = {
+        origin: { reform: "", deform: "", raw: "" },
+        image: { reform: "", deform: "", raw: "" },
+        destiny: { reform: "", deform: "", raw: "" },
+    };
 
-    // // ? payload de troca com o servidor
-    // // ? armazena os dados das entidades
-    // reflex = {
-    //     origin: { public: "", cipher: "", raw: "" }, // browser
-    //     image: { public: "", cipher: "", raw: "" }, // servidor local
-    //     destiny: { public: "", cipher: "", raw: "" }, // servidor remoto
-    // };
+    // ? payload de troca com o servidor
+    // ? armazena os dados das entidades
+    reflex = {
+        origin: { public: "", cipher: "", raw: "" }, // browser
+        image: { public: "", cipher: "", raw: "" }, // servidor local
+        destiny: { public: "", cipher: "", raw: "" }, // servidor remoto
+    };
 
-    // // ? parametros da requisição
-    // params = {
-    //     type: "GET",
-    //     contentType: "application/json; charset=utf-8",
-    // };
+    // ? parametros da requisição
+    params = {
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+    };
 
-    // constructor() {
-    //     // ! instacia da library RSA
-    //     this.rsa = new RSA({ keySize: 4096 });
+    constructor() {
+        // ! instacia da library RSA
+        this.rsa = new RSA({ keySize: 4096 });
 
-    //     // ! instancia da library de emciptação
-    //     this.crypt = new Crypt({ md: "sha512" });
-    // }
+        // ! instancia da library de emciptação
+        this.crypt = new Crypt({ md: "sha512" });
+    }
 
-    // /**
-    //  * * configura uma URI para uma requisição do cliente
-    //  * * retorna uma url
-    //  * @param {String} uri
-    //  * @returns {String} url
-    //  */
-    // url(uri = "") {
-    //     this.client.uri = uri || this.client.uri;
-    //     this.client.protocol = window.location.protocol;
-    //     this.client.host = window.location.host;
-    //     this.client.url = `${this.client.protocol}//${this.client.host}${this.client.uri}`;
-    //     return this.client.url;
-    // }
+    /**
+     * * configura uma URI para uma requisição do cliente
+     * * retorna uma url
+     * @param {String} uri
+     * @returns {String} url
+     */
+    url(uri = "") {
+        this.client.uri = uri || this.client.uri;
+        this.client.protocol = window.location.protocol;
+        this.client.host = window.location.host;
+        this.client.url = `${this.client.protocol}//${this.client.host}${this.client.uri}`;
+        return this.client.url;
+    }
 
-    // /**
-    //  * * carrega os dados para a classe
-    //  * @param {*} raw: any
-    //  * @return {*} raw
-    //  */
-    // raw(raw = "") {
-    //     return (this.formBox.origin.raw = raw || this.formBox.origin.raw);
-    // }
+    /**
+     * * carrega os dados para a classe
+     * @param {*} raw: any
+     * @return {*} raw
+     */
+    raw(raw = "") {
+        return (this.formBox.origin.raw = raw || this.formBox.origin.raw);
+    }
 
-    // /**
-    //  * * carrega o payload reflex na classe
-    //  * @param {Object} reflex
-    //  * @returns {Object} reflex
-    //  */
-    // setReflex(reflex = {}) {
-    //     return this.reflex = {...this.reflex, ...reflex };
-    // }
+    /**
+     * * carrega o payload reflex na classe
+     * @param {Object} reflex
+     * @returns {Object} reflex
+     */
+    setReflex(reflex = {}) {
+        return this.reflex = {...this.reflex, ...reflex };
+    }
 
-    // /**
-    //  * * combina os objetos reflex com formBox e keysBox
-    //  * @param {*} data 
-    //  * @returns {*} data
-    //  */
-    // match(data = {}) {
+    /**
+     * * combina os objetos reflex com formBox e keysBox
+     * @param {*} data 
+     * @returns {*} data
+     */
+    match(data = {}) {
 
-    //     // ! se o dado for formBox, carregada para reflex
-    //     if (data.hasOwnProperty('origin') && data.origin.hasOwnProperty("reform")) {
+        // // ! se o dado for formBox, carregada para reflex
+        // if (data.hasOwnProperty('origin') && data.origin.hasOwnProperty("reform")) {
 
-    //         // ! extrai os dados para reflex
-    //         const { origin: { raw: or, deform: od }, image: { raw: ir, deform: id }, destinity: { raw: dr, deform: dd } } = this.formBox;
-    //         const { origin: { public: op }, image: { public: ip }, destinity: { public: dp } } = this.keysBox;
+        //     // ! extrai os dados para reflex
+        //     const { origin: { raw: or, deform: od }, image: { raw: ir, deform: id }, destinity: { raw: dr, deform: dd } } = this.formBox;
+        //     const { origin: { public: op }, image: { public: ip }, destinity: { public: dp } } = this.keysBox;
 
-    //         // ! monta o novo reflex
-    //         const reflex = {
-    //             origin: { raw: or, cipher: od, public: op },
-    //             image: { raw: ir, cipher: id, public: ip },
-    //             destinity: { raw: dr, cipher: dd, public: dp },
-    //         }
+        //     // ! monta o novo reflex
+        //     const reflex = {
+        //         origin: { raw: or, cipher: od, public: op },
+        //         image: { raw: ir, cipher: id, public: ip },
+        //         destinity: { raw: dr, cipher: dd, public: dp },
+        //     }
 
-    //         // ? combina e retorn um reflex preenchido 
-    //         return this.reflex = {...this.reflex, ...reflex };
-    //     }
+        //     // ? combina e retorn um reflex preenchido 
+        //     return this.reflex = {...this.reflex, ...reflex };
+        // }
 
-    //     // ! se o dado for reflex, carrega para formBox e keysBox
-    //     if (data.hasOwnProperty('origin') && data.origin.hasOwnProperty('cipher')) {
+        // ! se o dado for reflex, carrega para formBox e keysBox
+        if (data.hasOwnProperty('origin') && data.origin.hasOwnProperty('cipher')) {
 
-    //         // ! extrai de reflex os dados para formbox e keysbox
-    //         const {
-    //             origin: { raw: or, cipher: oc, public: op },
-    //             image: { raw: ir, cipher: ic, public: ip },
-    //             destinity: { raw: dr, cipher: dc, public: dp }
-    //         } = this.reflex;
+            // ! extrai de reflex os dados para formbox e keysbox
+            const {
+                image:      { raw: ir, cipher: ic, public: ip },
+                origin:     { raw: or, cipher: oc, public: op },
+                destiny:    { raw: dr, cipher: dc, public: dp }
+            } = data;
 
-    //         // ! monta o novo keysbox
-    //         const keysBox = { origin: { public: op }, image: { public: ip }, destinity: { public: dp } };
+            // ! monta o novo keysbox
+            this.keysBox.image      = { ...this.keysBox.origin, public: op };
+            this.keysBox.origin     = { ...this.keysBox.origin, public: op };
+            this.keysBox.destiny    = { ...this.keysBox.origin, public: op };
 
-    //         // ! combina o keysbox
-    //         this.keysBox = {...this.keysBox, ...keysBox };
 
-    //         // ! monta o novo form box
-    //         const formBox = {
-    //             origin: { raw: or, deform: oc },
-    //             image: { raw: ir, deform: ic },
-    //             destinity: { raw: dr, deform: dc }
-    //         };
+        //     // ! monta o novo form box
+        //     const formBox = {
+        //         origin: { raw: or, deform: oc },
+        //         image: { raw: ir, deform: ic },
+        //         destinity: { raw: dr, deform: dc }
+        //     };
 
-    //         // ? combina e retorna form box
-    //         return this.formBox = {...this.formBox, ...formBox }
-    //     }
-    //     return data;
-    // }
+        //     // ? combina e retorna form box
+        //     return this.formBox = {...this.formBox, ...formBox }
+        }
+        return data;
+    }
 
     // /**
     //  * ! gera um par de chaves, desconstroi o iv e os armazena no keysBox
