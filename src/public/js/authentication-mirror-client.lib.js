@@ -22,32 +22,44 @@
     // * estrutura da url
     client = { protocol: "", host: "", uri: "", url: "" };
 
-    // ? Armazena as chaves das entidades
+    /**
+     * * Armazena as chaves das entidades
+     * @property {object} origin:       informacoes do cliente
+     * @property {object} destiny:      informacoes do sevidor
+     * @property {string} {}public:     chave pública do RSA
+     * @property {string} {}private:    chave privada do RSA do cliente
+     * @property {string} {}secret:     chave secreta do cliente
+     * @property {string} {}signature   Assinatura da mensagem emcriptada
+     */
     keysBox = {
-        origin: { public: "", private: "", secret: "", signature: "" },
-        image: { public: "", private: "", secret: "", signature: "" },
-        destiny: { public: "", private: "", secret: "", signature: "" }
+        origin:     { public: "", private: "", secret: "", signature: "" },
+        destiny:    { public: "", signature: "" }
     };
 
-    // ? armazena dos dados das entidades
+    /**
+     * * armazena dos dados das entidades
+     * @property {object} origin:   informacoes do cliente
+     * @property {object} destiny:  informacoes do sevidor
+     * @property {string} reform:   dados decifrado
+     * @property {string} deform:   dados cifrado
+     * @property {string} raw:      Dados cru   
+     */
     formBox = {
-        origin: { reform: "", deform: "", raw: "" },
-        image: { reform: "", deform: "", raw: "" },
-        destiny: { reform: "", deform: "", raw: "" },
+        origin:     { reform: "", deform: "", raw: "" },
+        destiny:    { reform: "", deform: "", raw: "" },
     };
 
-    // ? payload de troca com o servidor
-    // ? armazena os dados das entidades
+    /**
+     * * Pyaload usado para trocas informações com a servidor
+     * @property {object} origin:   informacoes do cliente
+     * @property {object} destiny:  informacoes do sevidor
+     * @property {string} {}public: chave public rsa
+     * @property {string} {}cipher: cigragem rsa
+     * @property {string} {}body:   payload de troca  
+     */
     reflex = {
-        origin: { public: "", cipher: "", raw: "" }, // browser
-        image: { public: "", cipher: "", raw: "" }, // servidor local
-        destiny: { public: "", cipher: "", raw: "" }, // servidor remoto
-    };
-
-    // ? parametros da requisição
-    params = {
-        type: "GET",
-        contentType: "application/json; charset=utf-8",
+        origin:     { public: "", cipher: "", body: {} },
+        destiny:    { public: "", cipher: "", body: {} },
     };
 
     constructor() {
@@ -74,8 +86,8 @@
 
     /**
      * * carrega os dados para a classe
-     * @param {*} raw: any
-     * @return {*} raw
+     * @param   {*} raw: any
+     * @return  {*} raw
      */
     raw(raw = "") {
         return (this.formBox.origin.raw = raw || this.formBox.origin.raw);
@@ -83,76 +95,70 @@
 
     /**
      * * carrega o payload reflex na classe
-     * @param {Object} reflex
-     * @returns {Object} reflex
+     * @param   {Object} reflex
+     * @return  {Object} reflex
      */
-    setReflex(reflex = {}) {
-        return this.reflex = {...this.reflex, ...reflex };
+    setReflex(reflex = { }) {
+        return this.reflex = { ...this.reflex, ...reflex };
     }
 
     /**
      * * combina os objetos reflex com formBox e keysBox
-     * @param {*} data 
-     * @returns {*} data
+     * @param   {*} data: formBox || kyesBox || reflex 
+     * @return  {*} data: formBox || reflex 
      */
     match(data = {}) {
 
-        // ! se o dado for formBox, carregada para reflex
-        if (data.hasOwnProperty('origin') && data.origin.hasOwnProperty("reform")) {
+        if(data.hasOwnProperty('origin') && !data.origin.hasOwnProperty('cipher')) { 
+
+            let keysBox = this.keysBox;
+            let formBox = this.formBox;
+
+            // ! se o dado for KeysBox, carregada  keysBox e formBox para o reflex
+            if (data.origin.hasOwnProperty("private")) {
+                keysBox = data;          
+            };
+
+              // ! se o dado for formBox, carregada para reflex
+            if (data.origin.hasOwnProperty("reform")) {
+                formBox = data;
+            }
 
             // ! extrai os dados para reflex
-            const { origin: { raw: or, deform: od }, image: { raw: ir, deform: id }, destiny: { raw: dr, deform: dd } } = data;
-            const { origin: { public: op }, image: { public: ip }, destiny: { public: dp } } = this.keysBox;
+            const { origin: { deform: originDeform }, destiny: { deform: destinyDeform } } = formBox;
+            const { origin: { public: originPublic }, destiny: { public: destinyPublic } } = keysBox;
 
             // ! monta o novo reflex
-            this.reflex.image   = { ...this.reflex.image,   raw: ir, cipher: id, public: ip };
-            this.reflex.origin  = { ...this.reflex.origin,  raw: or, cipher: od, public: op };
-            this.reflex.destiny = { ...this.reflex.destiny, raw: dr, cipher: dd, public: dp };
+            this.reflex.origin  = { ...this.reflex.origin,  cipher: originDeform,   public: originPublic };
+            this.reflex.destiny = { ...this.reflex.destiny, cipher: destinyDeform,  public: destinyPublic };
 
-            // ? combina e retorn um reflex preenchido 
+            // ? returna reflex
             return this.reflex;
-        }
+        };
 
-         // ! se o dado for KeysBox, carregada para reflex
-         if (data.hasOwnProperty('origin') && data.origin.hasOwnProperty("private")) {
-
-            // ! extrai os dados para reflex
-            const { origin: { raw: or, deform: od }, image: { raw: ir, deform: id }, destiny: { raw: dr, deform: dd } } = this.formBox;
-            const { origin: { public: op }, image: { public: ip }, destiny: { public: dp } } = data;
-
-            // ! monta o novo reflex
-            this.reflex.image   = { ...this.reflex.image,   raw: ir, cipher: id, public: ip };
-            this.reflex.origin  = { ...this.reflex.origin,  raw: or, cipher: od, public: op };
-            this.reflex.destiny = { ...this.reflex.destiny, raw: dr, cipher: dd, public: dp };
-
-            // ? combina e retorn um reflex preenchido 
-            return this.reflex;
-        }
 
         // ! se o dado for reflex, carrega para formBox e keysBox
         if (data.hasOwnProperty('origin') && data.origin.hasOwnProperty('cipher')) {
 
             // ! extrai de reflex os dados para formbox e keysbox
             const {
-                image:      { raw: ir, cipher: ic, public: ip },
-                origin:     { raw: or, cipher: oc, public: op },
-                destiny:    { raw: dr, cipher: dc, public: dp }
+                origin:     { public: originPublic,     cipher: originCipher,  },
+                destiny:    { public: destinyPublic,    cipher: destinyCipher }
             } = data;
 
             // ! monta o novo keysbox
-            this.keysBox.image      = { ...this.keysBox.image,      public: ip };
-            this.keysBox.origin     = { ...this.keysBox.origin,     public: op };
-            this.keysBox.destiny    = { ...this.keysBox.destiny,    public: dp };
+            this.keysBox.origin     = { ...this.keysBox.origin,     public: originPublic };
+            this.keysBox.destiny    = { ...this.keysBox.destiny,    public: destinyPublic };
 
             // ! monta o novo form box
-            this.formBox.image      = {...this.formBox.image,   raw: ir, deform: ic };
-            this.formBox.origin     = {...this.formBox.origin,  raw: or, deform: oc };
-            this.formBox.destiny    = {...this.formBox.destiny, raw: dr, deform: dc };
+            this.formBox.origin     = {...this.formBox.origin,  deform: originCipher };
+            this.formBox.destiny    = {...this.formBox.destiny, deform: destinyCipher };
 
-            // ? combina e retorn um reflex preenchido 
-            return this.formBox;
+            // ? returna reflex 
+            return this.reflex;
         }
-        return data;
+
+        return this.reflex = { ...this.reflex, ...data };
     }
 
     /**
@@ -273,10 +279,10 @@
         try {
 
             // ! carrega a chave pública do servidor
-            const image = this.keysBox.image.public;
+            const destiny = this.keysBox.destiny.public;
 
             // ! se não houver chave pública do servidor, não faz a cifragem 
-            if (image.length < 64) {
+            if (destiny.length < 64) {
                 console.error("Erro, a chave publica não existe");
                 return this.formBox.origin.deform;
             }
@@ -288,7 +294,7 @@
             const signature = this.signature(dataString);
 
             // ! cria uma crifra no cliente com a chave pública do servidor
-            return this.formBox.origin.deform = this.crypt.encrypt(image, dataString, signature);
+            return this.formBox.origin.deform = this.crypt.encrypt(destiny, dataString, signature);
         } catch (e) {
             console.error("Error ao deforma um dado: ", e);
             return this.formBox.origin.deform;
@@ -303,7 +309,7 @@
     async reform(cipher = "") {
         try {
 
-            this.formBox.image.deform = cipher || this.formBox.image.deform;
+            this.formBox.destiny.deform = cipher || this.formBox.destiny.deform;
 
             // ! pega a chave privada do client
             const privateKey = this.keysBox.origin.private;
@@ -311,14 +317,14 @@
             // ! se não houver chave privada do cliente, não faz a decifragem
             if (privateKey.length < 64) {
                 console.error("Erro, a chave privada não existe");
-                return this.formBox.image.reform;
+                return this.formBox.destiny.reform;
             }
 
             // ! faz a decigragem a string enviada do servidor
-            const { message, signature } = this.crypt.decrypt(privateKey, this.formBox.image.deform);
+            const { message, signature } = this.crypt.decrypt(privateKey, this.formBox.destiny.deform);
 
             // ! carrega a assinatura
-            this.keysBox.image.signature = signature;
+            this.keysBox.destiny.signature = signature;
 
             // ! verifica se a assinatura é autentica
             // ! vrify ainda não está funcional
@@ -327,10 +333,10 @@
             // }
 
             // ? retorna a informação decigrada
-            return this.formBox.image.reform = this.parse(message);
+            return this.formBox.destiny.reform = this.parse(message);
         } catch (e) {
             console.error("Error ao tentar decifrar o dado");
-            return this.formBox.image.reform;
+            return this.formBox.destiny.reform;
         }
     }
 
@@ -419,7 +425,7 @@
         await this.send();
 
         // // ! carrega a chave publica do servidor para a classe
-        // this.setImageKey(this.reflex.image.public);
+        // this.set Key(this.reflex.destiny.public);
 
         // ? retorna o payload da requisicão
         return this.reflex;
@@ -499,11 +505,11 @@
 
     //     this.setReflex(response);
 
-    //     this.formBox.deform.image = this.reflex.image.cipher;
+    //     this.formBox.deform.destiny = this.reflex.destiny.cipher;
 
     //     await this.readKeys();
 
-    //     return await this.reform(this.formBox.deform.image);
+    //     return await this.reform(this.formBox.deform.destiny);
     // }
 
     // /**

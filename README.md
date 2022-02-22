@@ -1,4 +1,4 @@
-# olombongo-ms-mirror-key-node
+# ms-mirror-authenticate
 Troca de chaves e cifras
 Comunicação segura
 Serviço de criptografia
@@ -21,17 +21,7 @@ A estrutura interna está organizada em dois objetos: origin e image, que são u
 Os dados do objeto persistem de modo que todas as alterações feitas pelo servidor normalmente estarão dentro do objeto image e todas as alterações feitas pelo cliente estarão no objeto origin.
 
 ## URIs
-- [x] /session : Iniciando login
-``` POST /session
-    Request: { email: "", password: "" }
-    Response: { uudi: "", token: "" }
-```
-- [x] /authenticate/mirror/reveal : Enviando um dado para recebê-lo encriptado
-``` POST /authenticate/mirror/reveal
-    Headers: x-api-token = token
-    Request: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
-    Response: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
-```
+
 - [x] /authenticate/mirror/reflect : Enviando a chave publica do cliente e recebendo a chave publica do servidor
 ``` POST /authenticate/mirror/reflect
     Headers: x-api-token = token
@@ -41,6 +31,14 @@ Os dados do objeto persistem de modo que todas as alterações feitas pelo servi
         image: { public: "{CHAVE PUBLICA DO SERVIDOR}", cipher: "", raw: "" } 
     }
 ```
+
+- [x] /authenticate/mirror/reveal : Enviando um dado para recebê-lo encriptado
+``` POST /authenticate/mirror/reveal
+    Headers: x-api-token = token
+    Request: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
+    Response: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
+```
+
 - [x] /authenticate/mirror/distort : Enviando o objeto para receber uma cifra do servidor
 ``` POST /authenticate/mirror/distort
     Headers: x-api-token = token

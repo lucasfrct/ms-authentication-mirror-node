@@ -24,10 +24,9 @@ router.get('/authentication/mirror/spec', SpecRoute);
 
 router.post('/authentication/mirror/reflect', ReflectRoute);
 
-// ! cliente envia um chave para o servidor encriptar um dado do servidor, 
-// ! devolver a cipher para o cliente e o clinete desemcriptar o dados do servidor 
-router.post('/authentication/mirror/distort', DistortRoute);
-
+// // ! cliente envia um chave para o servidor encriptar um dado do servidor, 
+// // ! devolver a cipher para o cliente e o clinete desemcriptar o dados do servidor 
+// router.post('/authentication/mirror/distort', DistortRoute);
 // router.post('/authenticate/mirror/keep', RouterAuthenticateMirrorKeep);
 // router.post('/authenticate/mirror/reveal', RouterAuthenticateMirrorReveal);
 // router.post('/authenticate/mirror/refraction', RouterAuthenticateMirrorRefraction);
