@@ -68,11 +68,12 @@ const AuthenticationMirror = class AuthenticationMirror {
         destiny:    { public: "", cipher: "", body: {} },
     };
 
-    // ? inicia a classe
     constructor() {
-        this.crypt = new Crypt({ md: 'sha512' }); // inicializando Crypto
-        this.rsa = new RSA({ keySize: 4096 }); // inicializando RSA
-        this.path(); // definido Pths de escrita/leitura
+          // ! instacia da library RSA
+          this.rsa = new RSA({ keySize: 4096 });
+
+          // ! instancia da library de emciptação
+          this.crypt = new Crypt({ md: "sha512" });
     }
 
     /**
