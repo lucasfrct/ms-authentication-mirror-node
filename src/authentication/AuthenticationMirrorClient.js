@@ -16,9 +16,9 @@
     /**
      * * guarda a url utilizada
      * @property {string} protocol: protocolo utilizado pelo clinete
-     * @property {string} host: dominio do cliente
-     * @property {string} uri: rota do recurso consumido no servidor
-     * @property {string} url: caminho completo da requisicao
+     * @property {string} host:     dominio do cliente
+     * @property {string} uri:      rota do recurso consumido no servidor
+     * @property {string} url:      caminho completo da requisicao
      */
     client = { protocol: "", host: "", uri: "", url: "" };
 
@@ -37,7 +37,7 @@
     };
 
     /**
-     * * armazena dos dados das entidades
+     * * armazena os dados das entidades
      * @property {object} origin:   informacoes do cliente
      * @property {object} destiny:  informacoes do sevidor
      * @property {string} reform:   dados decifrado
@@ -50,7 +50,7 @@
     };
 
     /**
-     * * Pyaload usado para trocas informações com a servidor
+     * * Payload usado para trocas informações com o servidor
      * @property {object} origin:   informacoes do cliente
      * @property {object} destiny:  informacoes do sevidor
      * @property {string} {}public: chave public rsa

@@ -41,20 +41,31 @@ const AuthenticationMirror = class AuthenticationMirror {
         destiny:    { public: "", signature: "" }
     };
 
-    headers = { token: 'x-auth-token', bearer: 'Bearer' }; // cabeçalhos
-
-    // ? armazena dos dados para a classe
-    formBox = {
-        raw: "",
-        reform: "",
-        deform: { origin: "", image: "", destiny: "" }
+    /**
+     * * armazena os dados das entidades
+     * @property {object} origin:   informacoes do cliente
+     * @property {object} destiny:  informacoes do sevidor
+     * @property {string} reform:   dados decifrado
+     * @property {string} deform:   dados cifrado
+     * @property {string} raw:      Dados cru   
+     */
+     formBox = {
+        origin:     { reform: "", deform: "", raw: "" },
+        destiny:    { reform: "", deform: "", raw: "" },
     };
 
-    // ? payload de troca com o servidor
-    reflex = {
-        origin: { public: "", cipher: "", raw: "" }, // browser
-        image: { public: "", cipher: "", raw: "" }, // servidor local
-        destiny: { public: "", cipher: "", raw: "" } // servidor remoto
+   
+    /**
+     * * Payload usado para trocas informações com  o cliente
+     * @property {object} origin:   informacoes do cliente
+     * @property {object} destiny:  informacoes do sevidor
+     * @property {string} {}public: chave public rsa
+     * @property {string} {}cipher: cigragem rsa
+     * @property {string} {}body:   payload de troca  
+     */
+     reflex = {
+        origin:     { public: "", cipher: "", body: {} },
+        destiny:    { public: "", cipher: "", body: {} },
     };
 
     // ? inicia a classe
