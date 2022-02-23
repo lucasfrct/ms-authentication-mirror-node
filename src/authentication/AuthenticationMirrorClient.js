@@ -1,14 +1,25 @@
 /**
- * * Classe usada pelo cliente para gerar suporte a autenticação espelada
+ * * Classe usada pelo cliente para gerar suporte a autenticação espelhada
  * @dependency hybrid-crypto-js: https://github.com/juhoen/hybrid-crypto-js
  * @dependency js-sha512: https://github.com/emn178/js-sha512
+ * ? gera um par de chaves publico-privada
+ * ? faz encryptacao com assinatura
+ * ? faz decryptação com assinatura
+ * ? verifuca assinatura: assina com chave pública e verifica com chave privada
  */
 
  class AuthenticationMirrorClient {
-    rsa = null; // ! classe para gerar RSA
-    crypt = null; // ! classe para encryptar
 
-    // * estrutura da url
+    rsa   = null; // ! library RSA
+    crypt = null; // ! library crypt (encruptacai de decriptacao)
+
+    /**
+     * * guarda a url utilizada
+     * @property {string} protocol: protocolo utilizado pelo clinete
+     * @property {string} host: dominio do cliente
+     * @property {string} uri: rota do recurso consumido no servidor
+     * @property {string} url: caminho completo da requisicao
+     */
     client = { protocol: "", host: "", uri: "", url: "" };
 
     /**

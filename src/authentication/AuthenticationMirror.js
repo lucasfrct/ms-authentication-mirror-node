@@ -3,21 +3,44 @@ const fs = require("fs");
 const Crypt = require('hybrid-crypto-js').Crypt;
 const RSA = require('hybrid-crypto-js').RSA;
 
-
 /**
- * Faz autenticação do usuário vi RSA
- *  - gera um par de chaves publico-privada
- *  - faz encryptacao com assinatura
- *  - faz decryptação com assinatura
- *  - verifuca assinatura [ assin com chave pública e verifica com chave privada
+ * * Classe usada pelo servidor para gerar suporte a autenticação espelhada
+ * @dependency hybrid-crypto-js: https://github.com/juhoen/hybrid-crypto-js
+ * @dependency js-sha512: https://github.com/emn178/js-sha512
+ * ? gera um par de chaves publico-privada
+ * ? faz encryptacao com assinatura
+ * ? faz decryptação com assinatura
+ * ? verifuca assinatura: assina com chave pública e verifica com chave privada
  */
 const AuthenticationMirror = class AuthenticationMirror {
 
-    instance = null; // ! classe para criar instancia
-    rsa = null; // ! classe para gerar RSA
+    rsa   = null; // ! library RSA
+    crypt = null; // ! library crypt (encruptacai de decriptacao)
 
-    paths = { public: "", private: "", secret: "", base: "./keys", data: "" }; // caminhos para arquivos
-    keysBox = { public: "", private: "", origin: "", destiny: "", signature: "", secret: "" }; // ! chaves
+    /**
+     * * guarda os path das chaves usadas
+     * @property {string} base:         guarda o diretório que armazena as chaves
+     * @property {string} public:       path da chave pública
+     * @property {string} private:      path da chave privada
+     * @property {string} secret:       path da chave secreta
+     * @property {string} signature:    path da assinatura do servidor
+     */
+    paths = { base: "./keys", public: "", private: "", secret: "", signature: "" }; 
+
+    /**
+     * * Armazena as chaves das entidades
+     * @property {object} origin:       informacoes do cliente
+     * @property {object} destiny:      informacoes do sevidor
+     * @property {string} {}public:     chave pública do RSA
+     * @property {string} {}private:    chave privada do RSA do cliente
+     * @property {string} {}secret:     chave secreta do cliente
+     * @property {string} {}signature   Assinatura da mensagem emcriptada
+     */
+    keysBox = {
+        origin:     { public: "", private: "", secret: "", signature: "" },
+        destiny:    { public: "", signature: "" }
+    };
+
     headers = { token: 'x-auth-token', bearer: 'Bearer' }; // cabeçalhos
 
     // ? armazena dos dados para a classe
@@ -36,7 +59,7 @@ const AuthenticationMirror = class AuthenticationMirror {
 
     // ? inicia a classe
     constructor() {
-        this.instance = new Crypt({ md: 'sha512' }); // inicializando Crypto
+        this.crypt = new Crypt({ md: 'sha512' }); // inicializando Crypto
         this.rsa = new RSA({ keySize: 4096 }); // inicializando RSA
         this.path(); // definido Pths de escrita/leitura
     }
@@ -115,7 +138,7 @@ const AuthenticationMirror = class AuthenticationMirror {
                 return this.keysBox.signature;
             };
 
-            const { signature } = this.parse(this.instance.signature(this.keysBox.private, JSON.stringify(this.formBox.raw)));
+            const { signature } = this.parse(this.crypt.signature(this.keysBox.private, JSON.stringify(this.formBox.raw)));
             return this.keysBox.signature = signature;
 
         } catch (e) {
@@ -137,7 +160,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             };
 
             // ! Desconstroi o iv
-            const { iv } = this.parse(this.instance.encrypt(publicKey, process.env.SECRET_KEY));
+            const { iv } = this.parse(this.crypt.encrypt(publicKey, process.env.SECRET_KEY));
 
             // ! Carrega na classe as chaves publica, privada e secreta
             return this.keysBox = {...this.keysBox, public: publicKey, private: privateKey, secret: iv };
@@ -237,7 +260,7 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @return bool
      */
     async verify(raw = "") {
-        return await this.instance.verify(this.keysBox.public, raw, this.keysBox.signature);
+        return await this.crypt.verify(this.keysBox.public, raw, this.keysBox.signature);
     }
 
     /**
@@ -265,7 +288,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             };
 
             // ! Cria uma cifra no servidor com a chave do cliente
-            return this.formBox.deform.image = this.instance.encrypt(
+            return this.formBox.deform.image = this.crypt.encrypt(
                 this.keysBox.public,
                 JSON.stringify(this.formBox.raw), ""
             );
@@ -293,7 +316,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             };
 
             // ! Decifra a cifra com a chave privada do servidor
-            const { message, signature } = this.instance.decrypt(this.keysBox.private, this.formBox.deform.image);
+            const { message, signature } = this.crypt.decrypt(this.keysBox.private, this.formBox.deform.image);
             
             //faz assinatura da informação que será transmitida 
             this.keysBox.signature = signature;
