@@ -162,8 +162,10 @@
     }
 
     /**
-     * ! gera um par de chaves, desconstroi o iv e os armazena no keysBox
-     * @returns keysBox: object
+     * ! gera o par de chaves publico/privada
+     * ! gera um chave secreta
+     * ! gera uma asinatura
+     * @return {object} keysBox:
      */
     async captureKeys() {
         try {

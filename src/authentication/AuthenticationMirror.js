@@ -111,7 +111,7 @@ const AuthenticationMirror = class AuthenticationMirror {
     /**
      * * combina os objetos reflex com formBox e keysBox
      * @param   {*} data: formBox || kyesBox || reflex 
-     * @return  {*} data: formBox || reflex 
+     * @return  {*} data: reflex 
      */
     match(data = {}) {
 
@@ -167,12 +167,7 @@ const AuthenticationMirror = class AuthenticationMirror {
         return this.reflex = { ...this.reflex, ...data };
     }
 
-    /**
-     * * Parseia uma string para json caso seja possível
-     * @param payload: any 
-     * @return payload: any 
-     */
-    parse(payload = "") { try { return JSON.parse(payload); } catch (e) { return payload; }; }
+   
 
     async writeData(data = "", path = "") {
 
@@ -185,16 +180,6 @@ const AuthenticationMirror = class AuthenticationMirror {
         };
     }
 
-    async readData(path = "") {
-
-        this.path(path);
-
-        try { 
-            this.formBox.raw = await fs.readFileSync(this.paths.data, "utf8");
-        }catch (e) {
-            console.error("Error reading data");
-        };
-    }
 
     /**
      * * Gera uma assinatura unica usando a chave privada
@@ -221,23 +206,34 @@ const AuthenticationMirror = class AuthenticationMirror {
     }
 
     /**
-     * * gera um par de chaves, desconstroi o iv e os armazena no keysBox
-     * @returns keysBox: object
+     * ! gera o par de chaves publico/privada
+     * ! gera um chave secreta
+     * ! gera uma asinatura
+     * @returns {object} keysBox:
      */
     async captureKeys() {
         try {
             // ! Generate 1024 bit RSA key pair
             const [err, { privateKey, publicKey }] = await handle(this.rsa.generateKeyPairAsync());
             if (err) {
+                // TODO: logger
+                console.error("Error ao gerar as chaves");
                 return this.keysBox;
             };
 
-            // ! Desconstroi o iv
-            const { iv } = this.parse(this.crypt.encrypt(publicKey, process.env.SECRET_KEY));
+            // ! gera uma chave IV de uma string forte de 64 caracteres e define a secret 
+            const { iv: secret } = this.parse(this.crypt.encrypt(publicKey, "De@14@Jxfjm^MiKpQP6tzKSm83xpa*vfXRi2bSjvtSFGVbwU8Yy&9K*&soIT5ft&EIS"));
+
+            // ! gera uma chave de assinatura
+            const { signature }  = this.parse(await this.crypt.signature(privateKey, secret));
 
             // ! Carrega na classe as chaves publica, privada e secreta
-            return this.keysBox = {...this.keysBox, public: publicKey, private: privateKey, secret: iv };
+            this.keysBox.destiny = { public: publicKey, private: privateKey, secret, siginature };
+            
+            // ? returna o objeto de chaves
+            return this.keysBox
         } catch (e) {
+            // TODO: logger
             console.error(e);
             return this.keysBox;
         }
@@ -557,6 +553,13 @@ const AuthenticationMirror = class AuthenticationMirror {
         // ! Retorna o estado atual dos objetos
         return { keysBox: this.keysBox, formBox: this.formBox };
     }
+
+     /**
+     * * Parseia uma string para json caso seja possível
+     * @param payload: any 
+     * @return payload: any 
+     */
+      parse(payload = "") { try { return JSON.parse(payload); } catch (e) { return payload; }; }
 
 }
 
