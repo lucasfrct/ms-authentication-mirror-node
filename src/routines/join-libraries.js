@@ -3,7 +3,7 @@ const { PathMatch, PathRead } = require('@utils/handle-path');
 const JonLibrariesRoutine = async()=> {
     const directory = "./src/lib";
     const destination = "./src/public/js/authentication-mirror-client.lib.js";
-    const authenticationMirrorClient = "./src/authentication/AuthenticationMirrorClient.js";
+    const authenticationMirrorClient = "./src/public/js/authentication-mirror-client.lib.min.js";
 
     const [err, match] = await PathMatch(directory, destination, joinAuthneticationMirrorClient);
     if(err) {
