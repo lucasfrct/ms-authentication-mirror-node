@@ -4,7 +4,7 @@ const Crypt = require('hybrid-crypto-js').Crypt;
 const RSA = require('hybrid-crypto-js').RSA;
 
 /**
- * * Classe usada pelo servidor para gerar suporte a autenticação espelhada
+ * * classe usada pelo servidor para gerar suporte a autenticação espelhada
  * @dependency hybrid-crypto-js: https://github.com/juhoen/hybrid-crypto-js
  * @dependency js-sha512: https://github.com/emn178/js-sha512
  * ? gera um par de chaves publico-privada
@@ -25,10 +25,10 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @property {string} secret:       path da chave secreta
      * @property {string} signature:    path da assinatura do servidor
      */
-    paths = { base: "./keys", public: "", private: "", secret: "", signature: "" }; 
+    paths = { base: "./keys/core", public: "", private: "", secret: "", signature: "" }; 
 
     /**
-     * * Armazena as chaves das entidades
+     * * armazena as chaves das entidades
      * @property {object} origin:       informacoes do cliente
      * @property {object} destiny:      informacoes do sevidor
      * @property {string} {}public:     chave pública do RSA
@@ -56,7 +56,7 @@ const AuthenticationMirror = class AuthenticationMirror {
 
    
     /**
-     * * Payload usado para trocas informações com  o cliente
+     * * payload usado para trocas informações com  o cliente
      * @property {object} origin:   informacoes do cliente
      * @property {object} destiny:  informacoes do sevidor
      * @property {string} {}public: chave public rsa
@@ -167,19 +167,150 @@ const AuthenticationMirror = class AuthenticationMirror {
         return this.reflex = { ...this.reflex, ...data };
     }
 
-   
+     /**
+     * ! gera o par de chaves publico/privada
+     * ! gera um chave secreta
+     * ! gera uma asinatura
+     * @return {object} keysBox:
+     */
+      async captureKeys() {
+        try {
+            // ! extrai o par de chaves publica/privada RSA
+            const [err, { privateKey, publicKey }] = await handle(this.rsa.generateKeyPairAsync());
+            if (err) {
+                // TODO: logger
+                console.error("Error ao gerar as chaves");
+                return this.keysBox;
+            };
 
-    async writeData(data = "", path = "") {
+            // ! gera uma chave IV de uma string forte de 64 caracteres e define a secret 
+            const { iv: secret } = this.parse(this.crypt.encrypt(publicKey, "De@14@Jxfjm^MiKpQP6tzKSm83xpa*vfXRi2bSjvtSFGVbwU8Yy&9K*&soIT5ft&EIS"));
 
-        this.path(path);
+            // ! gera uma chave de assinatura
+            const { signature }  = this.parse(await this.crypt.signature(privateKey, secret));
 
-        try { 
-            await fs.writeFileSync(this.paths.data, data);
-        }catch (e) {
-            console.error("Error writing data");
-        };
+             // ! cria novo o objeto de chaves do servidor
+            this.keysBox.destiny = { public: publicKey, private: privateKey, secret, signature };
+            
+            // ? returna o objeto de chaves
+            return this.keysBox
+        } catch (e) {
+            // TODO: logger
+            console.error(e);
+            return this.keysBox;
+        }
     }
 
+    /**
+     * * escreve as chaves publica, privada e secreta em arquivos no disco
+     * @param   {string} path: define um diretório para guardar as chaves
+     * @returns {object} keysBox:
+     */
+    async writeKeys(path = "") {
+
+        // ! define um diretório para armazenar as chaves
+        this.path(path);
+
+        try {
+            await fs.writeFileSync(this.paths.public, this.keysBox.destiny.public);
+            console.log("public");
+        } catch (e) {
+            // TODO: logger
+            console.error(e);
+        };
+
+        try {
+            await fs.writeFileSync(this.paths.private, this.keysBox.destiny.private);
+            console.log("private");
+        } catch (e) {
+            // TODO: logger
+            console.error(e);
+        };
+
+        try {
+            await fs.writeFileSync(this.paths.secret, this.keysBox.destiny.secret);
+            console.log("secret");
+        } catch (e) {
+            // TODO: logger
+            console.error(e);
+        };
+
+        try {
+            await fs.writeFileSync(this.paths.secret, this.keysBox.destiny.signature);
+            console.log("signature");
+        } catch (e) {
+            // TODO: logger
+            console.error(e);
+        };
+        
+        console.log("keysbox");
+        return this.keysBox;
+      }
+
+    /**
+     * * lê o valor das chaves no disco e passa para as variaveis de ambiente
+     * @param  {string} path: define um diretório para ler as chaves
+     * @return {object} keysBox:  
+     */
+    async readKeys(path = "") {
+
+        // ! define um diretório para ler as chaves
+        this.path(path);
+
+        try {
+            process.env.PUBLIC_KEY = await fs.readFileSync(this.paths.public, "utf8");
+            console.log("public");
+        } catch (e) {
+            console.error(e);
+        };
+
+        try {
+            process.env.PRIVATE_KEY = await fs.readFileSync(this.paths.private, "utf8");
+            console.log("private");
+        } catch (e) {
+            console.error(e);
+        };
+
+        try {
+            process.env.SECRET_KEY = await fs.readFileSync(this.paths.secret, "utf8");
+            console.log("secret");
+        } catch (e) {
+            console.error(e);
+        };
+
+        try {
+            process.env.SIGNATURE = await fs.readFileSync(this.paths.signature, "utf8");
+            console.log("signature");
+        } catch (e) {
+            console.error(e);
+        };
+
+        console.log("keysbox");
+        return this.keysBox;
+    }
+
+    /**
+     * * carrega as chaves armazenadas nas variaveis de ambiente para  a classe 
+     * @return {object} keysBox
+     */
+     async loadKeys() {
+
+        // ! Se o conteúdo da variavel de ambiente for menor que 64, faça um readKeys
+        if (!process.env.PUBLIC_KEY.length < 64) { await this.readKeys() }
+
+        // ! Se o conteúdo da variavel de ambiente for menor que 64, carrega as chaves armazenadas
+        // nas variaveis de ambiente para a classe
+        if (!this.keysBox.public.length < 64) {
+            this.keysBox = {
+                ...this.keysBox,
+                private: process.env.PRIVATE_KEY,
+                public: process.env.PUBLIC_KEY,
+                secret: process.env.SECRET_KEY
+            };
+        };
+
+        return this.keysBox;
+    }
 
     /**
      * * Gera uma assinatura unica usando a chave privada
@@ -205,123 +336,7 @@ const AuthenticationMirror = class AuthenticationMirror {
         }
     }
 
-    /**
-     * ! gera o par de chaves publico/privada
-     * ! gera um chave secreta
-     * ! gera uma asinatura
-     * @returns {object} keysBox:
-     */
-    async captureKeys() {
-        try {
-            // ! Generate 1024 bit RSA key pair
-            const [err, { privateKey, publicKey }] = await handle(this.rsa.generateKeyPairAsync());
-            if (err) {
-                // TODO: logger
-                console.error("Error ao gerar as chaves");
-                return this.keysBox;
-            };
 
-            // ! gera uma chave IV de uma string forte de 64 caracteres e define a secret 
-            const { iv: secret } = this.parse(this.crypt.encrypt(publicKey, "De@14@Jxfjm^MiKpQP6tzKSm83xpa*vfXRi2bSjvtSFGVbwU8Yy&9K*&soIT5ft&EIS"));
-
-            // ! gera uma chave de assinatura
-            const { signature }  = this.parse(await this.crypt.signature(privateKey, secret));
-
-            // ! Carrega na classe as chaves publica, privada e secreta
-            this.keysBox.destiny = { public: publicKey, private: privateKey, secret, siginature };
-            
-            // ? returna o objeto de chaves
-            return this.keysBox
-        } catch (e) {
-            // TODO: logger
-            console.error(e);
-            return this.keysBox;
-        }
-    }
-
-    /**
-     * * Escreve as chaves publica, privada e secreta em arquivos no disco
-     * @returns keysBox: object
-     */
-    async writeKeys(path = "") {
-
-        // ! define um diretório para armazenar as chaves public, private e secret
-        this.path(path);
-
-        try {
-            await fs.writeFileSync(this.paths.public, this.keysBox.public);
-        } catch (e) {
-            console.error(e);
-        };
-
-        try {
-            await fs.writeFileSync(this.paths.private, this.keysBox.private);
-        } catch (e) {
-            console.error(e);
-        };
-
-        try {
-            await fs.writeFileSync(this.paths.secret, this.keysBox.secret);
-        } catch (e) {
-            console.error(e);
-        };
-
-        return this.keysBox
-    }
-
-    /**
-     * * Lê o valor das chaves no disco e passa para as variaveis de ambiente
-     * @param path: string - caminho da pasta das chaves 
-     * @return keys: Object -  contém todas as chaves utilizadas   
-     */
-    async readKeys(path = "") {
-
-        // ! define um diretório para armazenar as chaves public, private e secret
-        this.path(path);
-
-        try {
-            process.env.SECRET_KEY = await fs.readFileSync(this.paths.secret, "utf8");
-        } catch (e) {
-            console.error(e);
-        };
-
-        try {
-            process.env.PUBLIC_KEY = await fs.readFileSync(this.paths.public, "utf8");
-        } catch (e) {
-            console.error(e);
-        };
-
-        try {
-            process.env.PRIVATE_KEY = await fs.readFileSync(this.paths.private, "utf8");
-        } catch (e) {
-            console.error(e);
-        };
-
-        return this.keysBox;
-    }
-
-    /**
-     * * Carrega as chaves armazenadas nas variaveis de ambiente para o objeto da classe 
-     * @returns keysBox: object
-     */
-    async loadKeys() {
-
-        // ! Se o conteúdo da variavel de ambiente for menor que 64, faça um readKeys
-        if (!process.env.PUBLIC_KEY.length < 64) { await this.readKeys() }
-
-        // ! Se o conteúdo da variavel de ambiente for menor que 64, carrega as chaves armazenadas
-        // nas variaveis de ambiente para a classe
-        if (!this.keysBox.public.length < 64) {
-            this.keysBox = {
-                ...this.keysBox,
-                private: process.env.PRIVATE_KEY,
-                public: process.env.PUBLIC_KEY,
-                secret: process.env.SECRET_KEY
-            };
-        };
-
-        return this.keysBox;
-    }
 
     /**
      * * Verifica se a assinatura é autentica

@@ -1,5 +1,5 @@
 /**
- * * Classe usada pelo cliente para gerar suporte a autenticação espelhada
+ * * classe usada pelo cliente para gerar suporte a autenticação espelhada
  * @dependency hybrid-crypto-js: https://github.com/juhoen/hybrid-crypto-js
  * @dependency js-sha512: https://github.com/emn178/js-sha512
  * ? gera um par de chaves publico-privada
@@ -23,7 +23,7 @@
     client = { protocol: "", host: "", uri: "", url: "" };
 
     /**
-     * * Armazena as chaves das entidades
+     * * armazena as chaves das entidades
      * @property {object} origin:       informacoes do cliente
      * @property {object} destiny:      informacoes do sevidor
      * @property {string} {}public:     chave pública do RSA
@@ -50,7 +50,7 @@
     };
 
     /**
-     * * Payload usado para trocas informações com o servidor
+     * * payload usado para trocas informações com o servidor
      * @property {object} origin:   informacoes do cliente
      * @property {object} destiny:  informacoes do sevidor
      * @property {string} {}public: chave public rsa
@@ -178,46 +178,48 @@
             // ! gera uma chave de assinatura
             const { signature }  = this.parse(await this.crypt.signature(privateKey, secret));
 
-            // ! cria novo o objeto de chaves da origem
+            // ! cria novo o objeto de chaves do cliente
             this.keysBox.origin = { public: publicKey, private: privateKey, secret, signature };
 
             // ? returna o objeto de chaves
             return this.keysBox
         } catch (e) {
-            console.error("Não foi possível gerar o par de chaves: ", e);
+            console.error(e);
             return this.keysBox;
         }
     }
 
     /**
-     * * Escreve as chaves publica, privada e secreta no localStorage do navegador
-     * @returns keysBox: object
+     * * escreve as chaves publica, privada e secreta no localStorage do navegador
+     * @param   {string} path: define uma prefixo para guardar as chaves
+     * @returns {object} keysBox
      */
-    async writeKeys() {
-        localStorage.setItem("AuthenticateMirrorPublicKey",     this.keysBox.origin.public);
-        localStorage.setItem("AuthenticateMirrorPrivateKey",    this.keysBox.origin.private);
-        localStorage.setItem("AuthenticateMirrorSecretKey",     this.keysBox.origin.secret);
-        localStorage.setItem("AuthenticateMirrorSignature",     this.keysBox.origin.signature);
+    async writeKeys(path = "") {
+        localStorage.setItem(`${path}AuthenticateMirrorPublicKey`,     this.keysBox.origin.public);
+        localStorage.setItem(`${path}AuthenticateMirrorPrivateKey`,    this.keysBox.origin.private);
+        localStorage.setItem(`${path}AuthenticateMirrorSecretKey`,     this.keysBox.origin.secret);
+        localStorage.setItem(`${path}AuthenticateMirrorSignature`,     this.keysBox.origin.signature);
 
         return this.keysBox;
     }
 
     /**
-     * * Lê o valor das chaves no localStorage do navegador e passa para o objeto da classe
-     * @returns keysBox: object
+     * * lê o valor das chaves no localStorage do navegador e passa para o objeto da classe
+     * @param  {string} path: define um prefixo para ler as chaves
+     * @return {object} keysBox:
      */
-    async readKeys() {
-
-        this.keysBox.secret     = await localStorage.getItem("AuthenticateMirrorSecretKey")   || "";
-        this.keysBox.public     = await localStorage.getItem("AuthenticateMirrorPublicKey")   || "";
-        this.keysBox.private    = await localStorage.getItem("AuthenticateMirrorPrivateKey")  || "";
-        this.keysBox.signature  = await localStorage.getItem("AuthenticateMirrorSignature")   || "";
+    async readKeys(path = "") {
+        this.keysBox.public     = await localStorage.getItem(`${path}AuthenticateMirrorPublicKey`)   || "";
+        this.keysBox.private    = await localStorage.getItem(`${path}AuthenticateMirrorPrivateKey`)   || "";
+        this.keysBox.secret     = await localStorage.getItem(`${path}AuthenticateMirrorSecretKey`)  || "";
+        this.keysBox.signature  = await localStorage.getItem(`${path}AuthenticateMirrorSignature`)   || "";
 
         return this.keysBox;
     }
 
     /**
-     * carrega as chaves para a classe
+     * * carrega as chaves do localstorage para a classe
+     * @return {object} keysBox:
      */
     async loadKeys() {
         // ! se não houver chave pública faz a leitura das chaves
