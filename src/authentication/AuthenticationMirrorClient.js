@@ -73,14 +73,14 @@
     /**
      * * configura uma URI para uma requisição do cliente
      * * retorna uma url
-     * @param {String} uri
-     * @returns {String} url
+     * @param {string} uri: recurso utilizado no servidor
+     * @return {string} url: caminho completo da requisicao
      */
     url(uri = "") {
-        this.client.uri = uri || this.client.uri;
-        this.client.protocol = window.location.protocol;
-        this.client.host = window.location.host;
-        this.client.url = `${this.client.protocol}//${this.client.host}${this.client.uri}`;
+        this.client.uri         = uri || this.client.uri;
+        this.client.protocol    = window.location.protocol;
+        this.client.host        = window.location.host;
+        this.client.url         = `${this.client.protocol}://${this.client.host}${this.client.uri}`;
         return this.client.url;
     }
 
@@ -105,7 +105,7 @@
     /**
      * * combina os objetos reflex com formBox e keysBox
      * @param   {*} data: formBox || kyesBox || reflex 
-     * @return  {*} data: formBox || reflex 
+     * @return  {*} data: reflex 
      */
     match(data = {}) {
 
@@ -146,11 +146,11 @@
                 destiny:    { public: destinyPublic,    cipher: destinyCipher }
             } = data;
 
-            // ! monta o novo keysbox
+            // ! monta o novo keysBox
             this.keysBox.origin     = { ...this.keysBox.origin,     public: originPublic };
             this.keysBox.destiny    = { ...this.keysBox.destiny,    public: destinyPublic };
 
-            // ! monta o novo form box
+            // ! monta o novo formBox
             this.formBox.origin     = {...this.formBox.origin,  deform: originCipher };
             this.formBox.destiny    = {...this.formBox.destiny, deform: destinyCipher };
 

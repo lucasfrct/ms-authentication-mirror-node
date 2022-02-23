@@ -78,33 +78,94 @@ const AuthenticationMirror = class AuthenticationMirror {
 
     /**
      * * define um diretório para armazenar as chaves public, private e secret
-     * @param path: string - folder das chaves
-     * @return paths: Object - contém todos os paths utilizados
+     * @param {string} path: diretório para as chaves
+     * @return {object} paths: contém todos os paths utilizados na classe
      */
-    path(path = "./keys") {
-        this.paths.base = path || this.paths.base;
-        this.paths.public = `${this.paths.base}/public_key.pem`
-        this.paths.private = `${this.paths.base}/private_key.pem`
-        this.paths.secret = `${this.paths.base}/secret_key.b64`
-        this.paths.data = `${this.paths.base}/data.pem`
+    path(path = "") {
+        this.paths.base         = path || this.paths.base;
+        this.paths.public       = `${this.paths.base}/public-key.pem`
+        this.paths.private      = `${this.paths.base}/private-key.pem`
+        this.paths.secret       = `${this.paths.base}/secret-key.key`
+        this.paths.signature    = `${this.paths.base}/siginature.key`
         return this.paths;
     }
 
     /**
-     * * Faz set no dos dos dados que serão encryptados
-     * @param raw: any - recebe dados de qualquer typo 
-     * @return raw: any - retorna o mesmo dado de entrada 
+     * * carrega os dados para a classe
+     * @param   {*} raw: any
+     * @return  {*} raw
      */
-    setRaw(raw = "") { return this.formBox.raw = raw || this.formBox.raw; }
+     raw(raw = "") {
+        return (this.formBox.destiny.raw = raw || this.formBox.destiny.raw);
+    }
 
     /**
      * * carrega o payload reflex na classe
-     * @paoram {*} reflex
-     * @returns
+     * @param   {Object} reflex
+     * @return  {Object} reflex
      */
-    setReflex(reflex = "") { return this.reflex = reflex || this.reflex; }
+    setReflex(reflex = { }) {
+        return this.reflex = { ...this.reflex, ...reflex };
+    }
 
-    hash(txt = "") { return sha512(txt); }
+    /**
+     * * combina os objetos reflex com formBox e keysBox
+     * @param   {*} data: formBox || kyesBox || reflex 
+     * @return  {*} data: formBox || reflex 
+     */
+    match(data = {}) {
+
+        if(data.hasOwnProperty('origin') && !data.origin.hasOwnProperty('cipher')) { 
+
+            let keysBox = this.keysBox;
+            let formBox = this.formBox;
+
+            // ! se o dado for KeysBox, carregada  keysBox e formBox para o reflex
+            if (data.origin.hasOwnProperty("private")) {
+                keysBox = data;          
+            };
+
+              // ! se o dado for formBox, carregada para reflex
+            if (data.origin.hasOwnProperty("reform")) {
+                formBox = data;
+            }
+
+            // ! extrai os dados para reflex
+            const { origin: { deform: originDeform }, destiny: { deform: destinyDeform } } = formBox;
+            const { origin: { public: originPublic }, destiny: { public: destinyPublic } } = keysBox;
+
+            // ! monta o novo reflex
+            this.reflex.origin  = { ...this.reflex.origin,  cipher: originDeform,   public: originPublic };
+            this.reflex.destiny = { ...this.reflex.destiny, cipher: destinyDeform,  public: destinyPublic };
+
+            // ? returna reflex
+            return this.reflex;
+        };
+
+
+        // ! se o dado for reflex, carrega para formBox e keysBox
+        if (data.hasOwnProperty('origin') && data.origin.hasOwnProperty('cipher')) {
+
+            // ! extrai de reflex os dados para formbox e keysbox
+            const {
+                origin:     { public: originPublic,     cipher: originCipher,  },
+                destiny:    { public: destinyPublic,    cipher: destinyCipher }
+            } = data;
+
+            // ! monta o novo keysBox
+            this.keysBox.origin     = { ...this.keysBox.origin,     public: originPublic };
+            this.keysBox.destiny    = { ...this.keysBox.destiny,    public: destinyPublic };
+
+            // ! monta o novo formBox
+            this.formBox.origin     = {...this.formBox.origin,  deform: originCipher };
+            this.formBox.destiny    = {...this.formBox.destiny, deform: destinyCipher };
+
+            // ? returna reflex 
+            return this.reflex;
+        }
+
+        return this.reflex = { ...this.reflex, ...data };
+    }
 
     /**
      * * Parseia uma string para json caso seja possível
