@@ -1,17 +1,20 @@
-const JoinLibrariesRoutine = require('./join-libraries');
-const MinifyRoutine = require('./minify');
+const JoinLibrariesRoutine = require('./join-libraries.routine');
+const MinifyLibrariesRoutine = require('./minify-libraries.routine');
 
+// * Função principal para a chamada das rotinas
 const RoutinesRun = async()=> {
     const returns = [];
 
-    // ! Minifica a classe AuthenticationMirrorClient
-    const min = await MinifyRoutine();
+    // ! Rotina de minificação da biblioteca
+    const min = await MinifyLibrariesRoutine();
     returns.push(min);
 
-    // ! Merge a lib com a classe authentication-mirror-client.lib.min
+    // ! Rotina de combinação de bibliotecas
     const files = await JoinLibrariesRoutine();
     returns.push(files);
 
+    // ? Retorna as repostas das rotinas
+    return returns;
 };
 
-module.exports = { run: RoutinesRun, RoutinesRun, MinifyRoutine, JoinLibrariesRoutine };
+module.exports = { run: RoutinesRun, RoutinesRun, MinifyLibrariesRoutine, JoinLibrariesRoutine };

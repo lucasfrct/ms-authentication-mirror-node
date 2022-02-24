@@ -35,7 +35,7 @@ const PathMatch = (directory = "", destination = "", intercept = undefined)=> {
                 match = match + '\n' + bin;
             })); 
 
-            // desvia o math para outra função assincrona
+            // desvia o match para outra função assincrona
             if(intercept && typeof intercept == "function") {
                 match = await intercept(match);
             };
