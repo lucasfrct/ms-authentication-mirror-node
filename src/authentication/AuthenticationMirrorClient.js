@@ -536,16 +536,16 @@
      * @param {*} data 
      * @returns 
      */
-    parseStr(data = "") {
-        if (typeof data === "string") {
-            return data;
-        }
-
+     parseStr(data = undefined) {
         try {
+            if (typeof data === "string") {
+                return data;
+            };
             return JSON.stringify(data);
         } catch (e) {
-            return data;
-        }
-
+            // TODO: logger
+            console.error(e);
+            return String(data);
+        };
     }
 }
