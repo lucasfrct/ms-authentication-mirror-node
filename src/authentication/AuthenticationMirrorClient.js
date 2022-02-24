@@ -222,25 +222,26 @@
      * @return {object} keysBox:
      */
     async loadKeys() {
-        // ! se não houver chave pública faz a leitura das chaves
+
+        // ! se não houver chave pública na classe, faz a leitura do localStorage
         if (this.keysBox.origin.public.length < 64) {
             await this.readKeys();
         }
 
-        // ! se não houver chaves para serem lidas então gera novas chaves
+        // ! se não houver chave publica no localStorage, gera um novo par de chaves
         if (this.keysBox.origin.public.length < 64) {
             await this.captureKeys();
             await this.writeKeys();
         }
 
-        // ? return das chaves para solicitação
+        // ? retorna as chaves
         return this.keysBox;
     }
 
     /**
      * ! assina um string
      * @param {*} raw
-     * @returns
+     * @return {string} signature:
      */
     async signature(raw = "") {
         try {
@@ -249,7 +250,7 @@
             if (this.keysBox.origin.private.length < 64) {
                 console.error("Erro, a chave privada não existe");
                 return this.keysBox.origin.signature;
-            }
+            };
 
             // ! converte para string
             const dataString = this.parseStr(this.raw(raw));
@@ -267,17 +268,18 @@
 
     /**
      * ! verifica se uma string foi assinada
-     * @param {*} raw
-     * @returns
+     * @param {string} raw:
+     * @return {boolean} verify
+     * !! OBS: ainda não está totalmente implementado
      */
     async verify(raw = "") {
         return await this.crypt.verify(this.keysBox.origin.public, this.raw(raw), this.keysBox.origin.signature);
     }
 
     /**
-     * ! Encrypta os dados com a public Key do servidor no padrão RSA
-     * @param raw: any
-     * @return cipher: string - hash cifrada
+     * ! Encrypta os dados com a chave publica do servidor no padrão RSA
+     * @param {*} raw:
+     * @return {string} cipher: hash cifrada
      */
     async deform(raw = "") {
         try {
@@ -295,7 +297,7 @@
             const dataString = this.parseStr(this.raw(raw));
 
             // ! faz assinatura
-            const signature = this.signature(dataString);
+            const signature = await this.signature(dataString);
 
             // ! cria uma crifra no cliente com a chave pública do servidor
             return this.formBox.origin.deform = this.crypt.encrypt(destiny, dataString, signature);
@@ -306,9 +308,9 @@
     }
 
     /**
-     * ! Decrypta uma cifra do servidor com a chave privada do cliente no padrão RSA
-     * @param cipher: string - hash cifrada
-     * @return raw: any
+     * ! decrypta uma cifra do servidor com a chave privada do cliente no padrão RSA
+     * @param   {string} cipher: hash cifrada 
+     * @return  {string} decoded: dados decifrados
      */
     async reform(cipher = "") {
         try {
@@ -324,15 +326,15 @@
                 return this.formBox.destiny.reform;
             }
 
-            // ! faz a decigragem a string enviada do servidor
+            // ! faz a decigragem da string enviada pelo servidor
             const { message, signature } = this.crypt.decrypt(privateKey, this.formBox.destiny.deform);
 
-            // ! carrega a assinatura
+            // ! carrega a assinatura dos servidor
             this.keysBox.destiny.signature = signature;
 
             // ! verifica se a assinatura é autentica
             // ! vrify ainda não está funcional
-            // if (this.keysBox.signature && !this.verify(message)) {
+            // if (this.keysBox.destiny.signature && !this.verify(message)) {
             //     console.error("Erro, documento com assinatura inválida");
             // }
 
@@ -412,24 +414,21 @@
      * @param {Object} reflex 
      * @returns reflex
      */
-    async reflect(reflex = "") {
+    async reflect(reflex = {}) {
         // ! define uma rota
         this.url("/authentication/mirror/reflect");
 
         // ! carrega as chaves para o cliente
         await this.loadKeys();
 
-        // ! carrega o objeto de troca para para a classe
+        // ! carrega o objeto entre servidor e cliente
         this.setReflex(reflex);
 
         // ! carrega a chave publica para dentro do reflex
         this.match(this.keysBox);
 
-        // ! envia as chaves para o servidor
+        // ! faza a requisicao par o servidor
         await this.send();
-
-        // // ! carrega a chave publica do servidor para a classe
-        // this.set Key(this.reflex.destiny.public);
 
         // ? retorna o payload da requisicão
         return this.reflex;
@@ -438,17 +437,17 @@
     /**
      * * faz postagem do cliente no servidor
      * * um dado no cliente é cifrado com a public Key do servidor
-     * @param {*} reflex 
-     * @returns 
+     * @param   {object} reflex:
+     * @return  {object} reflex:
      */
-    async distort(reflex = "") {
+    async distort(reflex = {}) {
         // ! define a url do servidor
         this.url("/authentication/mirror/distort");
 
-        // ! se houver payload, substitui o payload da classe
+        // ! carrega o objeto de troca para para a classe
         this.setReflex(reflex);
 
-        // ? faz o envio e recebe a resposta  em um reflex
+        // ? faz a requisição para o servidor
         return await this.send();
     }
 
@@ -526,17 +525,11 @@
     // }
 
     /**
-     * faz um parse par json
-     * @param {*} payload
-     * @returns
+     * * Parseia uma string para json caso seja possível
+     * @param   {*}     payload
+     * @return  {json}  payload 
      */
-    parse(payload = "") {
-        try {
-            return JSON.parse(payload);
-        } catch (e) {
-            return payload;
-        }
-    }
+     parse(payload = "") { try { return JSON.parse(payload); } catch (e) { return payload; }; }
 
     /**
      *  Passa um dado Json para string
