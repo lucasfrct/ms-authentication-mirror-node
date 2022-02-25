@@ -1,4 +1,4 @@
-# ms-mirror-authenticate
+# ms-authentication-mirror
 Troca de chaves e cifras
 Comunicação segura
 Serviço de criptografia
@@ -10,25 +10,31 @@ Padrão de consumo REST
 A aplicação usa um único payload para troca de informações durante toda a requisição, ou seja, tanto o request quanto response usam a mesma estrutura do objeto JSON.
 A estrutura interna está organizada em dois objetos: origin e image, que são um o reflexo do outro como demonstrado abaixo:
 ``` Estrutura do payload completa:
-    { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
+     keysBox = {
+        origin:     { public: "", private: "", secret: "", signature: "" },
+        destiny:    { public: "", signature: "" }
+    };
 ```
 ``` Estrutura interna do origin (origem é referente aos dados do cliente)
     origin: { public: "", cipher: "", raw: "" }
 ```
 ``` Estrutura interna da image (imagem é referente aos dados do servidor)
-    image: { public: "", cipher: "", raw: "" }
+    destiny:    { public: "", signature: "" }
 ```
-Os dados do objeto persistem de modo que todas as alterações feitas pelo servidor normalmente estarão dentro do objeto image e todas as alterações feitas pelo cliente estarão no objeto origin.
+Os dados do objeto persistem de modo que todas as alterações feitas pelo servidor normalmente estarão dentro do objeto detiny e todas as alterações feitas pelo cliente estarão no objeto origin.
 
 ## URIs
 
 - [x] /authenticate/mirror/reflect : Enviando a chave publica do cliente e recebendo a chave publica do servidor
 ``` POST /authenticate/mirror/reflect
-    Headers: x-api-token = token
-    Request: { origin: { public: "{CHAVE PUBLICA DO CLIENTE}", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
-    Response: { 
-        origin: { public: "{CHAVE PUBLICA DO CLIENTE}", cipher: "", raw: "" }, 
-        image: { public: "{CHAVE PUBLICA DO SERVIDOR}", cipher: "", raw: "" } 
+    Headers: x-api-token: token
+    Request: {
+        origin:     { public: "{{**chave pública do cliente**}}", private: "", secret: "", signature: "" },
+        destiny:    { public: "", signature: "" }
+    };
+    Response:  {
+        origin:     { public: "{{**chave pública do cliente**}}", private: "", secret: "", signature: "" },
+        destiny:    { public: "{{**chave pública do servidor**}}", signature: "" }
     }
 ```
 
@@ -51,15 +57,9 @@ Os dados do objeto persistem de modo que todas as alterações feitas pelo servi
     Request: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
     Response: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
 ```
-[x] /authenticate/hybrid-crypto-js : Baixando a biblioteca hybrid-crypto
+[x] /authentication/lib : Baixando a biblioteca authentication-mirror-client.lib.js
 ``` GET /authenticate/hybrid-crypto-js
-```
-[x] /authenticate/js-sha512 : Baixando a biblioteca js-sha512
-``` GET /authenticate/js-sha512
-```
-[x] /authenticate/client/mirror : Baixando a biblioteca do cliente
-``` GET /authenticate/client/mirror
-```
+``
 
 Autenticação do usuario
 - login: email e senha
