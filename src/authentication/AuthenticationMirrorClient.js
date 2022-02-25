@@ -1,18 +1,29 @@
 /**
- * * Classe usada pelo cliente para gerar suporte a autenticação espelada
+ * * classe usada pelo cliente para gerar suporte a autenticação espelhada
  * @dependency hybrid-crypto-js: https://github.com/juhoen/hybrid-crypto-js
  * @dependency js-sha512: https://github.com/emn178/js-sha512
+ * ? gera um par de chaves publico-privada
+ * ? faz encryptacao com assinatura
+ * ? faz decryptação com assinatura
+ * ? verifuca assinatura: assina com chave pública e verifica com chave privada
  */
 
  class AuthenticationMirrorClient {
-    rsa = null; // ! classe para gerar RSA
-    crypt = null; // ! classe para encryptar
 
-    // * estrutura da url
+    rsa   = null; // ! library RSA
+    crypt = null; // ! library crypt (encruptacai de decriptacao)
+
+    /**
+     * * guarda a url utilizada
+     * @property {string} protocol: protocolo utilizado pelo clinete
+     * @property {string} host:     dominio do cliente
+     * @property {string} uri:      rota do recurso consumido no servidor
+     * @property {string} url:      caminho completo da requisicao
+     */
     client = { protocol: "", host: "", uri: "", url: "" };
 
     /**
-     * * Armazena as chaves das entidades
+     * * armazena as chaves das entidades
      * @property {object} origin:       informacoes do cliente
      * @property {object} destiny:      informacoes do sevidor
      * @property {string} {}public:     chave pública do RSA
@@ -26,7 +37,7 @@
     };
 
     /**
-     * * armazena dos dados das entidades
+     * * armazena os dados das entidades
      * @property {object} origin:   informacoes do cliente
      * @property {object} destiny:  informacoes do sevidor
      * @property {string} reform:   dados decifrado
@@ -39,7 +50,7 @@
     };
 
     /**
-     * * Pyaload usado para trocas informações com a servidor
+     * * payload usado para trocas informações com o servidor
      * @property {object} origin:   informacoes do cliente
      * @property {object} destiny:  informacoes do sevidor
      * @property {string} {}public: chave public rsa
@@ -62,14 +73,14 @@
     /**
      * * configura uma URI para uma requisição do cliente
      * * retorna uma url
-     * @param {String} uri
-     * @returns {String} url
+     * @param   {string} uri: recurso utilizado no servidor
+     * @return  {string} url: caminho completo da requisicao
      */
     url(uri = "") {
-        this.client.uri = uri || this.client.uri;
-        this.client.protocol = window.location.protocol;
-        this.client.host = window.location.host;
-        this.client.url = `${this.client.protocol}//${this.client.host}${this.client.uri}`;
+        this.client.uri         = uri || this.client.uri;
+        this.client.protocol    = window.location.protocol;
+        this.client.host        = window.location.host;
+        this.client.url         = `${this.client.protocol}://${this.client.host}${this.client.uri}`;
         return this.client.url;
     }
 
@@ -93,8 +104,8 @@
 
     /**
      * * combina os objetos reflex com formBox e keysBox
-     * @param   {*} data: formBox || kyesBox || reflex 
-     * @return  {*} data: formBox || reflex 
+     * @param   {*}       data: formBox || kyesBox || reflex 
+     * @return  {object}  reflex: 
      */
     match(data = {}) {
 
@@ -135,11 +146,11 @@
                 destiny:    { public: destinyPublic,    cipher: destinyCipher }
             } = data;
 
-            // ! monta o novo keysbox
+            // ! monta o novo keysBox
             this.keysBox.origin     = { ...this.keysBox.origin,     public: originPublic };
             this.keysBox.destiny    = { ...this.keysBox.destiny,    public: destinyPublic };
 
-            // ! monta o novo form box
+            // ! monta o novo formBox
             this.formBox.origin     = {...this.formBox.origin,  deform: originCipher };
             this.formBox.destiny    = {...this.formBox.destiny, deform: destinyCipher };
 
@@ -151,8 +162,10 @@
     }
 
     /**
-     * ! gera um par de chaves, desconstroi o iv e os armazena no keysBox
-     * @returns keysBox: object
+     * ! gera o par de chaves publico/privada
+     * ! gera um chave secreta
+     * ! gera uma asinatura
+     * @return {object} keysBox:
      */
     async captureKeys() {
         try {
@@ -165,67 +178,70 @@
             // ! gera uma chave de assinatura
             const { signature }  = this.parse(await this.crypt.signature(privateKey, secret));
 
-            // ! cria novo o objeto de chaves da origem
+            // ! cria novo o objeto de chaves do cliente
             this.keysBox.origin = { public: publicKey, private: privateKey, secret, signature };
 
             // ? returna o objeto de chaves
             return this.keysBox
         } catch (e) {
-            console.error("Não foi possível gerar o par de chaves: ", e);
+            console.error(e);
             return this.keysBox;
         }
     }
 
     /**
-     * * Escreve as chaves publica, privada e secreta no localStorage do navegador
-     * @returns keysBox: object
+     * * escreve as chaves publica, privada e secreta no localStorage do navegador
+     * @param   {string} path: define uma prefixo para guardar as chaves
+     * @returns {object} keysBox
      */
-    async writeKeys() {
-        localStorage.setItem("AuthenticateMirrorPublicKey",     this.keysBox.origin.public);
-        localStorage.setItem("AuthenticateMirrorPrivateKey",    this.keysBox.origin.private);
-        localStorage.setItem("AuthenticateMirrorSecretKey",     this.keysBox.origin.secret);
-        localStorage.setItem("AuthenticateMirrorSignature",     this.keysBox.origin.signature);
+    async writeKeys(path = "") {
+        localStorage.setItem(`${path}AuthenticateMirrorPublicKey`,     this.keysBox.origin.public);
+        localStorage.setItem(`${path}AuthenticateMirrorPrivateKey`,    this.keysBox.origin.private);
+        localStorage.setItem(`${path}AuthenticateMirrorSecretKey`,     this.keysBox.origin.secret);
+        localStorage.setItem(`${path}AuthenticateMirrorSignature`,     this.keysBox.origin.signature);
 
         return this.keysBox;
     }
 
     /**
-     * * Lê o valor das chaves no localStorage do navegador e passa para o objeto da classe
-     * @returns keysBox: object
+     * * lê o valor das chaves no localStorage do navegador e passa para o objeto da classe
+     * @param  {string} path: define um prefixo para ler as chaves
+     * @return {object} keysBox:
      */
-    async readKeys() {
-
-        this.keysBox.secret     = await localStorage.getItem("AuthenticateMirrorSecretKey")   || "";
-        this.keysBox.public     = await localStorage.getItem("AuthenticateMirrorPublicKey")   || "";
-        this.keysBox.private    = await localStorage.getItem("AuthenticateMirrorPrivateKey")  || "";
-        this.keysBox.signature  = await localStorage.getItem("AuthenticateMirrorSignature")   || "";
+    async readKeys(path = "") {
+        this.keysBox.public     = await localStorage.getItem(`${path}AuthenticateMirrorPublicKey`)   || "";
+        this.keysBox.private    = await localStorage.getItem(`${path}AuthenticateMirrorPrivateKey`)   || "";
+        this.keysBox.secret     = await localStorage.getItem(`${path}AuthenticateMirrorSecretKey`)  || "";
+        this.keysBox.signature  = await localStorage.getItem(`${path}AuthenticateMirrorSignature`)   || "";
 
         return this.keysBox;
     }
 
     /**
-     * carrega as chaves para a classe
+     * * carrega as chaves do localstorage para a classe
+     * @return {object} keysBox:
      */
     async loadKeys() {
-        // ! se não houver chave pública faz a leitura das chaves
+
+        // ! se não houver chave pública na classe, faz a leitura do localStorage
         if (this.keysBox.origin.public.length < 64) {
             await this.readKeys();
         }
 
-        // ! se não houver chaves para serem lidas então gera novas chaves
+        // ! se não houver chave publica no localStorage, gera um novo par de chaves
         if (this.keysBox.origin.public.length < 64) {
             await this.captureKeys();
             await this.writeKeys();
         }
 
-        // ? return das chaves para solicitação
+        // ? retorna as chaves
         return this.keysBox;
     }
 
     /**
      * ! assina um string
-     * @param {*} raw
-     * @returns
+     * @param  {*} raw
+     * @return {string} signature:
      */
     async signature(raw = "") {
         try {
@@ -234,7 +250,7 @@
             if (this.keysBox.origin.private.length < 64) {
                 console.error("Erro, a chave privada não existe");
                 return this.keysBox.origin.signature;
-            }
+            };
 
             // ! converte para string
             const dataString = this.parseStr(this.raw(raw));
@@ -252,17 +268,18 @@
 
     /**
      * ! verifica se uma string foi assinada
-     * @param {*} raw
-     * @returns
+     * @param  {string} raw:
+     * @return {boolean} verify
+     * !! OBS: ainda não está totalmente implementado
      */
     async verify(raw = "") {
         return await this.crypt.verify(this.keysBox.origin.public, this.raw(raw), this.keysBox.origin.signature);
     }
 
     /**
-     * ! Encrypta os dados com a public Key do servidor no padrão RSA
-     * @param raw: any
-     * @return cipher: string - hash cifrada
+     * ! Encrypta os dados com a chave publica do servidor no padrão RSA
+     * @param  {*} raw:
+     * @return {string} cipher: hash cifrada
      */
     async deform(raw = "") {
         try {
@@ -280,7 +297,7 @@
             const dataString = this.parseStr(this.raw(raw));
 
             // ! faz assinatura
-            const signature = this.signature(dataString);
+            const signature = await this.signature(dataString);
 
             // ! cria uma crifra no cliente com a chave pública do servidor
             return this.formBox.origin.deform = this.crypt.encrypt(destiny, dataString, signature);
@@ -291,9 +308,9 @@
     }
 
     /**
-     * ! Decrypta uma cifra do servidor com a chave privada do cliente no padrão RSA
-     * @param cipher: string - hash cifrada
-     * @return raw: any
+     * ! decrypta uma cifra do servidor com a chave privada do cliente no padrão RSA
+     * @param   {string} cipher: hash cifrada 
+     * @return  {string} decoded: dados decifrados
      */
     async reform(cipher = "") {
         try {
@@ -309,15 +326,15 @@
                 return this.formBox.destiny.reform;
             }
 
-            // ! faz a decigragem a string enviada do servidor
+            // ! faz a decigragem da string enviada pelo servidor
             const { message, signature } = this.crypt.decrypt(privateKey, this.formBox.destiny.deform);
 
-            // ! carrega a assinatura
+            // ! carrega a assinatura dos servidor
             this.keysBox.destiny.signature = signature;
 
             // ! verifica se a assinatura é autentica
             // ! vrify ainda não está funcional
-            // if (this.keysBox.signature && !this.verify(message)) {
+            // if (this.keysBox.destiny.signature && !this.verify(message)) {
             //     console.error("Erro, documento com assinatura inválida");
             // }
 
@@ -341,8 +358,8 @@
 
     /**
      * * Envia dados com o Verbo POST
-     * @param {Object} reflex: JSON - precisa ser uma JSON passar na requisicao
-     * @return {Object} payload: JSON
+     * @param   {object} reflex:
+     * @return  {object} reflex
      */
     async send(reflex = "") {
         try {
@@ -368,7 +385,7 @@
 
     /**
      * * Faz uma requisicao ao servidor com o verbo GET 
-     * @return reflex key: string
+     * @return {object} reflex: 
      */
     async get() {
         try {
@@ -394,27 +411,24 @@
 
     /**
      *  ! Troca as chaves publicas entre cliente e servidor
-     * @param {Object} reflex 
-     * @returns reflex
+     * @param   {object} reflex 
+     * @returns {object} reflexx
      */
-    async reflect(reflex = "") {
+    async reflect(reflex = {}) {
         // ! define uma rota
         this.url("/authentication/mirror/reflect");
 
         // ! carrega as chaves para o cliente
         await this.loadKeys();
 
-        // ! carrega o objeto de troca para para a classe
+        // ! carrega o objeto entre servidor e cliente
         this.setReflex(reflex);
 
         // ! carrega a chave publica para dentro do reflex
         this.match(this.keysBox);
 
-        // ! envia as chaves para o servidor
+        // ! faza a requisicao par o servidor
         await this.send();
-
-        // // ! carrega a chave publica do servidor para a classe
-        // this.set Key(this.reflex.destiny.public);
 
         // ? retorna o payload da requisicão
         return this.reflex;
@@ -423,17 +437,17 @@
     /**
      * * faz postagem do cliente no servidor
      * * um dado no cliente é cifrado com a public Key do servidor
-     * @param {*} reflex 
-     * @returns 
+     * @param   {object} reflex:
+     * @return  {object} reflex:
      */
-    async distort(reflex = "") {
+    async distort(reflex = {}) {
         // ! define a url do servidor
         this.url("/authentication/mirror/distort");
 
-        // ! se houver payload, substitui o payload da classe
+        // ! carrega o objeto de troca para para a classe
         this.setReflex(reflex);
 
-        // ? faz o envio e recebe a resposta  em um reflex
+        // ? faz a requisição para o servidor
         return await this.send();
     }
 
@@ -511,33 +525,27 @@
     // }
 
     /**
-     * faz um parse par json
-     * @param {*} payload
-     * @returns
+     * * Parseia uma string para json caso seja possível
+     * @param   {*}     payload
+     * @return  {json}  payload 
      */
-    parse(payload = "") {
-        try {
-            return JSON.parse(payload);
-        } catch (e) {
-            return payload;
-        }
-    }
+     parse(payload = "") { try { return JSON.parse(payload); } catch (e) { return payload; }; }
 
     /**
      *  Passa um dado Json para string
      * @param {*} data 
      * @returns 
      */
-    parseStr(data = "") {
-        if (typeof data === "string") {
-            return data;
-        }
-
+     parseStr(data = undefined) {
         try {
+            if (typeof data === "string") {
+                return data;
+            };
             return JSON.stringify(data);
         } catch (e) {
-            return data;
-        }
-
+            // TODO: logger
+            console.error(e);
+            return String(data);
+        };
     }
 }

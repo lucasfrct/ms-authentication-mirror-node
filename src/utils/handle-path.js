@@ -45,9 +45,10 @@ const PathMatch = (directory = "", destination = "", intercept = undefined)=> {
 
             resolve([null, files]);
         } catch(e) {
-            return resolve([e, null])
+            return resolve([e, null]);
         };
     });
 };
 
 module.exports = { PathMatch, PathRead };
+
