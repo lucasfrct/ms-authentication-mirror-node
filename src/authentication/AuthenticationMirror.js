@@ -37,8 +37,8 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @property {string} {}signature   Assinatura da mensagem emcriptada
      */
     keysBox = {
-        origin:     { public: "", private: "", secret: "", signature: "" },
-        destiny:    { public: "", signature: "" }
+        origin:     { public: "", signature: "" },
+        destiny:    { public: "", private: "", secret: "", signature: "" },
     };
 
     /**
@@ -105,7 +105,15 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @return  {Object} reflex
      */
     setReflex(reflex = { }) {
-        return this.reflex = { ...this.reflex, ...reflex };
+        if (reflex.hasOwnProperty('origin')) {
+            this.reflex.origin = { ...this.reflex.origin, ...reflex.origin };
+        };
+
+        if(reflex.hasOwnProperty('destiny')) {
+            this.reflex.destiny = { ...this.reflex.destiny, ...reflex.destiny };
+        };
+
+        return this.reflex;
     }
 
     /**

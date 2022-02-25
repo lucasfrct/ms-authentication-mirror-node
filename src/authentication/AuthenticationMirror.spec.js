@@ -2,11 +2,10 @@ require('dotenv/config');
 const fs = require("fs");
 const AuthenticationMirror = require('./AuthenticationMirror');
 
-
-
-describe('Encriptação disponível', () => {
+describe('Testa os setters e getters das vairiaveis da classe', () => {
 
     const auth = new AuthenticationMirror();
+
     it('A classe contem a library RSA"', async() => {
         expect((auth.rsa !== null)).toBe(true);
     })
@@ -15,77 +14,151 @@ describe('Encriptação disponível', () => {
         expect((auth.crypt !== null)).toBe(true);
     })
 
+    it('A classe contem a propriedade paths', async() => {        
+        let test = (auth.hasOwnProperty('paths') && Object.keys(auth.paths).length == 5)
+        expect(test).toBe(true);
+    })
+
+    it('A classe contem a propriedade keysBox ', async() => {        
+        let hasKeysBox = (auth.hasOwnProperty("keysBox") && Object.keys(auth.keysBox).length == 2);
+        let hasOrigin = (auth.keysBox.hasOwnProperty("origin") && Object.keys(auth.keysBox.origin).length == 2)
+        let hasDestiny = (auth.keysBox.hasOwnProperty("destiny") && Object.keys(auth.keysBox.destiny).length == 4)
+        let test = (hasKeysBox && hasOrigin && hasDestiny);
+        expect(test).toBe(true);
+    })
+
+
+    it('A classe contem a propriedade formBox ', async() => {        
+        let hasformBox = (auth.hasOwnProperty("formBox") && Object.keys(auth.formBox).length == 2);
+        let hasOrigin = (auth.formBox.hasOwnProperty("origin") && Object.keys(auth.formBox.origin).length == 3)
+        let hasDestiny = (auth.formBox.hasOwnProperty("destiny") && Object.keys(auth.formBox.destiny).length == 3)
+        let test = (hasformBox && hasOrigin && hasDestiny);
+        expect(test).toBe(true);
+    })
+
+    it('A classe contem a propriedade reflex ', async() => {        
+        let hasReflex = (auth.hasOwnProperty("reflex") && Object.keys(auth.reflex).length == 2);
+        let hasOrigin = (auth.reflex.hasOwnProperty("origin") && Object.keys(auth.reflex.origin).length == 3)
+        let hasDestiny = (auth.reflex.hasOwnProperty("destiny") && Object.keys(auth.reflex.destiny).length == 3)
+        let test = (hasReflex && hasOrigin && hasDestiny);
+        expect(test).toBe(true);
+    })
+
 })
 
-describe('SET DATA', () => {
+describe('Metodo path(string)', () => {
 
-    // it('Metodo path(string)', async() => {
-    //     const auth = new AuthenticationMirror();
-    //     const folder = "./keys/spec";
-    //     const paths = auth.path(folder);
-    //     expect(paths.base).toBe(folder);
-    // });
+    const auth = new AuthenticationMirror();
+    const folder = "./keys/spec";
+    auth.path(folder);
 
-    // it("Metodo: raw(*)", async() => {
-    //     const auth = new AuthenticationMirror();
-    //     const raw = "spec-raw";
-    //     auth.raw(raw);a
-    //     expect(raw).toBe(auth.formBox.destiny.raw);
-    // });
+    it('auth.paths.base gravado', async() => {
+        expect(auth.paths.base).toBe(folder);
+    });
 
-    // it("Metodo: setReflex(reflex)", async() => {
-    //     const auth = new AuthenticationMirror();
+    it('auth.paths.public gravado', async() => {
+        let test = ((auth.paths.public.indexOf(folder) !== -1) && folder.length < auth.paths.public.length);
+        expect(test).toBe(true);
+    });
 
-    //     const reflex = {
-    //         origin:  { public: "ogirin-public",  cipher: "origin-cipher" },
-    //         destiny: { public: "destiny-public", cipher: "detiny-cipher" }, 
-    //     };
+    it('auth.paths.private gravado', async() => {
+        let test = ((auth.paths.private.indexOf(folder) !== -1) && folder.length < auth.paths.private.length);
+        expect(test).toBe(true);
+    });
 
-    //     auth.setReflex(reflex);
+    it('auth.paths.secret gravado', async() => {
+        let test = ((auth.paths.secret.indexOf(folder) !== -1) && folder.length < auth.paths.secret.length);
+        expect(test).toBe(true);
+    });
 
-    //     expect(auth.reflex.destiny.public).toBe(reflex.destiny.public);
-    // });
+    it('auth.paths.signature gravado', async() => {
+        let test = ((auth.paths.signature.indexOf(folder) !== -1) && folder.length < auth.paths.signature.length);
+        expect(test).toBe(true);
+    });
 
+})
+
+describe('Metodo: raw(*)', () => {
+    
+    const auth = new AuthenticationMirror();
+    const raw = "spec-raw";
+    auth.raw(raw);
+    
+    it("raw gravado com sucesso", async() => {
+        expect(auth.formBox.destiny.raw).toBe(raw);
+    });
+})
+
+describe('Metodo: setReflex(reflex)', () => {
+    
+    const auth = new AuthenticationMirror();
+    
+    const reflex = {
+        origin:  { public: "ogirin-public",  cipher: "origin-cipher",},
+        destiny: { public: "destiny-public", cipher: "detiny-cipher", }, 
+    };
+
+    auth.setReflex(reflex);
+
+    it("auth.reflex.origin.public gravado", async() => {
+        expect(auth.reflex.origin.public).toBe(reflex.origin.public);
+    });
+
+    it("auth.reflex.destiny.public gravado", async() => {
+        expect(auth.reflex.destiny.public).toBe(reflex.destiny.public);
+    });
+
+    it("auth.reflex.destiny.body inalterado", async() => {
+        console.log("DEBUG: ", auth.reflex.origin)
+        expect(auth.reflex.destiny.hasOwnProperty('body')).toBe(true);
+    });
 })
 
 describe('Metodo: match(reflex || formBox || keysBox)', () => {
 
-    // it("match(reflex)", async() => {
-    //     const reflex = {
-    //         origin:  { public: "ogirin-public",  cipher: "origin-cipher" },
-    //         destiny: { public: "destiny-public", cipher: "detiny-cipher" }, 
-    //     };
-        
-    //     const auth = new AuthenticationMirror();
-    //     auth.match(reflex);
+    const reflex = {
+        origin:  { public: "ogirin-public",  cipher: "origin-cipher" },
+        destiny: { public: "destiny-public", cipher: "detiny-cipher" }, 
+    };
 
-    //     expect(auth.keysBox.destiny.public).toBe(reflex.destiny.public);
-    //     expect(auth.formBox.destiny.deform).toBe(reflex.destiny.cipher);
-    // });
+    const formBox = {
+        origin:  { reform: "origin-reform",  deform: "origin-deform",  raw: "origin-raw" },
+        destiny: { reform: "destiny-reform", deform: "destiny-deform", raw: "destiny-raw" },
+    };
 
-    // it("match(formBox)", async() => {
-    //     // ! formBox
-    //     const formBox = {
-    //         origin:  { reform: "origin-reform",  deform: "origin-deform",  raw: "origin-raw" },
-    //         destiny: { reform: "destiny-reform", deform: "destiny-deform", raw: "destiny-raw" },
-    //     };
+    const keysBox = {
+        origin:     { public: "origin-public", private: "origin-private", secret: "origin-secret", signature: "origin-signature" },
+        destiny:    { public: "destiny-public", signature: "destiny-signature" }
+    };
 
-    //     const auth = new AuthenticationMirror();
-    //     auth.match(formBox);
-    //     expect(auth.reflex.destiny.cipher).toBe(formBox.destiny.deform);
-    // });
+    it("match(reflex)", async() => {
+        const auth = new AuthenticationMirror();
+        auth.match(reflex);
 
-    // it("match(keysBox)", async() => {
-    //     // ! keysBox
-    //     const keysBox = {
-    //         origin:     { public: "origin-public", private: "origin-private", secret: "origin-secret", signature: "origin-signature" },
-    //         destiny:    { public: "destiny-public", signature: "destiny-signature" }
-    //     };
+        let setKeys = (auth.keysBox.origin.public == reflex.origin.public);
+        let setForm = (auth.formBox.origin.deform == reflex.origin.cipher);
+        let test = (setKeys && setForm);
 
-    //     const auth = new AuthenticationMirror();
-    //     auth.match(keysBox);
-    //     expect(auth.reflex.destiny.public).toBe(keysBox.destiny.public);
-    // });
+        expect(test).toBe(true);
+    });
+
+    it("match(formBox)", async() => {
+        const auth = new AuthenticationMirror();
+        auth.match(formBox);
+
+        let setReflexOrgin = (formBox.origin.deform == auth.reflex.origin.cipher);
+        let setReflexDestiny = (formBox.destiny.deform == auth.reflex.destiny.cipher);
+        let test = (setReflexOrgin && setReflexDestiny);
+        expect(test).toBe(true);
+    });
+
+    it("match(keysBox)", async() => {
+        const auth = new AuthenticationMirror();
+        auth.match(keysBox);
+
+        let test = (keysBox.destiny.public == auth.reflex.destiny.public);
+        expect(test).toBe(true);
+    });
 
 })
 
