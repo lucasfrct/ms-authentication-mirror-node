@@ -78,8 +78,8 @@ const AuthenticationMirror = class AuthenticationMirror {
 
     /**
      * * define um diretório para armazenar as chaves public, private e secret
-     * @param {string} path: diretório para as chaves
-     * @return {object} paths: contém todos os paths utilizados na classe
+     * @param   {string} path: diretório para as chaves
+     * @return  {object} paths: contém todos os paths utilizados na classe
      */
     path(path = "") {
         this.paths.base         = path || this.paths.base;
@@ -110,8 +110,8 @@ const AuthenticationMirror = class AuthenticationMirror {
 
     /**
      * * combina os objetos reflex com formBox e keysBox
-     * @param   {*} data: formBox || kyesBox || reflex 
-     * @return  {*} data: reflex 
+     * @param   {*}       data: formBox || kyesBox || reflex 
+     * @return  {object}  reflex: 
      */
     match(data = {}) {
 
@@ -329,8 +329,8 @@ const AuthenticationMirror = class AuthenticationMirror {
 
     /**
      * ! assina um string
-     * @param {*} raw
-     * @return {string} signature:
+     * @param   {*} raw
+     * @return  {string} signature:
      */
     async signature(raw = "") {        
         try {
@@ -360,8 +360,8 @@ const AuthenticationMirror = class AuthenticationMirror {
 
     /**
      * ! verifica se uma string foi assinada
-     * @param {string} raw:
-     * @return {boolean} verify
+     * @param   {string} raw:
+     * @return  {boolean} verify
      * !! OBS: ainda não está totalmente implementado
      */
     async verify(raw = "") {
@@ -370,8 +370,8 @@ const AuthenticationMirror = class AuthenticationMirror {
 
     /**
      * * Encrypta um dado com uma public key recebida no padrão RSA
-     * @param {*} raw:
-     * @return {string} cipher: hash cifrada
+     * @param   {*} raw:
+     * @return  {string} cipher: hash cifrada
      */
     async deform(raw = "") {
         try {
@@ -444,8 +444,8 @@ const AuthenticationMirror = class AuthenticationMirror {
 
     /**
      *  ! Troca as chaves publicas entre cliente e servidor
-     * @param {Object} reflex 
-     * @returns reflex
+     * @param   {object} reflex 
+     * @returns {object} reflex
      */
     async reflect(reflex = {}) {
 

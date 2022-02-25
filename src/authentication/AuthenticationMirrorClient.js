@@ -73,8 +73,8 @@
     /**
      * * configura uma URI para uma requisição do cliente
      * * retorna uma url
-     * @param {string} uri: recurso utilizado no servidor
-     * @return {string} url: caminho completo da requisicao
+     * @param   {string} uri: recurso utilizado no servidor
+     * @return  {string} url: caminho completo da requisicao
      */
     url(uri = "") {
         this.client.uri         = uri || this.client.uri;
@@ -104,8 +104,8 @@
 
     /**
      * * combina os objetos reflex com formBox e keysBox
-     * @param   {*} data: formBox || kyesBox || reflex 
-     * @return  {*} data: reflex 
+     * @param   {*}       data: formBox || kyesBox || reflex 
+     * @return  {object}  reflex: 
      */
     match(data = {}) {
 
@@ -240,7 +240,7 @@
 
     /**
      * ! assina um string
-     * @param {*} raw
+     * @param  {*} raw
      * @return {string} signature:
      */
     async signature(raw = "") {
@@ -268,7 +268,7 @@
 
     /**
      * ! verifica se uma string foi assinada
-     * @param {string} raw:
+     * @param  {string} raw:
      * @return {boolean} verify
      * !! OBS: ainda não está totalmente implementado
      */
@@ -278,7 +278,7 @@
 
     /**
      * ! Encrypta os dados com a chave publica do servidor no padrão RSA
-     * @param {*} raw:
+     * @param  {*} raw:
      * @return {string} cipher: hash cifrada
      */
     async deform(raw = "") {
@@ -358,8 +358,8 @@
 
     /**
      * * Envia dados com o Verbo POST
-     * @param {Object} reflex: JSON - precisa ser uma JSON passar na requisicao
-     * @return {Object} payload: JSON
+     * @param   {object} reflex:
+     * @return  {object} reflex
      */
     async send(reflex = "") {
         try {
@@ -385,7 +385,7 @@
 
     /**
      * * Faz uma requisicao ao servidor com o verbo GET 
-     * @return reflex key: string
+     * @return {object} reflex: 
      */
     async get() {
         try {
@@ -411,8 +411,8 @@
 
     /**
      *  ! Troca as chaves publicas entre cliente e servidor
-     * @param {Object} reflex 
-     * @returns reflex
+     * @param   {object} reflex 
+     * @returns {object} reflexx
      */
     async reflect(reflex = {}) {
         // ! define uma rota
