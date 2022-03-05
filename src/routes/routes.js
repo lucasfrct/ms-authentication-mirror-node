@@ -1,4 +1,3 @@
-require('@config/module-alias.config');
 const router = require('express').Router();
 
 // ! Imports das rotas

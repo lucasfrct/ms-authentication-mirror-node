@@ -1,7 +1,12 @@
 require('dotenv/config');
-const fs = require("fs");
+const fs            = require("fs");
+const pathModule    = require("path");
+
+const RSA   = require('hybrid-crypto-js').RSA;
 const Crypt = require('hybrid-crypto-js').Crypt;
-const RSA = require('hybrid-crypto-js').RSA;
+
+const handle = require('@utils/handle');
+const { PathWrite, PathRead } = require('@utils/handle-path');
 
 /**
  * * classe usada pelo servidor para gerar suporte a autenticação espelhada
@@ -25,7 +30,7 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @property {string} secret:       path da chave secreta
      * @property {string} signature:    path da assinatura do servidor
      */
-    paths = { base: "./keys/core", public: "", private: "", secret: "", signature: "" }; 
+    paths = { base: "", public: "", private: "", secret: "", signature: "" }; 
 
     /**
      * * armazena as chaves das entidades
@@ -83,10 +88,11 @@ const AuthenticationMirror = class AuthenticationMirror {
      */
     path(path = "") {
         this.paths.base         = path || this.paths.base;
-        this.paths.public       = `${this.paths.base}/public-key.pem`
-        this.paths.private      = `${this.paths.base}/private-key.pem`
-        this.paths.secret       = `${this.paths.base}/secret-key.key`
-        this.paths.signature    = `${this.paths.base}/siginature.key`
+        this.paths.base         = pathModule.normalize(this.paths.base);
+        this.paths.public       = pathModule.normalize(`${this.paths.base}/public-key.pem`);
+        this.paths.private      = pathModule.normalize(`${this.paths.base}/private-key.pem`);
+        this.paths.secret       = pathModule.normalize(`${this.paths.base}/secret-key.key`);
+        this.paths.signature    = pathModule.normalize(`${this.paths.base}/siginature.key`);
         return this.paths;
     }
 
@@ -177,7 +183,7 @@ const AuthenticationMirror = class AuthenticationMirror {
 
      /**
      * ! gera o par de chaves publico/privada
-     * ! gera um chave secreta
+     * ! gera uma chave secreta
      * ! gera uma asinatura
      * @return {object} keysBox:
      */
@@ -215,44 +221,23 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @returns {object} keysBox:
      */
     async writeKeys(path = "") {
-
-        // ! define um diretório para armazenar as chaves
-        this.path(path);
-
-        try {
-            await fs.writeFileSync(this.paths.public, this.keysBox.destiny.public);
-            console.log("public");
-        } catch (e) {
-            // TODO: logger
-            console.error(e);
-        };
-
-        try {
-            await fs.writeFileSync(this.paths.private, this.keysBox.destiny.private);
-            console.log("private");
-        } catch (e) {
-            // TODO: logger
-            console.error(e);
-        };
-
-        try {
-            await fs.writeFileSync(this.paths.secret, this.keysBox.destiny.secret);
-            console.log("secret");
-        } catch (e) {
-            // TODO: logger
-            console.error(e);
-        };
-
-        try {
-            await fs.writeFileSync(this.paths.secret, this.keysBox.destiny.signature);
-            console.log("signature");
-        } catch (e) {
-            // TODO: logger
-            console.error(e);
-        };
         
-        console.log("keysbox");
-        return this.keysBox;
+        try {
+            // ! define um diretório para armazenar as chaves
+            this.path(path);
+
+            const [errPub, respPub]     = await handle(PathWrite(this.paths.public, this.keysBox.destiny.public));
+            const [errSec, respSec]     = await handle(PathWrite(this.paths.secret, this.keysBox.destiny.secret));
+            const [errSig, respSig]     = await handle(PathWrite(this.paths.signature, this.keysBox.destiny.signature));
+            const [errPriv, respPriv]   = await handle(PathWrite(this.paths.private, this.keysBox.destiny.private));
+
+            return this.keysBox;
+            
+        } catch (e) {
+            // TODO: logger
+            console.error(e);
+            return this.keysBox;
+        };
       }
 
     /**
@@ -261,40 +246,27 @@ const AuthenticationMirror = class AuthenticationMirror {
      * @return {object} keysBox:  
      */
     async readKeys(path = "") {
-
-        // ! define um diretório para ler as chaves
-        this.path(path);
-
         try {
-            process.env.PUBLIC_KEY = await fs.readFileSync(this.paths.public, "utf8");
-            console.log("public");
-        } catch (e) {
-            console.error(e);
-        };
+            // ! define um diretório para ler as chaves
+            this.path(path);
 
-        try {
-            process.env.PRIVATE_KEY = await fs.readFileSync(this.paths.private, "utf8");
-            console.log("private");
-        } catch (e) {
-            console.error(e);
-        };
+            const [errPub, publicKey]   = await handle(PathRead(this.paths.public));
+            const [errSec, secretKey]   = await handle(PathRead(this.paths.secret));
+            const [errSig, signature]   = await handle(PathRead(this.paths.signature));
+            const [errPriv, privateKey] = await handle(PathRead(this.paths.private));
 
-        try {
-            process.env.SECRET_KEY = await fs.readFileSync(this.paths.secret, "utf8");
-            console.log("secret");
-        } catch (e) {
-            console.error(e);
-        };
+            process.env.SIGNATURE   = signature || "" ;
+            process.env.PUBLIC_KEY  = publicKey || "" ; 
+            process.env.SECRET_KEY  =  secretKey || "" ;
+            process.env.PRIVATE_KEY = privateKey || "" ;
 
-        try {
-            process.env.SIGNATURE = await fs.readFileSync(this.paths.signature, "utf8");
-            console.log("signature");
-        } catch (e) {
-            console.error(e);
-        };
+            return this.keysBox;
 
-        console.log("keysbox");
-        return this.keysBox;
+        } catch (e) {
+            // TODO: logger
+            console.error(e);
+            return this.keysBox;
+        };
     }
 
     /**
@@ -303,34 +275,35 @@ const AuthenticationMirror = class AuthenticationMirror {
      */
      async loadKeys() {
 
-        // ! se não houver chave publica na classe, faz uma leitura do ambiente
-        if (this.keysBox.public.length < 64) {
+         const that = this;
+         // ! se não houver chave publica na classe, faz uma leitura do ambiente
+         if (this.keysBox.destiny.public.length < 814) {
             await loadEnvironmentToClass();
         };
-
+        
         // ! se não houver chave publica no ambiente, faz a leitura do disco
-        if(process.env.PUBLIC_KEY.length < 64) { 
-            await this.readKeys() 
-            await await loadEnvironmentToClass();
-        }
-
-         // ! se não houver chave publica no disco, gera um novo par de chaves
-         if(process.env.PUBLIC_KEY.length < 64) { 
+        if(!process.env.PUBLIC_KEY || process.env.PUBLIC_KEY && process.env.PUBLIC_KEY.length < 814) { 
+            await this.readKeys();
+            await loadEnvironmentToClass();
+        };
+        
+        // ! se não houver chave publica no disco, gera um novo par de chaves
+        if(!process.env.PUBLIC_KEY || process.env.PUBLIC_KEY && process.env.PUBLIC_KEY.length < 814) { 
             await this.captureKeys();
             await this.writeKeys();
-            await this.readKeys()
-            await await loadEnvironmentToClass();
-        }
+            await this.readKeys();
+            await loadEnvironmentToClass();
+        };
 
         // ? retorna as chaves
         return this.keysBox;
 
         // ! carrega as chaves do ambiente para a classe
         async function loadEnvironmentToClass() { 
-            this.keysBox.destiny.public     = process.env.PUBLIC_KEY;
-            this.keysBox.destiny.private    = process.env.PRIVATE_KEY;
-            this.keysBox.destiny.secret     = process.env.SECRET_KEY;
-            this.keysBox.destiny.signature  = process.env.SIGNATURE;
+            that.keysBox.destiny.public     = process.env.PUBLIC_KEY || "";
+            that.keysBox.destiny.secret     = process.env.SECRET_KEY || "";
+            that.keysBox.destiny.private    = process.env.PRIVATE_KEY || "";
+            that.keysBox.destiny.signature  = process.env.SIGNATURE || "";
         };
        
     }
