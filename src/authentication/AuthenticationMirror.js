@@ -515,6 +515,27 @@ const AuthenticationMirror = class AuthenticationMirror {
         // ? response num nova cifra para o cliente
         return this.reflex;
     }
+
+     /**
+     * * recebe uma cifra do cliente e decifra o dado com a chave privado do servidor 
+     * * cifra um dado com a pública do cliente e responde no reflex
+     * @param   {object} reflex: objeto do cliente
+     * @return  {object} reflex: objeto da classe
+     */
+      async distort(reflex = {}) {
+       
+        // ! decifra os dados do do cliente coma chave privada do servidor
+        await this.keep(reflex);
+
+        // ! cifra um dado do servidor com a chave pública do cliente
+        await this.deform();
+
+        // ! insere a cifra feita no servidor dentro reflex
+        this.match(this.formBox);
+
+        // ? response num nova cifra para o cliente
+        return this.reflex;
+    }
   
     /**
      * * Salva o estado dos objetos formBox e keysBox para reseta-los após uso
