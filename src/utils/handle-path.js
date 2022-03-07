@@ -116,7 +116,7 @@ const PathRemove = async(pathname = "")=> {
 }
 
 const DirRemove = async(directory = "")=> {
-    if (await fs.existsSync(directory) && await fs.lstatSync(directory).isDirectory()) {
+    if (await PathExists(directory) && await fs.lstatSync(path.resolve(directory)).isDirectory()) {
         return await fs.rmdirSync(path.resolve(directory), { recursive: true, force: true });
     }
 }

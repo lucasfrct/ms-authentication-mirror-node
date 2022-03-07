@@ -8,7 +8,10 @@ const { PathExists, DirRemove } = require('@utils/handle-path');
 
 const AuthenticationMirror = require('../../src/authentication/AuthenticationMirror');
 
+jest.useFakeTimers();
+
 describe('Testa os setters e getters das vairiaveis da classe', () => {
+    jest.setTimeout(20000);
 
     const auth = new AuthenticationMirror();
 
@@ -33,7 +36,6 @@ describe('Testa os setters e getters das vairiaveis da classe', () => {
         expect(test).toBe(true);
     })
 
-
     it('A classe contem a propriedade formBox ', async() => {        
         let hasformBox = (auth.hasOwnProperty("formBox") && Object.keys(auth.formBox).length == 2);
         let hasOrigin = (auth.formBox.hasOwnProperty("origin") && Object.keys(auth.formBox.origin).length == 3)
@@ -53,6 +55,8 @@ describe('Testa os setters e getters das vairiaveis da classe', () => {
 });
 
 describe('Metodo path(path: string)', () => {
+
+    jest.setTimeout(20000);
 
     const auth = new AuthenticationMirror();
     const folder = "./keys/spec";
@@ -86,7 +90,8 @@ describe('Metodo path(path: string)', () => {
 });
 
 describe('Metodo: raw(*)', () => {
-    
+    jest.setTimeout(20000);
+
     const auth = new AuthenticationMirror();
     const raw = "spec-raw";
     auth.raw(raw);
@@ -97,7 +102,8 @@ describe('Metodo: raw(*)', () => {
 });
 
 describe('Metodo: setReflex(reflex)', () => {
-    
+    jest.setTimeout(20000);
+
     const auth = new AuthenticationMirror();
     
     const reflex = {
@@ -121,6 +127,8 @@ describe('Metodo: setReflex(reflex)', () => {
 });
 
 describe('Metodo: match(reflex || formBox || keysBox)', () => {
+
+    jest.setTimeout(20000);
 
     const reflex = {
         origin:  { public: "ogirin-public",  cipher: "origin-cipher" },
@@ -169,6 +177,7 @@ describe('Metodo: match(reflex || formBox || keysBox)', () => {
 });
 
 describe('Metodo: captureKeys()', () => {
+    jest.setTimeout(20000);
 
     it('gera a publicKey em auth.keys.destiny.public', async() => {
         const auth = new AuthenticationMirror();
@@ -222,6 +231,8 @@ describe('Metodo: captureKeys()', () => {
 
 describe('Metodo: writeKeys(path: string)', () => {
 
+    jest.setTimeout(20000);
+
     let auth, paths;
 
     it('generate keys', async() => {
@@ -252,18 +263,13 @@ describe('Metodo: writeKeys(path: string)', () => {
     it('salva a chave de assinatura no servidor', async() => {
         const test = await PathExists(paths.signature);
         expect(test).toBe(true);
-    });
-
-    it('Remove folder', async() => {
-        await DirRemove('./keys-spec');
-        expect(true).toBe(true);
-    });    
+    });   
 
 });
 
 describe('Metodo: readKeys(path: string)', () => {
 
-    jest.setTimeout(15000);
+    jest.setTimeout(20000);
 
     let auth, paths;
 
@@ -318,16 +324,11 @@ describe('Metodo: readKeys(path: string)', () => {
         expect(test).toBe(true);
     });
 
-    it('Remove folder', async() => {
-        await DirRemove('./keys-spec');
-        expect(true).toBe(true);
-    });  
-
 });
 
 describe('Metodo: loadKeys()', () => {
 
-    jest.setTimeout(15000);
+    jest.setTimeout(20000);
 
     let auth, paths, keys;
 
@@ -380,11 +381,277 @@ describe('Metodo: loadKeys()', () => {
         expect(test).toBe(true);
     });
 
-    it('Remove folder', async() => {
-        await DirRemove('./keys-spec');
+});
+
+describe("Método: signature(raw: string)", ()=> {
+    jest.setTimeout(20000);
+
+    it("Cria uma assinatura numa string com a chave privada", async()=> {
         expect(true).toBe(true);
-    });  
+    })
+});
+
+describe("Método: verify(raw: string)", ()=> {
+    jest.setTimeout(20000);
+
+    it("faz verificação de assinatura numa string coma chave pública", async()=> {
+        expect(true).toBe(true);
+    })
+});
+
+describe("Método: deform(raw: string)", ()=> {
+    jest.setTimeout(20000);
+
+    let auth, paths, keys;
+    
+    it('generate keys', async() => {
+        auth = new AuthenticationMirror();
+        paths = auth.path("./keys-spec/deform");
+
+        keys = await auth.loadKeys();
+
+        expect((keys.destiny.public.length > 0)).toBe(true);
+    });
+
+    it('gerando uma cifra no servidor com a chave pública do cliente', async() => {
+        const text = "Mussum Ipsum, cacilds vidis litro abertis. Detraxit consequat et quo num tendi nada.Sapien in monti palavris qui num significa nadis i pareci latim.Tá deprimidis, eu conheço uma cachacis que pode alegrar sua vidis.A ordem dos tratores não altera o pão duris.";
+        
+        auth.keysBox.origin.public = auth.keysBox.destiny.public;
+
+        const deform = await auth.deform(text);
+
+        expect((deform.indexOf("hybrid-crypto") !== -1)).toBe(true);
+    });
 
 });
 
+describe("Método: reform(cipher: string)", ()=> {
+    jest.setTimeout(20000);
 
+    let auth, paths, keys, text, deform;
+    
+    it('preparando ambiente para testar reform', async() => {
+        auth = new AuthenticationMirror();
+        paths = auth.path("./keys-spec/deform");
+
+        keys = await auth.loadKeys();
+
+        auth.keysBox.origin.public = auth.keysBox.destiny.public;
+
+        text = "Mussum Ipsum, cacilds vidis litro abertis. Detraxit consequat et quo num tendi nada.Sapien in monti palavris qui num significa nadis i pareci latim.Tá deprimidis, eu conheço uma cachacis que pode alegrar sua vidis.A ordem dos tratores não altera o pão duris.";
+        
+        deform = await auth.deform(text);
+        const testKey = auth.keysBox.origin.public.length == 814;
+        const testDeform = (deform.indexOf("hybrid-crypto") !== -1);
+        const testText = text.length > 0;
+        const test = testKey && testDeform && testText;
+
+        expect(test).toBe(true);
+    });
+
+    it('gera uma cifra no servidor com a chave pública do cliente', async() => {
+
+        const reform = await auth.reform(deform);
+        const test = (text == reform);
+
+        expect(test).toBe(true);
+    });
+
+});
+
+describe("Método: reflect(reflex: object)", ()=> {
+    jest.setTimeout(20000);
+
+    let auth, paths;
+
+    const reflex = {
+        origin:  { public: "ogirin-public",  cipher: "" },
+        destiny: { public: "", cipher: "" }, 
+    };
+    
+    it('recebe a chave publica do cliente e devolve a chave publica do servidor', async() => {
+        auth = new AuthenticationMirror();
+        paths = auth.path("./keys-spec/reflect");
+
+        const reflexResponse = await auth.reflect(reflex);
+
+        const testOrigin = auth.keysBox.origin.public == reflex.origin.public;
+        const testClient = reflexResponse.destiny.public.length == 814;
+        const test = testOrigin && testClient;
+
+        expect(test).toBe(true);
+    });
+
+});
+
+describe("Método: keep(reflex: object)", ()=> {
+    jest.setTimeout(20000);
+
+    let auth, paths, keys, text, deform;
+
+    let reflex = {
+        origin:  { public: "ogirin-public",  cipher: "" },
+        destiny: { public: "", cipher: "" }, 
+    };
+    
+    it('preparando ambiente para testar Keep', async() => {
+        auth = new AuthenticationMirror();
+        paths = auth.path("./keys-spec/keep");
+
+        keys = await auth.loadKeys();
+        reflex.origin.public = keys.destiny.public;        
+        reflex = await auth.reflect(reflex);
+        
+        text = "Mussum Ipsum, cacilds vidis litro abertis. Detraxit consequat et quo num tendi nada.Sapien in monti palavris qui num significa nadis i pareci latim.Tá deprimidis, eu conheço uma cachacis que pode alegrar sua vidis.A ordem dos tratores não altera o pão duris.";
+
+        deform = await auth.deform(text);
+        auth.formBox.destiny.deform = "";
+        reflex.origin.cipher = deform;
+
+        const testKeyOrigin = reflex.origin.public.length == 814;
+        const testKeyDestiny = reflex.destiny.public.length == 814;
+        const testDeform = (reflex.origin.cipher.indexOf("hybrid-crypto") !== -1);
+        const testText = text.length > 0;
+        const test = testKeyOrigin && testKeyDestiny && testDeform && testText;
+
+        expect(test).toBe(true);
+    });
+    
+    it('enviando uma cifra para o servidor e decifrando o dado', async() => {
+        
+        const reflexResponse = await auth.keep(reflex);
+        
+        const testDeform = (reflexResponse.origin.cipher.indexOf("hybrid-crypto") !== -1);
+        const testReform = auth.formBox.origin.reform === text;
+        const test = testDeform && testReform;
+
+        expect(test).toBe(true);
+    });
+
+});
+
+describe("Método: distort(reflex: object)", ()=> {
+    jest.setTimeout(20000);
+
+    let authServer, authClient, deform, textClient, textServer;
+
+    let reflex = {
+        origin:  { public: "", cipher: "", body: {} },
+        destiny: { public: "", cipher: "", body: {} }, 
+    };
+
+    it('preparando ambiente do cliente', async() => {
+
+        authClient = new AuthenticationMirror();
+        authClient.path("./keys-spec/distort");
+    
+        const keys = await authClient.loadKeys(); 
+
+        reflex.origin.public = keys.destiny.public;        
+        
+        reflex = await authClient.reflect(reflex);
+        
+        textClient = "Mussum Ipsum, cacilds vidis litro abertis. Detraxit consequat et quo num tendi nada.Sapien in monti palavris qui num significa nadis i pareci latim.Tá deprimidis, eu conheço uma cachacis que pode alegrar sua vidis.A ordem dos tratores não altera o pão duris.";
+        
+        deform = await authClient.deform(textClient);
+
+        reflex.origin.cipher = deform;
+        reflex.origin.body = { raw: textClient };
+        
+        const testKeyDestiny    = reflex.destiny.public.length == 814;
+        const testKeyOrigin     = reflex.origin.public.length == 814;
+        const testDeform        = (reflex.origin.cipher.indexOf("hybrid-crypto") !== -1);
+        const testText          = reflex.origin.body.raw == textClient;
+        const test              = testKeyOrigin && testKeyDestiny && testDeform && testText;
+        
+        expect(test).toBe(true);
+    });
+
+
+    it('preparando ambiente do servidor', async() => {
+
+        authServer = new AuthenticationMirror();
+        authServer.path("./keys-spec/distort");
+        const keys = await authServer.loadKeys(); 
+      
+        textServer = "Sea of Tranquility globular star cluster Cambrian explosion light years something incredible is waiting to be known vanquish the impossible? Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit concept of the number one radio telescope the only home we've ever known made in the interiors of collapsing stars paroxysm of global death. At the edge of forever encyclopaedia galactica two ghostly white figures in coveralls and helmets are softly dancing with pretty stories for which there's little good evidence citizens of distant epochs a still more glorious dawn awaits and billions upon billions upon billions upon billions upon billions upon billions upon billions.";
+
+        const raw = authServer.raw(textServer);
+        authServer.reflex.destiny.body = { raw };
+
+        expect(raw.length > 0).toBe(true);
+    });
+    
+    it('enviando uma cifra para o servidor decifrar e decifrando um dado vindo do servidor', async() => {
+        
+        reflex = await authServer.distort(reflex);
+        const decryptClient = await authClient.reform(reflex.destiny.cipher);
+
+        const testDeformServer  = (reflex.destiny.cipher.indexOf("hybrid-crypto") !== -1);
+        const testReformServer  = authServer.formBox.origin.reform === textClient;
+        const testBodyServer    = reflex.destiny.body.raw.length > 0;
+        
+        const testDeformClient  = (reflex.origin.cipher.indexOf("hybrid-crypto") !== -1);
+        const testReformClient  = decryptClient == textServer;
+        const testBodyClient    = reflex.origin.body.raw.length > 0;
+        
+        const test = testDeformServer && testDeformClient && testReformServer &&  testReformClient && testBodyServer && testBodyClient;
+
+        expect(test).toBe(true);
+    });
+
+});
+
+describe("Método: reveal(reflex: object)", ()=> {
+    jest.setTimeout(20000);
+
+    let authClient, keys, textClient, deform;
+
+    let reflex = {
+        origin:  { public: "",  cipher: "", body: { } },
+        destiny: { public: "",  cipher: "", body: { } }, 
+    };
+    
+    it('preparando ambiente para testar reveal', async() => {
+        authClient = new AuthenticationMirror();
+        authClient.path("./keys-spec/reveal");
+
+        keys = await authClient.loadKeys();
+        reflex.origin.public = keys.destiny.public;        
+        reflex = await authClient.reflect(reflex);
+        
+        textClient = "Mussum Ipsum, cacilds vidis litro abertis. Detraxit consequat et quo num tendi nada.Sapien in monti palavris qui num significa nadis i pareci latim.Tá deprimidis, eu conheço uma cachacis que pode alegrar sua vidis.A ordem dos tratores não altera o pão duris.";
+
+        reflex.origin.body = { raw: textClient };
+
+        const testKeyOrigin = reflex.origin.public.length == 814;
+        const testKeyDestiny = reflex.destiny.public.length == 814;
+        const testText = reflex.origin.body.raw == textClient;
+        const test = testKeyOrigin && testKeyDestiny && testText;
+
+        expect(test).toBe(true);
+    });
+    
+    it('enviando um dado para o servidor e recebendo uma cifra do servidor', async() => {
+
+        authServer = new AuthenticationMirror();
+        authServer.path("./keys-spec/reveal");
+        
+        reflex = await authServer.reveal(reflex);
+
+        const test  = (reflex.origin.cipher.indexOf("hybrid-crypto") !== -1);
+
+        expect(test).toBe(true);
+    });
+
+});
+
+describe("clear Teste Unitário", ()=> {
+    jest.setTimeout(20000);
+
+    it('Remove folder', async() => {
+        await DirRemove('./keys-spec');
+        expect(true).toBe(true);
+    });
+    
+});

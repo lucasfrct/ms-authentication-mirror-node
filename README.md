@@ -1,94 +1,103 @@
 # ms-authentication-mirror
-Troca de chaves e cifras
-Comunicação segura
-Serviço de criptografia
-Padrão RSA
-Fornece classes de configuração
-Padrão de consumo REST
+Microserviço feito para trocar de chaves e cifras entre **cliente** e **servidor** garantindo uma comunicação segura no ambiente virtual.
+Fornecemos um serviço de criptografia fácil de ser utilizado usando o padrão RSA.
 
+O uso é simples, disponibilizamos uma classe de configuração para o **cliente** que contém toda a lógica de acesso e troca de informação no padrão REST.
 ## Payload para troca de informação
-A aplicação usa um único payload para troca de informações durante toda a requisição, ou seja, tanto o request quanto response usam a mesma estrutura do objeto JSON.
-A estrutura interna está organizada em dois objetos: origin e image, que são um o reflexo do outro como demonstrado abaixo:
+A aplicação usa um único payload para troca de informações durante toda a requisição, ou seja, tanto o **request** quanto **response** usam a mesma estrutura do objeto JSON.
+A estrutura interna está organizada em dois sub-objetos: **origin** e **destiny**, onde origin são dados do **cliente** e destiny sáo dados do **servidor**.
 ``` Estrutura do payload completa:
-     keysBox = {
-        origin:     { public: "", private: "", secret: "", signature: "" },
-        destiny:    { public: "", signature: "" }
+    reflex = {
+        origin:     { public: "", cipher: "", body: {} },
+        destiny:    { public: "", cipher: "", body: {} },
     };
 ```
 ``` Estrutura interna do origin (origem é referente aos dados do cliente)
-    origin: { public: "", cipher: "", raw: "" }
+    origin: { public: "", cipher: "", body: {} }
 ```
-``` Estrutura interna da image (imagem é referente aos dados do servidor)
-    destiny:    { public: "", signature: "" }
+``` Estrutura interna do destiny (imagem é referente aos dados do servidor)
+    destiny: { public: "", cipher: "", body: {} }
 ```
-Os dados do objeto persistem de modo que todas as alterações feitas pelo servidor normalmente estarão dentro do objeto detiny e todas as alterações feitas pelo cliente estarão no objeto origin.
+Os dados do objeto persistem de modo que todas as alterações feitas pelo **servidor** normalmente estarão dentro do sub-objeto **destiny** e todas as alterações feitas pelo **cliente** estarão no sub-objeto **origin**.
 
-## URIs
+## REST
 
-- [x] /authenticate/mirror/reflect : Enviando a chave publica do cliente e recebendo a chave publica do servidor
-``` POST /authenticate/mirror/reflect
+[x] /authentication/miror/lib : Baixando a biblioteca authentication-mirror-client.lib.js
+``` GET /authentication/mirror/lib
+```
+### Rota reflect
+- O **cliente** envia o objeto reflex com sua chave publica para o **servidor**, **servidor** insere no reflex sua própria chave publica,  e responde o reflex para o **cliente** que agora possui as duas chaves públicas.
+- [x] /authentication/mirror/reflect : Enviando a chave publica do **cliente** e recebendo a chave publica do **servidor**
+``` POST /authentication/mirror/reflect
     Headers: x-api-token: token
-    Request: {
-        origin:     { public: "{{**chave pública do cliente**}}", private: "", secret: "", signature: "" },
-        destiny:    { public: "", signature: "" }
-    };
-    Response:  {
-        origin:     { public: "{{**chave pública do cliente**}}", private: "", secret: "", signature: "" },
-        destiny:    { public: "{{**chave pública do servidor**}}", signature: "" }
-    }
-```
 
-- [x] /authenticate/mirror/reveal : Enviando um dado para recebê-lo encriptado
+    Request: {
+        origin:     { public: "chave-pública-do-cliente",   cipher: "", body: {} },
+        destiny:    { public: "",                           cipher: "", body: {} },
+    };
+
+    Response: {
+        origin:     { public: "chave-pública-do-cliente",   cipher: "", body: {} },
+        destiny:    { public: "chave-pública-do-servidor",  cipher: "", body: {} },
+    };
+```
+### Rota keep
+- O **cliente** envia o objeto reflex com uma cifra para o **servidor**, o **servidor** por sua vez decifra, armazena na classe e responde o reflex para o **cliente**.
+- [x] /authentication/mirror/keep : Enviando uma cifra do **cliente** para que o **servidor** decifre e armazene
+``` POST /authentication/mirror/keep
+    Headers: x-api-token = token
+
+    Request: {
+        origin:     { public: "chave-pública-do-cliente",   cipher: "cifra-docliente", body: {} },
+        destiny:    { public: "",                           cipher: "", body: {} },
+    };
+
+    Response: {} | status: 202 - Accepted
+```
+### Rota distort
+- O **cliente** envia o objeto reflex com a cifra do **cliente** para o **servidor**, o **servidor** decifra a cifra do **cliente**, faz uma cifra para resposta com a pública do **cliente**, insere no reflex, responsde e o **cliente** decrifra a cifra do **servidor** com a sua própria chave privada.
+- [x] /authentication/mirror/distort : Trocando cifra enter cliente e servidor e decifrndo de ambos os lados.
+```POST /authentication/mirror/distort
+    Headers: x-api-token = token
+
+    Request: {
+        origin:     { public: "chave-pública-do-cliente",   cipher: "cifra-do-cliente", body: {} },
+        destiny:    { public: "chave-pública-do-servidor",  cipher: "",                 body: {} },
+    };
+
+    Response: {
+        origin:     { public: "chave-pública-do-cliente",   cipher: "cifra-do-cliente",     body: {} },
+        destiny:    { public: "chave-pública-do-servidor",  cipher: "cifra-do-servidor",    body: {} },
+    };
+```
+### Rota reveal
+- O **cliente** envia o objeto reflex com o dado cru e a chave pública do **cliente** para o **servidor**, o **servidor** por sua vez cifra o dado cru recebido com a chave pública do **cliente**, insere a cifra no reflex e o responde o reflex com a chave pública do **cliente** e uma cifra feita com a chave pública do **cliente**.
+- [x] /authentication/mirror/reveal : Enviando um dado para recebê-lo encriptado
 ``` POST /authenticate/mirror/reveal
     Headers: x-api-token = token
-    Request: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
-    Response: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
+   
+    Request: {
+        origin:     { public: "chave-pública-do-cliente",   cipher: "", body: { raw: "dado-do-cliente" } },
+        destiny:    { public: "chave-pública-do-servidor",  cipher: "", body: {}                         },
+    };
+
+    Response: {
+        origin:   { public: "chave-pública-do-cliente",   cipher: "cifra-do-cliente", body: { raw: "dado-do-cliente" } },
+        destiny:  { public: "chave-pública-do-servidor",  cipher: "",                 body: {}                         },
+    };
 ```
-
-- [x] /authenticate/mirror/distort : Enviando o objeto para receber uma cifra do servidor
-``` POST /authenticate/mirror/distort
-    Headers: x-api-token = token
-    Request: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
-    Response: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
-```
-- [x] /authenticate/mirror/keep : Enviando uma cifra para que o servidor decifre e armazene
-``` POST /authenticate/mirror/keep
-    Headers: x-api-token = token
-    Request: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
-    Response: { origin: { public: "", cipher: "", raw: "" }, image: { public: "", cipher: "", raw: "" } }
-```
-[x] /authentication/lib : Baixando a biblioteca authentication-mirror-client.lib.js
-``` GET /authenticate/hybrid-crypto-js
-``
-
-Autenticação do usuario
-- login: email e senha
-- session: token
-
-Criar um arquivo só com essas librarys - o nome do arquivo client-mirror-autentication.js
-- src/authentication/AuthenticationClientMirror.js
-- src/lib/hybrid-crypto/hybrid-crypto-js.js
-- src/lib/js-sha521/js-sha512.js
-
-path do arquivo de cliente
-- src/public/client-mirror-autentication.js
-
-Rota reflect
-- O cliente envia o objeto reflex com sua chave publica para o servidor, o servidor por sua vez lê sua chave publica, insere no reflex e responde o reflex.
-
-Rota distort
-- Envia o objeto reflex com o dado e a chave publica do cliente para o servidor, o servidor por sua vez cifra o dado recebido no reflex com a chave publica do cliente, insere a cifra no reflex e o responde o reflex.
-Servidor precisa distorcer um dado
-
-Rota reveal
-- Envia o objeto reflex com o dado e a chave publica do cliente para o servidor, o servidor por sua vez cifra o dado recebido no reflex com a chave publica do cliente, insere a cifra no reflex e o responde o reflex.
-
-Rota keep
-- Envia o objeto reflex com uma cifra para o servidor, o servidor por sua vez decifra, armazena na classe e responde o reflex.
-
 ## Casos de uso
-- 1. O cliente obtém a chave publica do servidor, cifra um dado com a chave publica do servidor, envia a cifra para o servidor, o servidor decifra e guarda no banco de dados. URL /keep
-- 2. O cliente envia sua chave publica para o servidor, o servidor cifra um dado do banco de dados, o servidor devolve a cifra para o cliente e o cliente decifra com sua chave privada. URL /distort
-- 3. O cliente envia um dado para o servidor, o servidor cifra com sua chave publica, o servidor devolve uma cifra para o cliente, o cliente envia a cifra para seus pares e somente o servidor pode decifrar com a chave privada. URL /reveal
-- 4. (Servidor como TURN) O cliente cifra um dado com a chave publica do servidor, envia para o servidor, o servidor decifra, recifra com a chave publica do cliente2, envia para cliente2, o cliente2 decifra com sua privada.
-- 5. Cliente cifra a sua chave privada com a chave publica do cliente2, envia a cifra para o servidor, o servidor redireciona para o cliente2. (Usar Socket)
+
+- 1. O **cliente** obtém a chave publica do **servidor**, cifra um dado com a chave pública do **servidor**, envia a cifra para o **servidor**, o **servidor** decifra e guarda no banco de dados.
+```/authentication/mirror/keep```
+
+- 2. O **cliente** obtém uma chave pública do **servidor**, cifra uma dado com a chave pública do **servidor**, envia a chave pública do **cliente** junto coma cifra para o **servidor**. O **servidor** recebe a chave pública do **cliente** e uma cifra do **cliente** feita coma chave pública do **servidor**, então o **servidor** decifra a cifra do **cliente** com a chave privada do **servidor** e cifra um dado do banco de dados com a chave pública do **cliente**. O **servidor** devolve uma nova cifra para o **cliente** e o **cliente** decifra a cifra do **servidor** com sua chave privada do cliente.
+```/authentication/mirror/distort```
+
+- 3. O **cliente** envia um dado e a chave pública para o **servidor**, o **servidor** cifra o dado do **cliente** com a chave pública do **cliente** e devolve a cifra para o **cliente**.
+```/authentication/mirror/reveal```
+
+- 4. **SERVIDOR TURN**:  O **cliente 1** pede uma id-turn para o **servidor**, com a id-turn o **cliente 1** cifra um dado com a chave pública do **servidor** e envia a cifra e o id-turn para o **servidor**. O **servidor** decifra a cifra do o **cliente 1**  e guarda no bando de dados o dados decifado e a id-turn do **cliente 1**. O **cliente 2** envia para o servidor a id-turn do **cliente 1** e a chave pública do **cliente 2**, o **servidor** busca no banco de dados a id-turn do **cliente 1** enviada pelo **cliente 2** e crifra o dado do **cliente 1** com a chave pública do **cliente 2** e responde a requisição com a cifra dos dados do **cliente 1** para o **cliente 2** que recebe a cifra e decifra com a chave privada do **cliente 2**.
+    -  obter id-turn (GET): ```/authentication/mirror/detour```
+    -  guradar dados com id-turn (POST)```/authentication/mirror/refraction/{id-turn}```
+    -  recuperar dados com id-turn (GET)```/authentication/mirror/refraction/{id-turn}```
