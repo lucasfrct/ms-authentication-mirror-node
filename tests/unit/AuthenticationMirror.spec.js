@@ -646,7 +646,7 @@ describe("Método: reveal(reflex: object)", ()=> {
 
 });
 
-describe("clear Teste Unitário", ()=> {
+describe("clear teste tnitário", ()=> {
     jest.setTimeout(20000);
 
     it('Remove folder', async() => {
