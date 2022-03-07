@@ -19,15 +19,15 @@
     },
     "homepage": "https://github.com/lucasfrct/ms-auth-node#readme",
     "_moduleAliases": {
-      "@root"      : ".",
-      "@src"      : "./src",
-      "@library": "./src/lib",
-      "@public": "./src/public",
-      "@routes": "./src/routes",
-      "@routines": "./src/routines",
-      "@middleware": "./src/middleware",
-      "@authentication": "./src/authentication",
-      "@utils": "./src/utils"
+        "@root": ".",
+        "@src": "./src",
+        "@library": "./src/lib",
+        "@public": "./src/public",
+        "@routes": "./src/routes",
+        "@routines": "./src/routines",
+        "@middleware": "./src/middleware",
+        "@authentication": "./src/authentication",
+        "@utils": "./src/utils"
     },
     "dependencies": {
         "body-parser": "1.19.0",
