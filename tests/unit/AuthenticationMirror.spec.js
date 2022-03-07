@@ -4,7 +4,7 @@ require('module-alias/register');
 const fs = require("fs");
 const pathModule = require("path");
 
-const { PathExists, DirRemove } = require('@utils/handle-path');
+const { PathExists, DirRemove } = require('../../src/utils/handle-path');
 
 const AuthenticationMirror = require('../../src/authentication/AuthenticationMirror');
 

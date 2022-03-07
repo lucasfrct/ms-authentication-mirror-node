@@ -63,9 +63,9 @@ const PathMatch = (directory = "", destination = "", intercept = undefined)=> {
             // escreve o arquivo combinado num diritório
             await fs.writeFileSync(destination, match);
 
-            resolve([null, files]);
+            resolve(files);
         } catch(e) {
-            return resolve([e, null]);
+            return reject(e);
         };
     });
 };
