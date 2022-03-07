@@ -107,5 +107,4 @@ dist
 # TernJS port file
 .tern-port
 coverage/
-keys
 keys-**
