@@ -5,6 +5,7 @@
     "main": "app.js",
     "scripts": {
         "dev": "set NODE_ENV=dev && nodemon ./app.js",
+        "development": "export NODE_ENV=dev && nodemon ./app.js",
         "test": "jest --verbose",
         "spec": "jest --watch --coverage"
     },
@@ -18,6 +19,17 @@
         "url": "https://github.com/lucasfrct/ms-auth-node/issues"
     },
     "homepage": "https://github.com/lucasfrct/ms-auth-node#readme",
+    "_moduleAliases": {
+        "@root": ".",
+        "@src": "./src",
+        "@utils": "./src/utils",
+        "@public": "./src/public",
+        "@routes": "./src/routes",
+        "@library": "./src/lib",
+        "@routines": "./src/routines",
+        "@middleware": "./src/middleware",
+        "@authentication": "./src/authentication"
+    },
     "dependencies": {
         "body-parser": "1.19.0",
         "cors": "2.8.5",
@@ -34,6 +46,7 @@
         "@babel/preset-env": "7.16.11",
         "babel-jest": "27.5.1",
         "jest": "27.5.1",
+        "module-alias-jest": "0.0.3",
         "regenerator-runtime": "0.13.9"
     }
 }

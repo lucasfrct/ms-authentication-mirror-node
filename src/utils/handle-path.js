@@ -6,13 +6,33 @@ const path = require("path");
  * @param {Sting} file 
  * @returns 
  */
-const PathRead = async(file = "")=> {
-    try {
-        path.join("",file);
-        return await fs.readFileSync(file, "utf8");
-    } catch (e) {
-        return e
-    }
+const PathRead = async(pathname = "")=> {
+    return new Promise(async(resolve, reject) => {
+        try {
+
+            const { dir } = path.parse(pathname); 
+
+            if(!pathname || typeof pathname !== "string") {
+                reject({ message: "path undefined" });
+                return;
+            };
+
+            if (!fs.existsSync(dir)){
+                reject({ message: "directory unexists" });
+            };
+
+            if (!fs.existsSync(pathname)){
+                reject({ message: "path unexists" });
+            };
+
+            const file = await fs.readFileSync(pathname, "utf8");
+            
+            resolve(file);
+
+        } catch (e) {
+            reject(e);
+        };
+    });
 }
 
 /**
@@ -43,12 +63,63 @@ const PathMatch = (directory = "", destination = "", intercept = undefined)=> {
             // escreve o arquivo combinado num diritório
             await fs.writeFileSync(destination, match);
 
-            resolve([null, files]);
+            resolve(files);
         } catch(e) {
-            return resolve([e, null]);
+            return reject(e);
         };
     });
 };
 
-module.exports = { PathMatch, PathRead };
+/**
+ * * Cria os diretórios para gravar uma arquivo
+ * @param {string} pathname: path 
+ * @param {string} content: conteúdo do arquivo
+ */
+const PathWrite = (pathname = "", content = "")=> { 
+    return new Promise(async(resolve, reject) => {
+        try { 
+
+            const { dir } = path.parse(pathname); 
+
+            if(!pathname || typeof pathname !== "string") {
+                reject({ message: "path undefined" });
+                return;
+            };
+
+            if(!content || typeof content !== "string") {
+                reject({ message: "content undefined" });
+                return;
+            }
+
+            if (!fs.existsSync(dir)){
+                await fs.mkdirSync(dir, { recursive: true });
+            }
+
+            if (fs.existsSync(dir) && content.length > 0){
+                await fs.writeFileSync(path.resolve(pathname), content);
+            }
+            
+            resolve({ message: "created file"});
+
+        } catch (e) {
+            reject(e);
+        };
+    });
+}
+
+const PathExists = async(pathname = "")=> {
+    return await fs.existsSync(path.resolve(pathname));
+}
+
+const PathRemove = async(pathname = "")=> {
+    return await fs.unlinkSync(path.resolve(pathname));
+}
+
+const DirRemove = async(directory = "")=> {
+    if (await PathExists(directory) && await fs.lstatSync(path.resolve(directory)).isDirectory()) {
+        return await fs.rmdirSync(path.resolve(directory), { recursive: true, force: true });
+    }
+}
+
+module.exports = { PathMatch, PathRead, PathWrite, PathExists, PathRemove, DirRemove };
 

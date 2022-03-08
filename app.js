@@ -1,6 +1,10 @@
 require('dotenv/config');
-require('./src/config/module-alias.config');
+require('module-alias/register');
 
-const server = require('./src/server');
+// require('./module-aliases.config');
 
-server.listen(process.env.PORT, async() => {})
+// ! importa o servidor
+const server = require('@src/server');
+
+// ! sobe o servidor
+server.listen(process.env.PORT, async() => {});
