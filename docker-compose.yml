@@ -1,0 +1,28 @@
+# olombongo ms-database: -pot 3307
+version: '3.8'
+
+services:
+
+  ms-authentication-mirror:
+    container_name: ms-authentication-mirror
+    build: .
+    working_dir: /usr/local/ms-authentication-mirror
+    volumes:
+      - ./:/usr/local/ms-authentication-mirror
+    env_file: ".env"
+    environment:
+      NODE_ENV: development
+    networks:
+      - ms-authentication-mirror
+    restart: always
+    ports:
+      - 5001:5001 # host:container | 127.0.0.1:3307   
+
+volumes:
+  ms-authentication-mirror:
+    name: ms-authentication-mirror
+
+networks:
+  ms-authentication-mirror:
+    name: ms-authentication-mirror
+    driver: bridge
