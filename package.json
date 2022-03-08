@@ -21,13 +21,13 @@
     "_moduleAliases": {
         "@root": ".",
         "@src": "./src",
-        "@library": "./src/lib",
+        "@utils": "./src/utils",
         "@public": "./src/public",
         "@routes": "./src/routes",
+        "@library": "./src/lib",
         "@routines": "./src/routines",
         "@middleware": "./src/middleware",
-        "@authentication": "./src/authentication",
-        "@utils": "./src/utils"
+        "@authentication": "./src/authentication"
     },
     "dependencies": {
         "body-parser": "1.19.0",

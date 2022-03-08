@@ -80,6 +80,8 @@ const AuthenticationMirror = class AuthenticationMirror {
 
           // ! instancia da library de emciptação
           this.crypt = new Crypt({ md: "sha512" });
+
+          this.paths.base = "./keys";
     }
 
     /**
@@ -401,6 +403,12 @@ const AuthenticationMirror = class AuthenticationMirror {
                 console.error("Erro, a chave privada não existe");
                 return this.formBox.origin.reform;
             };
+
+            if(this.formBox.origin.deform.indexOf("hybrid-crypto") == -1) {
+                // TODO: logger
+                console.error("Erro, a chave privada não existe");
+                return this.formBox.origin.reform;
+            }
             
             // ! faz a decigragem da string enviada pelo cliente
             const { message, signature } = this.crypt.decrypt(privateKey, this.formBox.origin.deform);
