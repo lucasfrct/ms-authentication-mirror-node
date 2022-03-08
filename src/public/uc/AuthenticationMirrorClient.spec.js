@@ -1,5 +1,7 @@
 (async() => {
 
+    const client = { url: "http://localhost:5001" };
+    
     await test("Encriptação disponível", async(ctx)=>{
         const auth = new AuthenticationMirrorClient();
         ctx.assert("A classe contem a library RSA", (auth.rsa !== null), true);
@@ -122,14 +124,14 @@
     });
 
     // ! ainda não foi possíve testar verify
-    await test("Metodo: verify()", async(ctx)=>{
-        const auth = new AuthenticationMirrorClient();
+    // await test("Metodo: verify()", async(ctx)=>{
+        // const auth = new AuthenticationMirrorClient();
         // keysBox = await auth.loadKeys();
         // const msg = "spec";
         // const signature = await auth.signature(msg);
         // const verify = await auth.verify(msg);
-        ctx.assert("Ainda não foi possível testar", true, true);
-    });
+        // ctx.assert("Ainda não foi possível testar", true, true);
+    // });
 
     await test("Metodo: deform()", async(ctx)=>{
 
@@ -169,23 +171,31 @@
         };
 
         auth.url("/healthz");
+        auth.client.url = `${client.url}${auth.client.uri}`
         const res = await auth.send(reflex);
         ctx.assert("Dados postados com sucesso", (res.hasOwnProperty("healthz") && res.method == "POST"), true);
     });
 
-    await test("Metodo: get()", async(ctx)=>{
-        const auth = new AuthenticationMirrorClient();
-        auth.url("/healthz");
-        const res = await auth.get();
-        ctx.assert("Dados obtidos com sucesso", (res.hasOwnProperty("healthz") && res.method == "GET"), true);
-    });
+    // await test("Metodo: get()", async(ctx)=>{
+    //     const auth = new AuthenticationMirrorClient();
+    //     auth.url("/healthz");
+    //     const res = await auth.get();
+    //     ctx.assert("Dados obtidos com sucesso", (res.hasOwnProperty("healthz") && res.method == "GET"), true);
+    // });
 
-    await test("Metodo: reflect()", async(ctx)=>{
-        const auth = new AuthenticationMirrorClient();
-        const res = await auth.reflect();
-        const assert = (res.origin.public.length > 64 && res.destiny.public.length > 64)
-        ctx.assert("Chaves trocadas com sucesso", assert, true);
-    });
+    // await test("Metodo: reflect()", async(ctx)=>{
+    //     const auth = new AuthenticationMirrorClient();
+    //     const res = await auth.reflect();
+    //     const assert = (res.origin.public.length > 64 && res.destiny.public.length > 64)
+    //     ctx.assert("Chaves trocadas com sucesso", assert, true);
+    // });
+
+    // await test("Metodo: distort()", async(ctx)=>{
+    //     const auth = new AuthenticationMirrorClient();
+    //     const res = await auth.reflect();
+    //     const distortion = await auth.distort();
+    //     ctx.assert("Distorção concluída com sucesso", distortion, true);
+    // });
 
 })();
 

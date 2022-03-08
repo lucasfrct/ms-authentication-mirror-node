@@ -364,7 +364,8 @@
     async send(reflex = "") {
         try {
             // ! configura a requisição
-            const url       = this.url();
+            // const url       = this.url();
+            const url = this.client.url;
             const config    = this.config("POST", this.parseStr(this.setReflex(reflex)));
 
             // ! instancia a requisição

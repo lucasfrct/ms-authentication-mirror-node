@@ -1,6 +1,6 @@
 require('dotenv/config');
 const fs = require("fs");
-const AuthenticationMirror = require('./AuthenticationMirror');
+const AuthenticationMirror = require('./AuthenticationMirrorClient');
 
 describe('Encriptação disponível', () => {
 
@@ -147,5 +147,13 @@ describe('Metodo: captureKeys()', () => {
         expect((signature.length > 64)).toBe(true);
     })
 
+    it('Metodo: deform()', async() => {
+        const auth = new AuthenticationMirror();
+        keysBox =  await auth.loadKeys();
+        
+        const cipher = await auth.deform("spec");
+
+        expect((cipher.length > 64)).toBe(true);
+    })
 
 })
