@@ -1,0 +1,306 @@
+{
+	"info": {
+		"_postman_id": "7faf8a82-f8c7-406d-9f90-3e99a90b4c97",
+		"name": "MS::Authentication::Mirror",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "authentication",
+			"item": [
+				{
+					"name": "mirror",
+					"item": [
+						{
+							"name": "AuthenticationMirrorClient.min",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{endpoint}}/authentication/mirror/min",
+									"host": [
+										"{{endpoint}}"
+									],
+									"path": [
+										"authentication",
+										"mirror",
+										"min"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "lib",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{endpoint}}/authentication/mirror/lib",
+									"host": [
+										"{{endpoint}}"
+									],
+									"path": [
+										"authentication",
+										"mirror",
+										"lib"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "uc",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{endpoint}}/authentication/mirror/uc",
+									"host": [
+										"{{endpoint}}"
+									],
+									"path": [
+										"authentication",
+										"mirror",
+										"uc"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "spec",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{endpoint}}/authentication/mirror/spec",
+									"host": [
+										"{{endpoint}}"
+									],
+									"path": [
+										"authentication",
+										"mirror",
+										"spec"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "reflect",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = JSON.parse(responseBody);\r",
+											"if (jsonData.destiny.public) {\r",
+											"    postman.setEnvironmentVariable(\"serverPublicKey\", jsonData.destiny.public);\r",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"origin\": {\r\n        \"public\": \"{{clientPublicKey}}\",\r\n        \"cipher\": \"\",\r\n        \"body\": {}\r\n    },\r\n    \"destiny\": {\r\n        \"public\": \"\",\r\n        \"cipher\": \"\",\r\n        \"body\": {}\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{endpoint}}/authentication/mirror/reflect",
+									"host": [
+										"{{endpoint}}"
+									],
+									"path": [
+										"authentication",
+										"mirror",
+										"reflect"
+									]
+								},
+								"description": "O **cliente** envia o objeto reflex com sua chave publica para o **servidor**, **servidor** insere no reflex sua própria chave publica, e responde o reflex para o **cliente** que agora possui as duas chaves públicas."
+							},
+							"response": []
+						},
+						{
+							"name": "keep",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"origin\": {\r\n        \"public\": \"{{clientPublicKey}}\",\r\n        \"cipher\": \"{{clientCipher}}\",\r\n        \"body\": {}\r\n    },\r\n    \"destiny\": {\r\n        \"public\": \"\",\r\n        \"cipher\": \"\",\r\n        \"body\": {}\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{endpoint}}/authentication/mirror/keep",
+									"host": [
+										"{{endpoint}}"
+									],
+									"path": [
+										"authentication",
+										"mirror",
+										"keep"
+									]
+								},
+								"description": "O **cliente** obtém a chave publica do **servidor**, cifra um dado com a chave pública do **servidor**, envia a cifra para o **servidor**, o **servidor** decifra e guarda no banco de dados."
+							},
+							"response": []
+						},
+						{
+							"name": "distort",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"origin\": {\r\n        \"public\": \"{{clientPublicKey}}\",\r\n        \"cipher\": \"{{clientCipher}}\",\r\n        \"body\": {}\r\n    },\r\n    \"destiny\": {\r\n        \"public\": \"\",\r\n        \"cipher\": \"\",\r\n        \"body\": {}\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{endpoint}}/authentication/mirror/distort",
+									"host": [
+										"{{endpoint}}"
+									],
+									"path": [
+										"authentication",
+										"mirror",
+										"distort"
+									]
+								},
+								"description": "O **cliente** obtém uma chave pública do **servidor**, cifra um dado com a chave pública do **servidor**, envia a chave pública do **cliente** junto com a cifra para o **servidor**. O **servidor** recebe a chave pública do **cliente** e uma cifra do **cliente** feita coma chave pública do **servidor**, então o **servidor** decifra a cifra do **cliente** com a chave privada do **servidor** e cifra um dado do banco de dados com a chave pública do **cliente**. O **servidor** devolve uma nova cifra para o **cliente** e o **cliente** decifra a cifra do **servidor** com sua chave privada do cliente."
+							},
+							"response": []
+						},
+						{
+							"name": "reveal",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"origin\": {\r\n        \"public\": \"{{clientPublicKey}}\",\r\n        \"cipher\": \"\",\r\n        \"body\": { \"raw\": \"teste\"}\r\n    },\r\n    \"destiny\": {\r\n        \"public\": \"\",\r\n        \"cipher\": \"\",\r\n        \"body\": {}\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{endpoint}}/authentication/mirror/reveal",
+									"host": [
+										"{{endpoint}}"
+									],
+									"path": [
+										"authentication",
+										"mirror",
+										"reveal"
+									]
+								},
+								"description": "O **cliente** envia o objeto reflex com o dado cru e a chave pública do **cliente** para o **servidor**, o **servidor** por sua vez cifra o dado cru recebido com a chave pública do **cliente**, insere a cifra no reflex e o responde o reflex com a chave pública do **cliente** e uma cifra feita com a chave pública do **cliente**."
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "healthz",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{endpoint}}/healthz",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"healthz"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "index",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{endpoint}}",
+					"host": [
+						"{{endpoint}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "healthz",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{endpoint}}/healthz",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"healthz"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
