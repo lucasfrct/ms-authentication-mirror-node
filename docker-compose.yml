@@ -9,7 +9,7 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-      target: ms-authentication-mirror
+      target: ms-authentication-mirror-po
     working_dir: /usr/local/ms-authentication-mirror
     volumes:
       - ./:/usr/local/ms-authentication-mirror

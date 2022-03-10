@@ -4,10 +4,11 @@
     "description": "microservice auth mirror",
     "main": "app.js",
     "scripts": {
-        "dev": "set NODE_ENV=dev && nodemon ./app.js",
-        "development": "export NODE_ENV=dev && nodemon ./app.js",
+        "dev": "set NODE_ENV=development && nodemon ./app.js",
+        "development": "export NODE_ENV=development && nodemon ./app.js",
         "test": "jest --verbose",
-        "spec": "jest --watch --coverage"
+        "spec": "jest --watch --coverage",
+        "prodution": ""
     },
     "repository": {
         "type": "git",
@@ -25,6 +26,7 @@
         "@utils": "./src/utils",
         "@public": "./src/public",
         "@routes": "./src/routes",
+        "@logger": "./src/logger",
         "@library": "./src/lib",
         "@routines": "./src/routines",
         "@middleware": "./src/middleware",
@@ -32,14 +34,19 @@
     },
     "dependencies": {
         "body-parser": "1.19.0",
+        "compression": "1.7.4",
         "cors": "2.8.5",
         "dotenv": "10.0.0",
         "express": "4.17.1",
         "fs": "0.0.1-security",
+        "helmet": "5.0.2",
         "https": "^1.0.0",
         "hybrid-crypto-js": "0.2.4",
         "module-alias": "2.2.2",
         "nodemon": "2.0.15",
+        "pino": "7.8.1",
+        "pino-http": "6.6.0",
+        "pino-pretty": "7.5.3",
         "uglify-js": "3.15.1"
     },
     "devDependencies": {
