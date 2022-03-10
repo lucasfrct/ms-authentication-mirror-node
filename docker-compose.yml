@@ -5,7 +5,11 @@ services:
 
   ms-authentication-mirror:
     container_name: ms-authentication-mirror
-    build: .
+    hostname: ms-authentication-mirror
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: ms-authentication-mirror
     working_dir: /usr/local/ms-authentication-mirror
     volumes:
       - ./:/usr/local/ms-authentication-mirror
