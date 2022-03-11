@@ -478,7 +478,7 @@ const AuthenticationMirror = class AuthenticationMirror {
      */
     async distort(reflex = {}) {
        
-        // ! decifra os dados do cliente coma chave privada do servidor
+        // ! decifra os dados do do cliente coma chave privada do servidor
         await this.keep(reflex);
 
         // ! cifra um dado do servidor com a chave pública do cliente
