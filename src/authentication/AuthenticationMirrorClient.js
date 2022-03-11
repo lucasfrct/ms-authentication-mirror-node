@@ -15,12 +15,11 @@
 
     /**
      * * guarda a url utilizada
-     * @property {string} protocol: protocolo utilizado pelo clinete
      * @property {string} host:     dominio do cliente
      * @property {string} uri:      rota do recurso consumido no servidor
      * @property {string} url:      caminho completo da requisicao
      */
-    client = { protocol: "", host: "", uri: "", url: "" };
+    client = { host: "", uri: "", url: "" };
 
     /**
      * * armazena as chaves das entidades
@@ -76,12 +75,20 @@
      * @param   {string} uri: recurso utilizado no servidor
      * @return  {string} url: caminho completo da requisicao
      */
-    url(uri = "") {
+    uri(uri = "") {
         this.client.uri         = uri || this.client.uri;
-        this.client.protocol    = window.location.protocol;
-        this.client.host        = window.location.host;
-        this.client.url         = `${this.client.protocol}://${this.client.host}${this.client.uri}`;
+        this.client.url         = `${this.client.host}${this.client.uri}`;
         return this.client.url;
+    }
+
+    /**
+     * * configura o host para uma requisição do cliente
+     * * retorna o host
+     * @param   {string} host: recurso utilizado no servidor
+     * @return  {string} host: host do servidor
+     */
+    host(host = "") {
+        return this.client.host = host || window.location.host;
     }
 
     /**
@@ -286,9 +293,9 @@
 
             // ! carrega a chave pública do servidor
             const destiny = this.keysBox.destiny.public;
-
+            
             // ! se não houver chave pública do servidor, não faz a cifragem 
-            if (destiny.length < 64) {
+            if (destiny.length < 814) {
                 console.error("Erro, a chave publica não existe");
                 return this.formBox.origin.deform;
             }
@@ -364,8 +371,7 @@
     async send(reflex = "") {
         try {
             // ! configura a requisição
-            // const url       = this.url();
-            const url = this.client.url;
+            const url       = this.uri();
             const config    = this.config("POST", this.parseStr(this.setReflex(reflex)));
 
             // ! instancia a requisição
@@ -391,7 +397,7 @@
     async get() {
         try {
            // ! configura a requisição
-           const url       = this.url();
+           const url       = this.uri();
            const config    = this.config("GET");
 
            // ! instancia a requisição
@@ -417,19 +423,19 @@
      */
     async reflect(reflex = {}) {
         // ! define uma rota
-        this.url("/authentication/mirror/reflect");
+        this.uri("/authentication/mirror/reflect");
 
         // ! carrega as chaves para o cliente
         await this.loadKeys();
-
-        // ! carrega o objeto entre servidor e cliente
-        this.setReflex(reflex);
 
         // ! carrega a chave publica para dentro do reflex
         this.match(this.keysBox);
 
         // ! faza a requisicao par o servidor
         await this.send();
+
+        // ! carrega a chave publica do servidor para dentro da classe do cliente
+        this.match(this.reflex);
 
         // ? retorna o payload da requisicão
         return this.reflex;
@@ -443,13 +449,20 @@
      */
     async distort(reflex = {}) {
         // ! define a url do servidor
-        this.url("/authentication/mirror/distort");
+        this.uri("/authentication/mirror/distort");
 
         // ! carrega o objeto de troca para para a classe
         this.setReflex(reflex);
 
         // ? faz a requisição para o servidor
-        return await this.send();
+        await this.send();
+
+        // ! carrega a chave publica do servidor para dentro da classe do cliente
+        this.match(this.reflex);
+
+        // 
+        return this.reflex;
+        
     }
 
     // /**
@@ -459,7 +472,7 @@
     //  */
     // async keep() {
     //     // ! define a url do servidor
-    //     this.url("/authenticate/mirror/keep");
+    //     this.uri("/authenticate/mirror/keep");
 
     //     // ! cifra um dodo do clinente com a chave publica do servidor
     //     await this.deform();
@@ -482,7 +495,7 @@
     //     this.row(raw);
 
     //     // ! define a url do servidor
-    //     this.url("/authenticate/mirror/reveal");
+    //     this.uri("/authenticate/mirror/reveal");
 
     //     // ! carraga das chaves publica e privada do cliente para dentro da classe
     //     await this.loadKeys();
@@ -503,7 +516,7 @@
     //  */
     // async refraction() {
     //     // ! define a url do servidor
-    //     this.url("/authenticate/mirror/refraction");
+    //     this.uri("/authenticate/mirror/refraction");
 
     //     const response = await this.send();
 
@@ -550,3 +563,7 @@
         };
     }
 }
+
+// auth.url(localhost)
+// auth.uri(localhost) - http://localhost/m
+// auth.host(localhost)
