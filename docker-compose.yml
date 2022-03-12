@@ -5,13 +5,15 @@ services:
 
   ms-authentication-mirror:
     container_name: ms-authentication-mirror
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ms-authentication-mirror
     working_dir: /usr/local/ms-authentication-mirror
+    command: npm run production
     volumes:
       - ./:/usr/local/ms-authentication-mirror
     env_file: ".env"
-    environment:
-      NODE_ENV: development
     networks:
       - ms-authentication-mirror
     restart: always

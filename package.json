@@ -5,9 +5,12 @@
     "main": "app.js",
     "scripts": {
         "dev": "set NODE_ENV=dev && nodemon ./app.js",
-        "development": "export NODE_ENV=dev && nodemon ./app.js",
-        "test": "jest --verbose",
-        "spec": "jest --watch --coverage"
+        "development": "export NODE_ENV=development && nodemon ./app.js",
+        "staging": "export NODE_ENV=production && nodemon ./app.js",
+        "production": "export NODE_ENV=production && nodemon ./app.js",
+        "spec:dev": "jest --watch --coverage",
+        "spec:backend": "jest --verbose",
+        "spec:frontend": "jest --verbose"
     },
     "repository": {
         "type": "git",
@@ -42,11 +45,7 @@
         "uglify-js": "3.15.1"
     },
     "devDependencies": {
-        "@babel/core": "7.17.5",
-        "@babel/preset-env": "7.16.11",
-        "babel-jest": "27.5.1",
         "jest": "27.5.1",
-        "module-alias-jest": "0.0.3",
-        "regenerator-runtime": "0.13.9"
+        "module-alias-jest": "0.0.3"
     }
 }

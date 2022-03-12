@@ -1,6 +1,6 @@
 FROM node:16 AS ms-authentication-mirror
 
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 
 WORKDIR /usr/local/ms-authentication-mirror
 
@@ -14,4 +14,4 @@ EXPOSE 5001
 
 VOLUME /usr/local/ms-authentication-mirror
 
-CMD [ "npm", "run", "development" ]
+CMD [ "npm", "run", "production" ]
