@@ -9,8 +9,17 @@ services:
       context: .
       dockerfile: Dockerfile
       target: ms-authentication-mirror
+      args:
+        - PORT=$PORT
+        - NODE_ENV=$NODE_ENV
+        - SECRET_KEY_SALT=$SECRET_KEY_SALT
+        - ENDPOINT=$ENDPOINT
     working_dir: /usr/local/ms-authentication-mirror
-    command: npm run production
+    command: npm run $NODE_ENV
+    environment:
+      - PORT=$PORT
+      - ENDPOINT=$ENDPOINT
+      - SECRET_KEY_SALT=$SECRET_KEY_SALT
     volumes:
       - ./:/usr/local/ms-authentication-mirror
     env_file: ".env"
@@ -18,8 +27,7 @@ services:
       - ms-authentication-mirror
     restart: always
     ports:
-      - 5001:5001 # host:container | 127.0.0.1:3307   
-
+      - $PORT:$PORT # host:container   
 volumes:
   ms-authentication-mirror:
     name: ms-authentication-mirror
