@@ -1,39 +1,37 @@
 # olombongo ms-database: -pot 3307
 version: '3.8'
-
 services:
-
-  ms-authentication-mirror:
-    container_name: ms-authentication-mirror
-    hostname: ms-authentication-mirror
+  app:
+    container_name: $HOSTNAME
+    hostname: $HOSTNAME
     build:
       context: .
       dockerfile: Dockerfile
-      target: ms-authentication-mirror
       args:
         - PORT=$PORT
         - NODE_ENV=$NODE_ENV
         - SECRET_KEY_SALT=$SECRET_KEY_SALT
         - ENDPOINT=$ENDPOINT
-    working_dir: /usr/local/ms-authentication-mirror
+        - HOSTNAME=$HOSTNAME
+    working_dir: /usr/local/$HOSTNAME
     command: npm run $NODE_ENV
     environment:
       - PORT=$PORT
       - ENDPOINT=$ENDPOINT
       - SECRET_KEY_SALT=$SECRET_KEY_SALT
     volumes:
-      - ./:/usr/local/ms-authentication-mirror
+      - ./:/usr/local/$HOSTNAME
     env_file: ".env"
     networks:
-      - ms-authentication-mirror
+      - default-network
     restart: always
     ports:
       - $PORT:$PORT # host:container   
 volumes:
-  ms-authentication-mirror:
-    name: ms-authentication-mirror
+  default-volume:
+    name: $HOSTNAME
 
 networks:
-  ms-authentication-mirror:
-    name: ms-authentication-mirror
+  default-network:
+    name: $HOSTNAME
     driver: bridge
