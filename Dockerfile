@@ -1,8 +1,14 @@
-FROM node:16 AS ms-authentication-mirror
+FROM node:16
 
-ENV NODE_ENV=development
+ARG PORT
+ARG NODE_ENV
+ARG HOSTNAME
 
-WORKDIR /usr/local/ms-authentication-mirror
+ENV PORT=${PORT?5001}
+ENV NODE_ENV=${NODE_ENV?development}
+ENV HOSTNAME=${HOSTNAME?app}
+
+WORKDIR /usr/local/$HOSTNAME
 
 COPY package*.json ./
 
@@ -10,8 +16,8 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 5001
+EXPOSE $PORT
 
-VOLUME /usr/local/ms-authentication-mirror
+VOLUME /usr/local/$HOSTNAME
 
-CMD [ "npm", "run", "development" ]
+CMD [ "npm", "run", NODE_ENV ]

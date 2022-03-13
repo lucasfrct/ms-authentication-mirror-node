@@ -13,24 +13,21 @@ const MinifyLibrariesRoutine = async()=> {
         // ! Carrega o arquivo da origem
         const [err, authenticationMirrorClient ] = await handle(PathRead(origin));
         if (err) {
-            // TODO: logger
-            console.error(err);
+            logger.error(err);
             return err;
         };
 
         // ! Minifica o dado
         const { error, code: authenticationMirrorClientMin } = await UglifyJS.minify(authenticationMirrorClient);
         if (error) {
-            // TODO: logger
-            console.error(error);
+            logger.error(error);
             return error;
         };
 
         // ! Cria um novo arquivo minificado
         const [e, result ] = await handle(PathWrite(destiny, authenticationMirrorClientMin));
-        if (error) {
-            // TODO: logger
-            console.error(e);
+        if (e) {
+            logger.error(e);
             return e;
         };
         
@@ -38,7 +35,7 @@ const MinifyLibrariesRoutine = async()=> {
         return destiny;
         
     } catch (e) {
-        // TODO: logger
+        logger.error(e);
         console.error(e);
         return e;        
     }

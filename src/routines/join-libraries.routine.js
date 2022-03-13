@@ -1,5 +1,6 @@
 const { PathMatch, PathRead } = require('@utils/handle-path');
 const handle = require('@utils/handle');
+const logger = require('@utils/logger');
 
 // * Rotina para Mergir a lib com a classe authentication-mirror-client.lib.min em um unico aquivo
 const JonLibrariesRoutine = async()=> {
@@ -10,8 +11,7 @@ const JonLibrariesRoutine = async()=> {
     // ! Desconstroi o erro e o dado combinado
     const [err, match] = await handle(PathMatch(directory, destination, joinAuthneticationMirrorClient));
     if(err) {
-        // TODO: logger 
-        console.error(err);
+        logger.error(err);
         return err;
     };
 
@@ -19,8 +19,7 @@ const JonLibrariesRoutine = async()=> {
     async function joinAuthneticationMirrorClient(match = "") {
         const [e, auth ] = await handle(PathRead(authenticationMirrorClient));
         if(e) {
-            // TODO: logger 
-            console.error(e);
+            logger.error(e);
             return match;
         };
         

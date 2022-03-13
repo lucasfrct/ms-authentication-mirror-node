@@ -1,4 +1,4 @@
-
+const logger = require('./logger')
  /**
  * * Parseia uma string para json caso seja possível
  * @param   {string} payload
@@ -13,8 +13,7 @@
         
         return JSON.parse(payload); 
     } catch (e) { 
-        // TODO: logger
-        console.error(e);
+        logger.error(e);
         return payload; 
     }; 
 }
@@ -32,8 +31,7 @@ const parseToStr = (payload = undefined)=> {
         
         return JSON.stringify(payload);
     } catch (e) {
-        // TODO: logger
-        console.error(e);
+        logger.error(e);
         return payload;
     };
 }

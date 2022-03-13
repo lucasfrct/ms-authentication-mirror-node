@@ -1,4 +1,4 @@
-
+const logger = require('./logger');
 /**
  * * clone uma objeto
  * @param {*} obj 
@@ -7,8 +7,7 @@
 const clone = (obj = undefined) => {
     try {
         if(!obj) {
-            // TODO: logger
-            console.error("objecto inexistende");
+            logger.error("objecto inexistende");
             return {};
         };
 
@@ -23,8 +22,7 @@ const clone = (obj = undefined) => {
         return obj;
 
     } catch(e) {
-        // TODO: logger
-        console.error(e);
+        logger.error(e);
         return obj;
     }
 };
