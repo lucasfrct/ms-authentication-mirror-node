@@ -1,3 +1,1 @@
-{   
-    "ignore": ["/**/public/js/*.js", "README"] 
-}
+{ "ignore": ["/**/public/js/*.js", "README"] }

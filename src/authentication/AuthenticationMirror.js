@@ -9,6 +9,7 @@ const handle = require('@utils/handle');
 const { PathWrite, PathRead } = require('@utils/handle-path');
 const { parseToJson, parseToStr } = require('@utils/parse');
 const clone = require("@utils/clone");
+const logger = require('@utils/logger')
 
 /**
  * * classe usada pelo servidor para gerar suporte a autenticação espelhada
@@ -193,8 +194,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             // ! extrai o par de chaves publica/privada RSA
             const [err, { privateKey, publicKey }] = await handle(this.rsa.generateKeyPairAsync());
             if (err) {
-                // TODO: logger
-                console.error("Error ao gerar as chaves");
+                logger.error("Error ao gerar as chaves")
                 return this.keysBox;
             };
 
@@ -211,7 +211,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             return this.keysBox
         } catch (e) {
             // TODO: logger
-            console.error(e);
+            logger.error(e);
             return this.keysBox;
         }
     }
@@ -236,7 +236,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             
         } catch (e) {
             // TODO: logger
-            console.error(e);
+            logger.error(e);
             return this.keysBox;
         };
       }
@@ -264,8 +264,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             return this.keysBox;
 
         } catch (e) {
-            // TODO: logger
-            console.error(e);
+            logger.error(e);
             return this.keysBox;
         };
     }
@@ -319,8 +318,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             
             // ! se não hpuver chave privada, não faz a assinatura
             if (!this.keysBox.destiny.private.length < 3294) {
-                // TODO logger
-                // console.error("Erro, a chave privada não existe");
+                logger.error("Erro, a chave privada não existe");
                 return this.keysBox.destiny.signature;
             };
 
@@ -334,8 +332,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             return this.keysBox.destiny.signature = signature;
 
         } catch (e) {
-            // TODO: logger
-            console.error(e);
+            logger.error(e);
             return this.keysBox.destiny.signature
         }
     }
@@ -363,8 +360,7 @@ const AuthenticationMirror = class AuthenticationMirror {
 
             // ! se não houver chave pública do cliente, não faz a cifragem 
             if (origin.length != 814) {
-                // TODO: logger
-                console.error("Erro, a chave publica não existe");
+                logger.error("Erro, a chave publica não existe");
                 return this.formBox.destiny.deform;
             }
 
@@ -378,8 +374,7 @@ const AuthenticationMirror = class AuthenticationMirror {
             return this.formBox.destiny.deform = this.crypt.encrypt(origin, dataString, signature);
 
         } catch (e) {
-            // TODO: logger
-            console.error(e);
+            logger.error(e);
             return this.formBox.destiny.deform;
         }
     }
@@ -399,14 +394,12 @@ const AuthenticationMirror = class AuthenticationMirror {
             
             // ! Se não houver chave privada dos servidor, não fz decifragem
             if (privateKey.length < 3294) {
-                // TODO: logger
-                console.error("Erro, a chave privada não existe");
+                logger.error("Erro, a chave privada não existe");
                 return this.formBox.origin.reform;
             };
 
             if(this.formBox.origin.deform.indexOf("hybrid-crypto") == -1) {
-                // TODO: logger
-                console.error("Erro, a chave privada não existe");
+                logger.error("Erro, a chave privada não existe");
                 return this.formBox.origin.reform;
             }
             
@@ -419,14 +412,13 @@ const AuthenticationMirror = class AuthenticationMirror {
             // !!! verify ainda não está funcional !!!
             // ! verifica se a assinatura é autentica
             // if (this.keysBox.origin.signature && !this.verify(message)) {
-            //     console.error("Erro, documento com assinatura inválida");
+            //     logger.error("Erro, documento com assinatura inválida");
             // }
 
             // ? retorna a informação decigrada
             return this.formBox.origin.reform = message;
         } catch (e) {
-            // TODO: logger
-            console.error(e);
+            logger.error(e);
             return this.formBox.origin.reform
         }
     }
