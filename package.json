@@ -5,6 +5,8 @@
     "main": "app.js",
     "scripts": {
         "dev": "set NODE_ENV=dev && nodemon ./app.js",
+        "dev:up": "docker-compose up --build",
+        "dev:down": "docker-compose down -v --rmi all",
         "development": "export NODE_ENV=development && nodemon ./app.js",
         "staging": "export NODE_ENV=production && nodemon ./app.js",
         "production": "export NODE_ENV=production && nodemon ./app.js",
@@ -42,6 +44,8 @@
         "hybrid-crypto-js": "0.2.4",
         "module-alias": "2.2.2",
         "nodemon": "2.0.15",
+        "pino": "7.8.1",
+        "pino-pretty": "7.5.3",
         "uglify-js": "3.15.1"
     },
     "devDependencies": {

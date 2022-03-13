@@ -5,6 +5,7 @@ services:
 
   ms-authentication-mirror:
     container_name: ms-authentication-mirror
+    hostname: ms-authentication-mirror
     build:
       context: .
       dockerfile: Dockerfile
