@@ -1,37 +1,40 @@
-# olombongo ms-database: -pot 3307
-version: '3.8'
+## Environment NODE
+version: "3.8"
 services:
-  app:
-    container_name: $HOSTNAME
-    hostname: $HOSTNAME
-    build:
+  environment:
+    container_name: ${HOSTNAME}
+    hostname: ${HOSTNAME}
+    image: ${HOSTNAME}
+    labels:
+      description: ${HOSTNAME}
+      org.opencontainers.image.name: ${HOSTNAME}
+      org.opencontainers.image.authors: ${AUTHOR}
+      org.opencontainers.image.hostname: ${HOSTNAME}
+      com.docker.volume.name: ${HOSTNAME}
+      com.docker.network.bridge.name: ${HOSTNAME}
+    build: 
       context: .
       dockerfile: Dockerfile
       args:
-        - PORT=$PORT
-        - NODE_ENV=$NODE_ENV
-        - SECRET_KEY_SALT=$SECRET_KEY_SALT
-        - ENDPOINT=$ENDPOINT
-        - HOSTNAME=$HOSTNAME
-    working_dir: /usr/local/$HOSTNAME
-    command: npm run $NODE_ENV
-    environment:
-      - PORT=$PORT
-      - ENDPOINT=$ENDPOINT
-      - SECRET_KEY_SALT=$SECRET_KEY_SALT
+        - PORT=${PORT}
+        - DIRECTORY=${VOLUME}
+        - ENVIRONMENT=${NODE_ENV}
     volumes:
-      - ./:/usr/local/$HOSTNAME
-    env_file: ".env"
+      - .:${VOLUME}
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: ${NODE_ENV}
+    command: npm run ${NODE_ENV}
     networks:
-      - default-network
+      - local-network
     restart: always
     ports:
-      - $PORT:$PORT # host:container   
+      - ${PORT}:${PORT}
 volumes:
-  default-volume:
-    name: $HOSTNAME
-
+  local-volume:
+    name: ${HOSTNAME}
 networks:
-  default-network:
-    name: $HOSTNAME
+  local-network:
+    name: ${HOSTNAME}
     driver: bridge

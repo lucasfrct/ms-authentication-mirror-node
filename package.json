@@ -7,9 +7,9 @@
         "dev": "nodemon ./app.js",
         "dev:up": "docker-compose up --build",
         "dev:down": "docker-compose down -v --rmi all",
-        "development": "nodemon ./app.js",
-        "staging": "nodemon ./app.js",
-        "production": "nodemon ./app.js",
+        "development": "nodemon -L ./app.js",
+        "staging": "nodemon -L ./app.js",
+        "production": "nodemon -L ./app.js",
         "spec:dev": "jest --watch --coverage",
         "spec:backend": "jest --verbose",
         "spec:frontend": "jest --verbose"
