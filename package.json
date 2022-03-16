@@ -12,7 +12,10 @@
         "production": "nodemon -L ./app.js",
         "spec:dev": "jest --watch --coverage",
         "spec:backend": "jest --verbose",
-        "spec:frontend": "jest --verbose"
+        "spec:frontend": "jest --verbose",
+        "deploy:aws": "docker-machine create -driver amazonec2 ms-authentication-mirror",
+        "deploy:aws:env":"C:/ProgramData/chocolatey/lib/docker-machine/bin/docker-machine.exe env ms-authentication-mirror"
+
     },
     "repository": {
         "type": "git",
