@@ -1,23 +1,29 @@
-FROM node:16
 
+## Node alpine
+FROM node:alpine AS environment-node
+
+## agumentos de entrada
 ARG PORT
-ARG NODE_ENV
-ARG HOSTNAME
+ARG DIRECTORY
+ARG ENVIRONMENT
 
-ENV PORT=${PORT?5001}
-ENV NODE_ENV=${NODE_ENV?development}
-ENV HOSTNAME=${HOSTNAME?app}
+## diretorios de trabalho
+WORKDIR ${DIRECTORY}
 
-WORKDIR /usr/local/$HOSTNAME
-
+## Arquivos de iniciacao par ao node
 COPY package*.json ./
 
+## install dependences
 RUN npm install
 
+## Copia projeto
 COPY . .
 
-EXPOSE $PORT
+## porta de acesso
+EXPOSE ${PORT}  
 
-VOLUME /usr/local/$HOSTNAME
+## diretorio padrao
+VOLUME ${DIRECTORY}
 
-CMD [ "npm", "run", NODE_ENV ]
+## start do ambiente
+CMD ["npm", "run", ${ENVIRONMENT}]
